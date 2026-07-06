@@ -1,0 +1,10 @@
+# dependencies & binaries (see README for setup)
+node_modules/
+bin/
+
+# generated at runtime
+buffer/
+clips/
+
+# OS noise
+.DS_Store

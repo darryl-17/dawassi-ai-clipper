@@ -1,0 +1,16 @@
+{
+  "name": "clip-studio",
+  "version": "1.0.0",
+  "description": "Local Twitch & YouTube stream/VOD clipping app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

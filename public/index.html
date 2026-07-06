@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAWASSI AI CLIPPER</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #ffffff; --panel2: #faf7f5; --border: #eee4de;
+    --text: #211a16; --muted: #8a7d75; --accent: #e4571e; --accent-dark: #c44712;
+    --ok: #1e9e5a; --warn: #d98b00; --danger: #d93025;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+  h1 { font-size: 34px; margin: 0 0 4px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--accent); }
+  h1 .white { color: var(--text); }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 2px 10px rgba(228,87,30,.06); }
+  .card h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); font-weight: 800; font-style: italic; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input[type=text] { background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; }
+  input[type=text]:focus { border-color: var(--accent); }
+  input::placeholder { color: #b5a89f; }
+  .grow { flex: 1; min-width: 200px; }
+  select { background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px; font-size: 14px; }
+  button { background: #fff; border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: .15s; font-weight: 600; }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  button.primary:hover { background: var(--accent-dark); color: #fff; }
+  button.danger { background: #fff; border-color: var(--danger); color: var(--danger); }
+  button.big { font-size: 16px; padding: 14px 20px; font-weight: 800; }
+  button.clipbtn { background: linear-gradient(135deg, #e4571e, #c44712); border: none; color: #fff; font-style: italic; text-transform: uppercase; }
+  button.clipbtn:hover { filter: brightness(1.1); color: #fff; }
+  .status { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-size: 14px; }
+  .pill { padding: 4px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted); }
+  .pill.rec { background: rgba(228,87,30,.1); border-color: var(--accent); color: var(--accent); font-weight: 800; }
+  .pill.rec::before { content: '●'; margin-right: 6px; animation: blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  .hint { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
+  .hint b { color: var(--accent-dark); }
+  .jobs { font-size: 13.5px; }
+  .job { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .job:last-child { border-bottom: none; }
+  .job .st { min-width: 62px; text-align: center; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 800; }
+  .st.running { background: rgba(217,139,0,.12); color: var(--warn); }
+  .st.done { background: rgba(30,158,90,.12); color: var(--ok); }
+  .st.error { background: rgba(217,48,37,.1); color: var(--danger); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .clip { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .clip video { width: 100%; aspect-ratio: 16/9; background: #000; display: block; }
+  .clip .meta { padding: 10px 12px; }
+  .clip .name { font-size: 13.5px; font-weight: 700; word-break: break-all; }
+  .clip .info { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
+  .clip .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .clip .actions button, .clip .actions a { font-size: 12px; padding: 6px 10px; border-radius: 6px; text-decoration: none; background: #fff; border: 1px solid var(--border); color: var(--text); cursor: pointer; font-weight: 600; }
+  .clip .actions a:hover, .clip .actions button:hover { border-color: var(--accent); color: var(--accent); }
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; border: 1.5px solid var(--accent); color: var(--text); padding: 12px 22px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: 90vw; box-shadow: 0 6px 24px rgba(228,87,30,.18); }
+  #toast.show { opacity: 1; }
+  #toast.err { border-color: var(--danger); }
+  .timefields input { width: 110px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>DAWASSI <span class="white">AI CLIPPER</span></h1>
+  <p class="sub">Local Twitch &amp; YouTube clipper — live streams and VODs. Clips are saved to the <b>clips/</b> folder.</p>
+
+  <!-- LIVE -->
+  <div class="card">
+    <h2>Live stream</h2>
+    <div class="row">
+      <input type="text" id="liveUrl" class="grow" placeholder="https://twitch.tv/kaicenat  or  YouTube live URL">
+      <select id="liveQuality">
+        <option value="best">Best quality</option>
+        <option value="1080">1080p max</option>
+        <option value="720">720p max</option>
+        <option value="480" selected>480p max</option>
+      </select>
+      <button id="btnStart" class="primary big">▶ Start buffering</button>
+      <button id="btnStop" class="danger" style="display:none">■ Stop</button>
+    </div>
+    <div class="status" id="liveStatus"></div>
+    <div class="row" id="clipButtons" style="margin-top:14px; display:none">
+      <button class="clipbtn big" data-sec="30">Clip last 30s</button>
+      <button class="clipbtn big" data-sec="60">Clip last 1 min</button>
+      <button class="clipbtn big" data-sec="120">Clip last 2 min</button>
+      <button class="clipbtn big" data-sec="300">Clip last 5 min</button>
+      <input type="text" id="customSec" placeholder="custom sec" style="width:100px">
+      <button id="btnCustomClip">Clip</button>
+      <span style="width:14px"></span>
+      <button id="btnMark">⚑ Mark start</button>
+      <button id="btnClipMark" disabled>✂ Clip from mark</button>
+    </div>
+    <div class="hint">Start buffering <b>before</b> the moment happens — the app records a rolling 2-hour buffer, and every “Clip last …” button cuts instantly from it. Use <b>Mark start</b> right when something begins, then <b>Clip from mark</b> when it ends.</div>
+  </div>
+
+  <!-- VOD -->
+  <div class="card">
+    <h2>VOD / video clip</h2>
+    <div class="row timefields">
+      <input type="text" id="vodUrl" class="grow" placeholder="YouTube video URL or Twitch VOD URL">
+      <input type="text" id="vodStart" placeholder="start 1:23:45">
+      <input type="text" id="vodEnd" placeholder="end 1:25:00">
+      <input type="text" id="vodName" placeholder="clip name (optional)" style="width:180px">
+      <button id="btnVod" class="primary big">✂ Create clip</button>
+    </div>
+    <div class="hint">Downloads only the section you asked for (not the whole video). Times accept <b>1:23:45</b>, <b>12:34</b> or plain seconds.</div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="card" id="jobsCard" style="display:none">
+    <h2>Activity</h2>
+    <div class="jobs" id="jobs"></div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="card">
+    <h2>Clip library</h2>
+    <div class="grid" id="clips"></div>
+    <div class="hint" id="noClips">No clips yet.</div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let toastT;
+function toast(msg, err) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.className = '', 3500);
+}
+async function api(path, opts) {
+  const r = await fetch(path, opts ? { headers: {'Content-Type': 'application/json'}, ...opts } : undefined);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+const post = (path, body) => api(path, { method: 'POST', body: JSON.stringify(body || {}) });
+
+function fmtDur(s) {
+  s = Math.round(s);
+  const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return (h ? h+'h ' : '') + (m ? m+'m ' : '') + x + 's';
+}
+function fmtSize(b) { return b > 1e9 ? (b/1e9).toFixed(2)+' GB' : (b/1e6).toFixed(1)+' MB'; }
+
+// ---- live controls
+$('btnStart').onclick = async () => {
+  const url = $('liveUrl').value.trim();
+  if (!url) return toast('Paste a stream URL first', true);
+  $('btnStart').disabled = true;
+  $('btnStart').textContent = 'Connecting…';
+  try {
+    const r = await post('/api/live/start', { url, quality: $('liveQuality').value });
+    toast('Buffering: ' + (r.title || url));
+  } catch (e) { toast(e.message, true); }
+  $('btnStart').disabled = false;
+  $('btnStart').textContent = '▶ Start buffering';
+  refresh();
+};
+$('btnStop').onclick = async () => { await post('/api/live/stop'); toast('Stopped'); refresh(); };
+$('btnMark').onclick = async () => {
+  try { await post('/api/live/mark'); toast('Mark set — press “Clip from mark” when the moment ends'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+$('btnClipMark').onclick = () => doClip({ fromMark: true });
+document.querySelectorAll('#clipButtons [data-sec]').forEach((b) => b.onclick = () => doClip({ seconds: Number(b.dataset.sec) }));
+$('btnCustomClip').onclick = () => {
+  const s = Number($('customSec').value);
+  if (!s || s < 1) return toast('Enter a number of seconds', true);
+  doClip({ seconds: s });
+};
+async function doClip(body) {
+  try {
+    const r = await post('/api/live/clip', body);
+    toast('✂ Saved ' + r.file);
+    refresh();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ---- VOD
+$('btnVod').onclick = async () => {
+  try {
+    await post('/api/vod/clip', {
+      url: $('vodUrl').value.trim(),
+      start: $('vodStart').value.trim(),
+      end: $('vodEnd').value.trim(),
+      name: $('vodName').value.trim(),
+    });
+    toast('Downloading section… watch the Activity panel');
+    refresh();
+  } catch (e) { toast(e.message, true); }
+};
+
+// ---- clip actions
+async function delClip(f) {
+  if (!confirm('Delete ' + f + '?')) return;
+  await api('/api/clips/' + encodeURIComponent(f), { method: 'DELETE' });
+  loadClips();
+}
+async function renameClip(f) {
+  const name = prompt('New name for ' + f + ':', f.replace(/\.mp4$/i, ''));
+  if (!name) return;
+  try { await post('/api/clips/' + encodeURIComponent(f) + '/rename', { name }); loadClips(); }
+  catch (e) { toast(e.message, true); }
+}
+async function vertClip(f) {
+  try { await post('/api/clips/' + encodeURIComponent(f) + '/vertical'); toast('Making 9:16 vertical version…'); refresh(); }
+  catch (e) { toast(e.message, true); }
+}
+
+// ---- rendering
+let lastClipsJson = '';
+async function loadClips() {
+  const clips = await api('/api/clips');
+  const json = JSON.stringify(clips);
+  if (json === lastClipsJson) return;
+  lastClipsJson = json;
+  $('noClips').style.display = clips.length ? 'none' : 'block';
+  $('clips').innerHTML = clips.map((c) => `
+    <div class="clip">
+      <video src="/clips/${encodeURIComponent(c.file)}" controls preload="metadata"></video>
+      <div class="meta">
+        <div class="name">${c.file}</div>
+        <div class="info">${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
+        <div class="actions">
+          <a href="/clips/${encodeURIComponent(c.file)}" download>⬇ Download</a>
+          ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ Vertical 9:16</button>`}
+          <button onclick="renameClip('${c.file}')">Rename</button>
+          <button onclick="delClip('${c.file}')" style="color:var(--danger)">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function refresh() {
+  try {
+    const st = await api('/api/status');
+    const L = st.live;
+    const rec = L.status === 'recording';
+    $('btnStop').style.display = rec ? '' : 'none';
+    $('btnStart').style.display = rec ? 'none' : '';
+    $('clipButtons').style.display = rec ? 'flex' : 'none';
+    $('btnClipMark').disabled = !L.markAt;
+    let html = '';
+    if (rec) {
+      html += `<span class="pill rec">REC</span>`;
+      if (L.title) html += `<span class="pill">${L.title}</span>`;
+      html += `<span class="pill">buffered: ${fmtDur(L.bufferedSeconds)}</span>`;
+      if (L.markAt) html += `<span class="pill" style="color:var(--warn)">⚑ mark ${fmtDur((Date.now() - L.markAt)/1000)} ago</span>`;
+    } else if (L.status === 'resolving') {
+      html += `<span class="pill">connecting…</span>`;
+    } else if (L.status === 'error') {
+      html += `<span class="pill" style="color:var(--danger)">error: ${L.error || 'unknown'}</span>`;
+    }
+    $('liveStatus').innerHTML = html;
+
+    const jobs = st.jobs || [];
+    $('jobsCard').style.display = jobs.length ? '' : 'none';
+    $('jobs').innerHTML = jobs.map((j) => `
+      <div class="job">
+        <span class="st ${j.status}">${j.status === 'running' ? (j.progress != null ? j.progress.toFixed(0) + '%' : '…') : j.status}</span>
+        <span>${j.label}</span>
+        ${j.status === 'error' ? `<span style="color:var(--danger);font-size:12px">${(j.detail || '').slice(0, 140)}</span>` : ''}
+      </div>`).join('');
+    if (jobs.some((j) => j.status === 'done' && Date.now() - j.startedAt < 15000)) loadClips();
+  } catch (_) {}
+  loadClips().catch(() => {});
+}
+refresh();
+setInterval(refresh, 2500);
+</script>
+</body>
+</html>

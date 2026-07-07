@@ -40,7 +40,8 @@
   .navdiscord { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.04); color: #4a4038; }
   .navdiscord::after { display: none !important; }
   .navdiscord svg { width: 20px; height: 20px; display: block; }
-  .navdiscord:hover { background: var(--accent); color: #fff; transform: translateY(-1px); }
+  .navdiscord:hover { background: var(--accent); color: #fff !important; transform: translateY(-1px); }
+  .navdiscord:hover svg { fill: #fff; }
   .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); transition: transform .35s var(--spring); }
   .logo:hover { transform: scale(1.04); }
   .logo .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }

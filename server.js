@@ -487,6 +487,58 @@ function thumbExport(file, at) {
   return job;
 }
 
+function clamp01(v) { v = Number(v); return isNaN(v) ? 0 : Math.max(0, Math.min(1, v)); }
+
+// Full web-editor render: trim + reframe(crop) + caption + speed + mute, one pass.
+function editClip(file, o) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = sanitizeName(o.name) || (file.replace(/\.mp4$/i, '') + '_edit');
+  const out = path.join(CLIPS_DIR, base + '.mp4');
+  const job = newJob('edit', `Edit: ${base}.mp4`);
+
+  const args = ['-hide_banner', '-loglevel', 'error'];
+  const s = o.start != null && o.start !== '' ? Math.max(0, Number(o.start)) : null;
+  const e = o.end != null && o.end !== '' ? Number(o.end) : null;
+  if (s != null && s > 0) args.push('-ss', String(s));
+  args.push('-i', src);
+  if (e != null && e > (s || 0)) args.push('-t', String(e - (s || 0)));
+
+  const vf = [];
+  const R = { '9:16': 9 / 16, '1:1': 1, '16:9': 16 / 9 }[o.aspect];
+  const scaleTo = { '9:16': '1080:1920', '1:1': '1080:1080', '16:9': '1920:1080' }[o.aspect];
+  if (R) {
+    const cx = clamp01(o.cropX), cy = clamp01(o.cropY);
+    vf.push(`crop='min(iw,ih*${R})':'min(ih,iw/${R})':'(iw-ow)*${cx}':'(ih-oh)*${cy}'`);
+    vf.push(`scale=${scaleTo}:flags=lanczos`, 'setsar=1');
+  }
+  const speed = [0.5, 1, 1.5, 2].includes(Number(o.speed)) ? Number(o.speed) : 1;
+  if (speed !== 1) vf.push(`setpts=PTS/${speed}`);
+
+  let capFile = null;
+  if (o.caption && String(o.caption).trim()) {
+    capFile = path.join(BUFFER_DIR, `cap_${Date.now()}.txt`);
+    fs.writeFileSync(capFile, String(o.caption).slice(0, 200));
+    const y = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' }[o.captionPos] || 'h*0.84';
+    const font = '/System/Library/Fonts/Supplemental/Arial.ttf';
+    vf.push(`drawtext=fontfile='${font}':textfile='${capFile}':fontcolor=white:bordercolor=black:borderw=6:fontsize=h/14:x=(w-text_w)/2:y=${y}`);
+  }
+  if (vf.length) args.push('-vf', vf.join(','));
+
+  if (o.mute) args.push('-an');
+  else if (speed !== 1) args.push('-af', `atempo=${speed}`);
+
+  args.push('-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20');
+  if (!o.mute) args.push('-c:a', 'aac', '-b:a', '160k');
+  args.push('-movflags', '+faststart', '-y', out);
+
+  runFfmpeg(args)
+    .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
+    .catch((err) => { job.status = 'error'; job.detail = err.message.slice(0, 300); })
+    .finally(() => { if (capFile) try { fs.unlinkSync(capFile); } catch (_) {} });
+  return job;
+}
+
 function trimClip(file, start, end) {
   const s = parseTime(start), e = parseTime(end);
   if (s == null || e == null || e <= s) throw new Error('invalid start/end time');
@@ -624,6 +676,11 @@ app.post('/api/clips/:file/thumb', (req, res) => {
 
 app.post('/api/clips/:file/trim', (req, res) => {
   try { res.json({ ok: true, jobId: trimClip(path.basename(req.params.file), req.body.start, req.body.end).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/edit', (req, res) => {
+  try { res.json({ ok: true, jobId: editClip(path.basename(req.params.file), req.body || {}).id }); }
   catch (e) { res.status(400).json({ error: e.message }); }
 });
 

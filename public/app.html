@@ -98,6 +98,31 @@
   footer a svg { width: 15px; height: 15px; display: block; }
   footer a:hover { background: var(--chip-hover); transform: translateY(-2px); }
   footer .fcopy { opacity: .85; line-height: 1.6; }
+  /* ---------- web editor ---------- */
+  .modalbg { position: fixed; inset: 0; background: rgba(20,12,8,.62); backdrop-filter: blur(5px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 18px; }
+  .modalbg.open { display: flex; animation: fade .2s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .editor { background: var(--panel); border-radius: 18px; width: min(940px, 100%); max-height: 92vh; overflow: auto; box-shadow: 0 30px 90px rgba(0,0,0,.45); animation: pop .25s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop { from { transform: scale(.94); opacity: .5; } to { transform: none; opacity: 1; } }
+  .ehead { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--panel); z-index: 2; }
+  .ehead h2 { margin: 0; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); font-weight: 800; font-style: italic; }
+  .eclose { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); line-height: 1; padding: 0 4px; }
+  .ebody { padding: 18px 20px; display: grid; grid-template-columns: 1fr 250px; gap: 20px; }
+  .vidwrap { position: relative; background: #000; border-radius: 12px; overflow: hidden; line-height: 0; width: fit-content; max-width: 100%; margin: 0 auto; }
+  .vidwrap video { display: block; width: auto; height: auto; max-width: 100%; max-height: 48vh; }
+  .cropbox { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.5); cursor: move; display: none; touch-action: none; }
+  .cropbox::after { content: '↔ drag'; position: absolute; top: 4px; left: 6px; font-size: 11px; color: #fff; text-shadow: 0 1px 2px #000; line-height: 1; }
+  .capprev { position: absolute; left: 0; right: 0; text-align: center; color: #fff; font-weight: 800; font-size: clamp(14px, 3.4vw, 26px); text-shadow: 0 2px 0 #000, 0 0 7px #000; pointer-events: none; padding: 0 12px; display: none; }
+  .scrub { width: 100%; margin: 12px 0 6px; accent-color: var(--accent); }
+  .trimrow { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .ectrls { display: flex; flex-direction: column; gap: 16px; }
+  .egroup label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: block; margin-bottom: 7px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--panel2); font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text); }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .egroup input[type=text] { width: 100%; }
+  .efoot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; position: sticky; bottom: 0; background: var(--panel); }
+  @media (max-width: 720px) { .ebody { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -183,6 +208,70 @@
     <div class="fcopy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
   </footer>
 </div>
+<!-- WEB EDITOR -->
+<div class="modalbg" id="editorBg">
+  <div class="editor">
+    <div class="ehead">
+      <h2 id="edTitle">Edit clip</h2>
+      <button class="eclose" id="edClose" title="Close">✕</button>
+    </div>
+    <div class="ebody">
+      <div class="estage">
+        <div class="vidwrap" id="edVidwrap">
+          <video id="edVideo" controls preload="metadata"></video>
+          <div class="cropbox" id="edCrop"></div>
+          <div class="capprev" id="edCapPrev"></div>
+        </div>
+        <input type="range" class="scrub" id="edScrub" min="0" max="100" value="0" step="0.1">
+        <div class="trimrow">
+          <button id="edSetIn">⏮ Set start</button>
+          <span id="edInLbl">start 0:00</span>
+          <button id="edSetOut">Set end ⏭</button>
+          <span id="edOutLbl">end —</span>
+          <button id="edTrimReset">reset</button>
+        </div>
+      </div>
+      <div class="ectrls">
+        <div class="egroup">
+          <label>Format / reframe</label>
+          <div class="chips" id="edAspect">
+            <button class="chip on" data-a="original">Original</button>
+            <button class="chip" data-a="9:16">9:16</button>
+            <button class="chip" data-a="1:1">1:1</button>
+            <button class="chip" data-a="16:9">16:9</button>
+          </div>
+        </div>
+        <div class="egroup">
+          <label>Caption (burned in)</label>
+          <input type="text" id="edCaption" placeholder="Type a caption…" maxlength="120">
+          <div class="chips" id="edCapPos" style="margin-top:7px">
+            <button class="chip" data-p="top">Top</button>
+            <button class="chip" data-p="middle">Middle</button>
+            <button class="chip on" data-p="bottom">Bottom</button>
+          </div>
+        </div>
+        <div class="egroup">
+          <label>Speed</label>
+          <div class="chips" id="edSpeed">
+            <button class="chip" data-s="0.5">0.5×</button>
+            <button class="chip on" data-s="1">1×</button>
+            <button class="chip" data-s="1.5">1.5×</button>
+            <button class="chip" data-s="2">2×</button>
+          </div>
+        </div>
+        <div class="egroup">
+          <label>Audio</label>
+          <div class="chips"><button class="chip" id="edMute" data-on="0">🔊 Sound on</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="efoot">
+      <button id="edCancel">Cancel</button>
+      <button class="primary" id="edExport">✨ Export edited clip</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -339,10 +428,10 @@ async function loadClips() {
         <div class="actions">
           <a href="/clips/${encodeURIComponent(c.file)}" download>⬇ Download</a>
           ${c.kind === 'video' ? `
+            <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">✏️ Edit</button>
             ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ 9:16</button>`}
             <button onclick="gifClip('${c.file}')">GIF</button>
-            <button onclick="thumbClip('${c.file}')">📷 Thumb</button>
-            <button onclick="trimClipUI('${c.file}')">✂ Trim</button>` : ''}
+            <button onclick="thumbClip('${c.file}')">📷 Thumb</button>` : ''}
           <button onclick="renameClip('${c.file}')">Rename</button>
           <button onclick="delClip('${c.file}')" style="color:var(--danger)">Delete</button>
         </div>
@@ -394,6 +483,75 @@ async function refresh() {
 }
 refresh();
 setInterval(refresh, 2500);
+
+// ================= web editor =================
+const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 } };
+const edEl = { bg: $('editorBg'), video: $('edVideo'), wrap: $('edVidwrap'), crop: $('edCrop'), cap: $('edCapPrev'), scrub: $('edScrub'), title: $('edTitle'), inLbl: $('edInLbl'), outLbl: $('edOutLbl'), caption: $('edCaption') };
+function fmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+function setChips(groupId, attr, val){ document.querySelectorAll('#'+groupId+' .chip').forEach(c => c.classList.toggle('on', c.dataset[attr] === val)); }
+function updTrimLbl(){ edEl.inLbl.textContent = 'start ' + fmtT(ed.inPt); edEl.outLbl.textContent = 'end ' + (ed.outPt != null ? fmtT(ed.outPt) : '—'); }
+
+window.openEditor = function(file){
+  Object.assign(ed, { file, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 } });
+  edEl.title.textContent = 'Edit — ' + file;
+  edEl.video.src = '/clips/' + encodeURIComponent(file);
+  edEl.caption.value = '';
+  edEl.cap.style.display = 'none'; edEl.crop.style.display = 'none';
+  setChips('edAspect','a','original'); setChips('edCapPos','p','bottom'); setChips('edSpeed','s','1');
+  const mb = $('edMute'); mb.classList.remove('on'); mb.textContent = '🔊 Sound on';
+  edEl.bg.classList.add('open');
+  edEl.video.onloadedmetadata = () => { ed.dur = edEl.video.duration || 0; ed.outPt = ed.dur; edEl.scrub.max = ed.dur || 100; updTrimLbl(); };
+};
+function closeEditor(){ edEl.bg.classList.remove('open'); edEl.video.pause(); edEl.video.removeAttribute('src'); }
+$('edClose').onclick = closeEditor; $('edCancel').onclick = closeEditor;
+edEl.bg.addEventListener('click', e => { if (e.target === edEl.bg) closeEditor(); });
+
+edEl.video.addEventListener('timeupdate', () => { edEl.scrub.value = edEl.video.currentTime; });
+edEl.scrub.addEventListener('input', () => { edEl.video.currentTime = Number(edEl.scrub.value); });
+$('edSetIn').onclick = () => { ed.inPt = edEl.video.currentTime; if (ed.outPt != null && ed.inPt >= ed.outPt) ed.outPt = ed.dur; updTrimLbl(); };
+$('edSetOut').onclick = () => { ed.outPt = edEl.video.currentTime; if (ed.outPt <= ed.inPt) ed.inPt = 0; updTrimLbl(); };
+$('edTrimReset').onclick = () => { ed.inPt = 0; ed.outPt = ed.dur; updTrimLbl(); };
+
+document.querySelectorAll('#edAspect .chip').forEach(c => c.onclick = () => { ed.aspect = c.dataset.a; setChips('edAspect','a',ed.aspect); layoutCrop(); });
+function layoutCrop(){
+  const R = { '9:16': 9/16, '1:1': 1, '16:9': 16/9 }[ed.aspect];
+  if (!R) { edEl.crop.style.display = 'none'; return; }
+  const w = edEl.video.clientWidth, h = edEl.video.clientHeight;
+  let bw = h*R, bh = h; if (bw > w) { bw = w; bh = w/R; }
+  edEl.crop.style.width = bw+'px'; edEl.crop.style.height = bh+'px';
+  edEl.crop.style.left = ((w-bw)*ed.crop.x)+'px'; edEl.crop.style.top = ((h-bh)*ed.crop.y)+'px';
+  edEl.crop.style.display = 'block';
+}
+(function(){ let drag = null;
+  const pt = e => e.touches ? e.touches[0] : e;
+  const start = e => { if (edEl.crop.style.display === 'none') return; const p = pt(e); drag = { px: p.clientX, py: p.clientY, l: parseFloat(edEl.crop.style.left)||0, t: parseFloat(edEl.crop.style.top)||0 }; e.preventDefault(); };
+  const move = e => { if (!drag) return; const p = pt(e); const w = edEl.video.clientWidth, h = edEl.video.clientHeight, bw = edEl.crop.offsetWidth, bh = edEl.crop.offsetHeight;
+    const l = Math.max(0, Math.min(w-bw, drag.l + p.clientX - drag.px)), t = Math.max(0, Math.min(h-bh, drag.t + p.clientY - drag.py));
+    edEl.crop.style.left = l+'px'; edEl.crop.style.top = t+'px';
+    ed.crop.x = (w-bw > 0) ? l/(w-bw) : 0; ed.crop.y = (h-bh > 0) ? t/(h-bh) : 0; };
+  const end = () => drag = null;
+  edEl.crop.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+  edEl.crop.addEventListener('touchstart', start, { passive: false }); window.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', end);
+})();
+window.addEventListener('resize', () => { if (edEl.bg.classList.contains('open')) layoutCrop(); });
+
+function updCap(){ const t = edEl.caption.value.trim(); if (!t) { edEl.cap.style.display = 'none'; return; }
+  edEl.cap.textContent = t; edEl.cap.style.display = 'block';
+  if (ed.capPos === 'top') { edEl.cap.style.top = '6%'; edEl.cap.style.bottom = 'auto'; }
+  else if (ed.capPos === 'middle') { edEl.cap.style.top = '44%'; edEl.cap.style.bottom = 'auto'; }
+  else { edEl.cap.style.top = 'auto'; edEl.cap.style.bottom = '8%'; } }
+edEl.caption.addEventListener('input', updCap);
+document.querySelectorAll('#edCapPos .chip').forEach(c => c.onclick = () => { ed.capPos = c.dataset.p; setChips('edCapPos','p',ed.capPos); updCap(); });
+
+document.querySelectorAll('#edSpeed .chip').forEach(c => c.onclick = () => { ed.speed = Number(c.dataset.s); setChips('edSpeed','s',c.dataset.s); });
+$('edMute').onclick = () => { ed.mute = !ed.mute; const b = $('edMute'); b.classList.toggle('on', ed.mute); b.textContent = ed.mute ? '🔇 Muted' : '🔊 Sound on'; };
+
+$('edExport').onclick = async () => {
+  const body = { start: ed.inPt, end: ed.outPt, aspect: ed.aspect, cropX: ed.crop.x, cropY: ed.crop.y, caption: edEl.caption.value.trim(), captionPos: ed.capPos, speed: ed.speed, mute: ed.mute };
+  try { await post('/api/clips/' + encodeURIComponent(ed.file) + '/edit', body); toast('✨ Rendering edited clip…'); closeEditor(); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && edEl.bg.classList.contains('open')) closeEditor(); });
 </script>
 </body>
 </html>

@@ -4,19 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAWASSI AI CLIPPER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #ffffff; --panel: #ffffff; --panel2: #faf7f5; --border: #eee4de;
-    --text: #211a16; --muted: #8a7d75; --accent: #e4571e; --accent-dark: #c44712;
-    --ok: #1e9e5a; --warn: #d98b00; --danger: #d93025;
+    /* default theme: orange main, white secondary (DAWASSI brand) */
+    --bg: #e4571e; --panel: #ffffff; --panel2: #faf6f2; --border: #efe2da;
+    --text: #221a15; --muted: #8d7f76; --accent: #e4571e; --accent-dark: #c44712;
+    --on-bg: #ffffff; --on-bg-muted: rgba(255,255,255,.88);
+    --ok: #1e9e5a; --warn: #d98b00; --danger: #d93025; --shadow: rgba(0,0,0,.15);
+  }
+  body.dark {
+    --bg: #0d0d10; --panel: #17171d; --panel2: #20202a; --border: #2b2b36;
+    --text: #eceaf0; --muted: #8f8c9c;
+    --on-bg: #ffffff; --on-bg-muted: rgba(255,255,255,.75);
+    --shadow: rgba(0,0,0,.5);
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; transition: background .25s; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-  h1 { font-size: 34px; margin: 0 0 4px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--accent); }
-  h1 .white { color: var(--text); }
-  .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 2px 10px rgba(228,87,30,.06); }
+  .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  h1 { font-size: 38px; margin: 0 0 4px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--on-bg); text-shadow: 0 2px 8px var(--shadow); }
+  h1 .script { font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive; font-style: normal; text-transform: none; font-weight: 700; font-size: 0.95em; letter-spacing: 0; }
+  #themeBtn { background: var(--panel); border: none; color: var(--text); border-radius: 999px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px var(--shadow); margin-top: 6px; white-space: nowrap; }
+  .sub { color: var(--on-bg-muted); margin: 0 0 24px; font-size: 14px; }
+  .sub b { color: var(--on-bg); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 4px 16px var(--shadow); }
   .card h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); font-weight: 800; font-style: italic; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   input[type=text] { background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; }
@@ -24,12 +37,12 @@
   input::placeholder { color: #b5a89f; }
   .grow { flex: 1; min-width: 200px; }
   select { background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px; font-size: 14px; }
-  button { background: #fff; border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: .15s; font-weight: 600; }
+  button { background: var(--panel); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: .15s; font-weight: 600; }
   button:hover { border-color: var(--accent); color: var(--accent); }
   button:disabled { opacity: .45; cursor: not-allowed; }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
   button.primary:hover { background: var(--accent-dark); color: #fff; }
-  button.danger { background: #fff; border-color: var(--danger); color: var(--danger); }
+  button.danger { background: var(--panel); border-color: var(--danger); color: var(--danger); }
   button.big { font-size: 16px; padding: 14px 20px; font-weight: 800; }
   button.clipbtn { background: linear-gradient(135deg, #e4571e, #c44712); border: none; color: #fff; font-style: italic; text-transform: uppercase; }
   button.clipbtn:hover { filter: brightness(1.1); color: #fff; }
@@ -54,9 +67,9 @@
   .clip .name { font-size: 13.5px; font-weight: 700; word-break: break-all; }
   .clip .info { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
   .clip .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-  .clip .actions button, .clip .actions a { font-size: 12px; padding: 6px 10px; border-radius: 6px; text-decoration: none; background: #fff; border: 1px solid var(--border); color: var(--text); cursor: pointer; font-weight: 600; }
+  .clip .actions button, .clip .actions a { font-size: 12px; padding: 6px 10px; border-radius: 6px; text-decoration: none; background: var(--panel); border: 1px solid var(--border); color: var(--text); cursor: pointer; font-weight: 600; }
   .clip .actions a:hover, .clip .actions button:hover { border-color: var(--accent); color: var(--accent); }
-  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; border: 1.5px solid var(--accent); color: var(--text); padding: 12px 22px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: 90vw; box-shadow: 0 6px 24px rgba(228,87,30,.18); }
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1.5px solid var(--accent); color: var(--text); padding: 12px 22px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: 90vw; box-shadow: 0 6px 24px var(--shadow); }
   #toast.show { opacity: 1; }
   #toast.err { border-color: var(--danger); }
   .timefields input { width: 110px; }
@@ -64,7 +77,10 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>DAWASSI <span class="white">AI CLIPPER</span></h1>
+  <div class="topbar">
+    <h1>DAWASSI <span class="script">AI Clipper</span></h1>
+    <button id="themeBtn" title="Switch theme">🌙 Black</button>
+  </div>
   <p class="sub">Local Twitch &amp; YouTube clipper — live streams and VODs. Clips are saved to the <b>clips/</b> folder.</p>
 
   <!-- LIVE -->
@@ -126,6 +142,18 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
+
+// ---- theme switcher (default orange ↔ black), remembered in the browser
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  $('themeBtn').textContent = dark ? '🟠 Orange' : '🌙 Black';
+}
+applyTheme(localStorage.getItem('theme') === 'dark');
+$('themeBtn').onclick = () => {
+  const dark = !document.body.classList.contains('dark');
+  localStorage.setItem('theme', dark ? 'dark' : 'orange');
+  applyTheme(dark);
+};
 let toastT;
 function toast(msg, err) {
   const t = $('toast');

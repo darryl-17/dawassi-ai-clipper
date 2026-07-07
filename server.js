@@ -405,11 +405,28 @@ app.get('/api/status', (req, res) => {
       startedAt: live.startedAt,
       markAt: live.markAt,
       bufferedSeconds: segs.length ? Math.max(0, (segs.length - 1) * SEG_SECONDS) : 0,
+      bufferBytes: segs.reduce((a, s) => a + s.size, 0),
       bufferMinutesMax: BUFFER_MINUTES,
     },
     jobs: jobs.slice(0, 12),
   });
 });
+
+// Clip duration via `ffmpeg -i` (no ffprobe in our toolchain), cached by file+mtime.
+const durCache = new Map();
+function clipDuration(file, mtime) {
+  const key = file + ':' + mtime;
+  if (durCache.has(key)) return Promise.resolve(durCache.get(key));
+  return new Promise((resolve) => {
+    execFile(FFMPEG, ['-i', path.join(CLIPS_DIR, file)], { timeout: 10000 }, (err, so, se) => {
+      const m = String(se).match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+      const d = m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : null;
+      if (durCache.size > 500) durCache.clear();
+      durCache.set(key, d);
+      resolve(d);
+    });
+  });
+}
 
 app.post('/api/live/start', async (req, res) => {
   try {
@@ -448,7 +465,7 @@ app.post('/api/vod/clip', (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-app.get('/api/clips', (req, res) => {
+app.get('/api/clips', async (req, res) => {
   const files = fs.readdirSync(CLIPS_DIR)
     .filter((f) => f.toLowerCase().endsWith('.mp4'))
     .map((f) => {
@@ -456,6 +473,7 @@ app.get('/api/clips', (req, res) => {
       return { file: f, size: st.size, mtime: st.mtimeMs };
     })
     .sort((a, b) => b.mtime - a.mtime);
+  await Promise.all(files.map(async (f) => { f.duration = await clipDuration(f.file, f.mtime); }));
   res.json(files);
 });
 

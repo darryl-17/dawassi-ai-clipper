@@ -2,15 +2,27 @@
 
 Local Twitch & YouTube clipping app — built for clipping live streams (e.g. Kai Cenat's Streamer University) and VODs. Brand: white primary, orange (#E4571E) secondary.
 
-## Start it
-
-Double-click **`Start DAWASSI AI CLIPPER.command`** in Finder, or run:
+## Quick start (fresh clone)
 
 ```bash
-cd clip-studio && node server.js
+git clone https://github.com/darryl-17/dawassi-ai-clipper
+cd dawassi-ai-clipper
+./setup.sh        # installs node deps + yt-dlp + ffmpeg (no Homebrew needed)
+node server.js
 ```
 
-Then open **http://localhost:3547** in your browser.
+Then open **http://localhost:3547** in your browser. Needs Node 18+ and Python 3 (for yt-dlp).
+
+On the original machine you can also just double-click **`Start DAWASSI AI CLIPPER.command`** in Finder.
+
+## Features at a glance
+
+- 🔴 Rolling 2-hour live buffer (Twitch + YouTube), instant no-re-encode clips
+- ⌨️ Keyboard shortcuts while recording: **1**=30s, **2**=1min, **3**=2min, **5**=5min, **M**=mark, **C**=clip from mark
+- ✂️ VOD section downloads by timestamp (only the part you need)
+- 📱 One-click vertical 9:16 export (1080×1920) for TikTok/Shorts/Reels
+- 🎨 Orange (default) and black themes, remembered per browser
+- 🔒 100% local — nothing leaves your machine
 
 ## Live stream clipping (the main workflow)
 

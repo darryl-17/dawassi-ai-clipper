@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAWASSI AI CLIPPER</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -73,6 +74,13 @@
   #toast.show { opacity: 1; }
   #toast.err { border-color: var(--danger); }
   .timefields input { width: 110px; }
+  footer { margin-top: 34px; text-align: center; color: var(--on-bg-muted); font-size: 13px; }
+  footer .fbrand { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 17px; color: var(--on-bg); }
+  footer .fbrand .script { font-family: 'Caveat', 'Bradley Hand', cursive; font-style: normal; text-transform: none; }
+  footer .flinks { margin: 8px 0; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  footer a { color: var(--on-bg); font-weight: 700; text-decoration: none; border-bottom: 1.5px solid var(--on-bg-muted); }
+  footer a:hover { border-color: var(--on-bg); }
+  footer .fcopy { opacity: .8; }
 </style>
 </head>
 <body>
@@ -109,7 +117,8 @@
       <button id="btnMark">⚑ Mark start</button>
       <button id="btnClipMark" disabled>✂ Clip from mark</button>
     </div>
-    <div class="hint">Start buffering <b>before</b> the moment happens — the app records a rolling 2-hour buffer, and every “Clip last …” button cuts instantly from it. Use <b>Mark start</b> right when something begins, then <b>Clip from mark</b> when it ends.</div>
+    <div class="hint">Start buffering <b>before</b> the moment happens — the app records a rolling 2-hour buffer, and every “Clip last …” button cuts instantly from it. Use <b>Mark start</b> right when something begins, then <b>Clip from mark</b> when it ends.<br>
+    ⌨️ Keyboard shortcuts while recording: <b>1</b> = 30s · <b>2</b> = 1 min · <b>3</b> = 2 min · <b>5</b> = 5 min · <b>M</b> = mark · <b>C</b> = clip from mark</div>
   </div>
 
   <!-- VOD -->
@@ -137,6 +146,14 @@
     <div class="grid" id="clips"></div>
     <div class="hint" id="noClips">No clips yet.</div>
   </div>
+
+  <footer id="footer">
+    <div class="fbrand">DAWASSI <span class="script">AI Clipper</span></div>
+    <div class="flinks">
+      <a href="https://github.com/darryl-17/dawassi-ai-clipper" target="_blank">GitHub</a>
+    </div>
+    <div class="fcopy">© 2026 DAWASSI — free &amp; open source. Runs 100% on your machine.</div>
+  </footer>
 </div>
 <div id="toast"></div>
 
@@ -211,6 +228,20 @@ async function doClip(body) {
   } catch (e) { toast(e.message, true); }
 }
 
+// ---- keyboard shortcuts (active while recording, ignored while typing)
+let isRec = false;
+document.addEventListener('keydown', (e) => {
+  if (!isRec || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === '1') doClip({ seconds: 30 });
+  else if (k === '2') doClip({ seconds: 60 });
+  else if (k === '3') doClip({ seconds: 120 });
+  else if (k === '5') doClip({ seconds: 300 });
+  else if (k === 'm') $('btnMark').click();
+  else if (k === 'c' && !$('btnClipMark').disabled) doClip({ fromMark: true });
+});
+
 // ---- VOD
 $('btnVod').onclick = async () => {
   try {
@@ -255,7 +286,7 @@ async function loadClips() {
       <video src="/clips/${encodeURIComponent(c.file)}" controls preload="metadata"></video>
       <div class="meta">
         <div class="name">${c.file}</div>
-        <div class="info">${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
+        <div class="info">${c.duration ? '⏱ ' + fmtDur(c.duration) + ' · ' : ''}${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
         <div class="actions">
           <a href="/clips/${encodeURIComponent(c.file)}" download>⬇ Download</a>
           ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ Vertical 9:16</button>`}
@@ -271,6 +302,7 @@ async function refresh() {
     const st = await api('/api/status');
     const L = st.live;
     const rec = L.status === 'recording';
+    isRec = rec;
     $('btnStop').style.display = rec ? '' : 'none';
     $('btnStart').style.display = rec ? 'none' : '';
     $('clipButtons').style.display = rec ? 'flex' : 'none';
@@ -279,7 +311,7 @@ async function refresh() {
     if (rec) {
       html += `<span class="pill rec">REC</span>`;
       if (L.title) html += `<span class="pill">${L.title}</span>`;
-      html += `<span class="pill">buffered: ${fmtDur(L.bufferedSeconds)}</span>`;
+      html += `<span class="pill">buffered: ${fmtDur(L.bufferedSeconds)}${L.bufferBytes ? ' · ' + fmtSize(L.bufferBytes) : ''}</span>`;
       if (L.markAt) html += `<span class="pill" style="color:var(--warn)">⚑ mark ${fmtDur((Date.now() - L.markAt)/1000)} ago</span>`;
     } else if (L.status === 'resolving') {
       html += `<span class="pill">connecting…</span>`;

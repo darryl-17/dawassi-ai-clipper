@@ -13,22 +13,29 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
+const IS_WIN = process.platform === 'win32';
+// Python interpreter for pip-installed yt-dlp: python3 on mac/linux, python/py on Windows.
+const PYTHONS = IS_WIN ? ['python', 'py'] : ['python3'];
 
-// Locate a working ffmpeg: system install > ffmpeg-static > imageio-ffmpeg (pip).
+// Locate a working ffmpeg: ./bin copy > system install > ffmpeg-static > imageio-ffmpeg (pip).
 function findFfmpeg() {
   const candidates = [];
   if (process.env.CLIP_FFMPEG) candidates.push(process.env.CLIP_FFMPEG);
-  candidates.push(path.join(ROOT, 'bin', 'ffmpeg')); // signed copy made at setup
+  candidates.push(path.join(ROOT, 'bin', IS_WIN ? 'ffmpeg.exe' : 'ffmpeg')); // copy made by setup script
+  candidates.push(IS_WIN ? 'ffmpeg.exe' : 'ffmpeg'); // whatever is on PATH
   for (const p of ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg']) candidates.push(p);
   try { candidates.push(require('ffmpeg-static')); } catch (_) {}
   candidates.push(path.join(ROOT, 'node_modules', '@ffmpeg-installer', 'darwin-arm64', 'ffmpeg'));
-  try {
-    const p = execFileSync('python3', ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())'],
-      { timeout: 15000, stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
-    if (p) candidates.push(p);
-  } catch (_) {}
+  for (const py of PYTHONS) {
+    try {
+      const p = execFileSync(py, ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())'],
+        { timeout: 15000, stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+      if (p) { candidates.push(p); break; }
+    } catch (_) {}
+  }
   for (const c of candidates) {
-    if (!c || !fs.existsSync(c)) continue;
+    if (!c) continue;
+    if (path.isAbsolute(c) && !fs.existsSync(c)) continue;
     try { execFileSync(c, ['-version'], { timeout: 10000, stdio: 'pipe' }); return c; } catch (_) {}
   }
   return null;
@@ -43,17 +50,22 @@ function findYtdlp() {
       return { cmd: process.env.CLIP_YTDLP, baseArgs: [] };
     } catch (_) {}
   }
-  const bin = path.join(ROOT, 'bin', 'yt-dlp');
+  const bin = path.join(ROOT, 'bin', IS_WIN ? 'yt-dlp.exe' : 'yt-dlp');
   if (fs.existsSync(bin)) {
     try {
-      fs.accessSync(bin, fs.constants.X_OK);
       execFileSync(bin, ['--version'], { timeout: 20000, stdio: 'pipe' });
       return { cmd: bin, baseArgs: [] };
     } catch (_) {}
   }
+  for (const py of PYTHONS) {
+    try {
+      execFileSync(py, ['-m', 'yt_dlp', '--version'], { timeout: 20000, stdio: 'pipe' });
+      return { cmd: py, baseArgs: ['-m', 'yt_dlp'] };
+    } catch (_) {}
+  }
   try {
-    execFileSync('python3', ['-m', 'yt_dlp', '--version'], { timeout: 20000, stdio: 'pipe' });
-    return { cmd: 'python3', baseArgs: ['-m', 'yt_dlp'] };
+    execFileSync(IS_WIN ? 'yt-dlp.exe' : 'yt-dlp', ['--version'], { timeout: 20000, stdio: 'pipe' });
+    return { cmd: IS_WIN ? 'yt-dlp.exe' : 'yt-dlp', baseArgs: [] }; // on PATH
   } catch (_) {}
   return null;
 }

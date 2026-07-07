@@ -4,6 +4,9 @@ Local Twitch & YouTube clipping app — built for clipping live streams (e.g. Ka
 
 ## Quick start (fresh clone)
 
+**Requirements:** [Node.js 18+](https://nodejs.org) and [Python 3](https://python.org) (on Windows, check "Add python.exe to PATH" during install).
+
+**Mac / Linux:**
 ```bash
 git clone https://github.com/darryl-17/dawassi-ai-clipper
 cd dawassi-ai-clipper
@@ -11,9 +14,14 @@ cd dawassi-ai-clipper
 node server.js
 ```
 
-Then open **http://localhost:3547** in your browser. Needs Node 18+ and Python 3 (for yt-dlp).
+**Windows:**
+1. Download the project (green **Code** button → Download ZIP → extract), or `git clone` it
+2. Double-click **`setup.bat`** (installs everything automatically)
+3. Double-click **`Start DAWASSI AI CLIPPER.bat`**
 
-On the original machine you can also just double-click **`Start DAWASSI AI CLIPPER.command`** in Finder.
+Then open **http://localhost:3547** in your browser.
+
+On Mac you can also double-click **`Start DAWASSI AI CLIPPER.command`** in Finder.
 
 ## Features at a glance
 

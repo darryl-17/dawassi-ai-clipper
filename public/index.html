@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
 <title>DAWASSI AI CLIPPER — The #1 Local Stream Clipping Tool</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,77 +13,116 @@
     --bg: #ffffff; --text: #1a130f; --muted: #6f635b; --accent: #e4571e;
     --accent-dark: #c44712; --hi: #e4571e; --border: #f0e6df; --panel: #fbf7f4;
     --shadow: rgba(228,87,30,.12);
+    --spring: cubic-bezier(.34,1.56,.64,1);
+    --ease: cubic-bezier(.16,1,.3,1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
 
+  /* ---------- ambient background ---------- */
+  .blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; will-change: transform; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(72px); opacity: .42; will-change: transform; }
+  .blob.b1 { width: 470px; height: 470px; background: #ff8a4c; top: -150px; left: -100px; animation: drift 20s ease-in-out infinite; }
+  .blob.b2 { width: 410px; height: 410px; background: #ffcbb0; top: 40px; right: -130px; animation: drift 25s ease-in-out -8s infinite; }
+  .blob.b3 { width: 340px; height: 340px; background: #ffb184; top: 560px; left: 34%; animation: drift 27s ease-in-out -14s infinite; }
+  @keyframes drift { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(52px,-38px) scale(1.12); } 66% { transform: translate(-36px,28px) scale(.93); } }
+  header, .hero, .section, .final, footer { position: relative; z-index: 1; }
+
+  /* ---------- scroll progress ---------- */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, #ff9a5c, #e4571e); z-index: 60; box-shadow: 0 0 12px rgba(228,87,30,.5); }
+
   /* ---------- header ---------- */
-  header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-  nav { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 26px; }
-  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); }
+  header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); transition: box-shadow .35s ease, background .35s ease; }
+  header.scrolled { box-shadow: 0 8px 30px rgba(228,87,30,.1); background: rgba(255,255,255,.93); }
+  nav { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 26px; transition: padding .35s ease; }
+  header.scrolled nav { padding-top: 11px; padding-bottom: 11px; }
+  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); transition: transform .35s var(--spring); }
+  .logo:hover { transform: scale(1.04); }
   .logo .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
   .navlinks { display: flex; gap: 30px; align-items: center; }
-  .navlinks a { font-weight: 600; font-size: 15px; color: #3a322d; transition: color .15s; }
-  .navlinks a:hover { color: var(--accent); }
-  .cta { background: var(--accent); color: #fff; font-weight: 800; font-size: 15px; padding: 11px 22px; border-radius: 999px; box-shadow: 0 6px 18px var(--shadow); transition: .18s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
-  .cta:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 10px 24px var(--shadow); }
+  .navlinks a { font-weight: 600; font-size: 15px; color: #3a322d; transition: color .15s; position: relative; }
+  .navlinks a:not(.cta)::after { content: ''; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0; background: var(--accent); border-radius: 2px; transition: width .3s var(--ease); }
+  .navlinks a:not(.cta):hover { color: var(--accent); }
+  .navlinks a:not(.cta):hover::after { width: 100%; }
+  .cta { background: var(--accent); color: #fff; font-weight: 800; font-size: 15px; padding: 11px 22px; border-radius: 999px; box-shadow: 0 6px 18px var(--shadow); transition: transform .35s var(--spring), background .2s ease, box-shadow .25s ease; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+  .cta:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 12px 26px var(--shadow); }
   .menuBtn { display: none; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--text); }
 
   /* ---------- hero ---------- */
-  .hero { max-width: 1000px; margin: 0 auto; text-align: center; padding: 74px 26px 40px; }
+  .hero { max-width: 1000px; margin: 0 auto; text-align: center; padding: 78px 26px 40px; }
   .proof { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; letter-spacing: .5px; color: #4a4038; margin-bottom: 26px; }
   .stars { color: #ffb020; letter-spacing: 2px; font-size: 16px; }
   h1.head { font-size: clamp(42px, 8vw, 88px); line-height: .98; font-weight: 900; letter-spacing: -2px; }
-  h1.head .mark { background: var(--accent); color: #fff; padding: 0 .18em; border-radius: 14px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  h1.head .mark { display: inline-block; position: relative; overflow: hidden; background: var(--accent); color: #fff; padding: 0 .18em; border-radius: 14px; }
+  h1.head .mark::after { content: ''; position: absolute; top: 0; left: -75%; width: 48%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-18deg); animation: shine 4.4s ease-in-out 1.3s infinite; }
+  @keyframes shine { 0% { left: -75%; } 24%, 100% { left: 140%; } }
   .subhead { max-width: 640px; margin: 26px auto 0; font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); line-height: 1.55; }
   .herocta { margin-top: 34px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .big { font-size: 18px; padding: 16px 34px; }
+  .herocta .cta:first-child { animation: breathe 3.2s ease-in-out 1s infinite; }
+  @keyframes breathe { 0%,100% { box-shadow: 0 6px 18px var(--shadow); } 50% { box-shadow: 0 12px 38px rgba(228,87,30,.42); } }
   .ghost { background: #fff; color: var(--text); border: 1.5px solid var(--border); box-shadow: none; }
-  .ghost:hover { border-color: var(--accent); color: var(--accent); background: #fff; transform: translateY(-1px); }
+  .ghost:hover { border-color: var(--accent); color: var(--accent); background: #fff; transform: translateY(-2px); }
   .micro { margin-top: 16px; font-size: 13.5px; color: var(--muted); }
+  .scrollcue { margin: 44px auto 0; width: 26px; height: 42px; border: 2px solid var(--border); border-radius: 14px; position: relative; }
+  .scrollcue::before { content: ''; position: absolute; top: 7px; left: 50%; width: 4px; height: 8px; margin-left: -2px; background: var(--accent); border-radius: 2px; animation: cue 1.8s ease-in-out infinite; }
+  @keyframes cue { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 60% { opacity: 1; transform: translateY(14px); } 100% { opacity: 0; transform: translateY(14px); } }
 
   /* ---------- features ---------- */
-  .section { max-width: 1120px; margin: 0 auto; padding: 40px 26px 20px; }
+  .section { max-width: 1120px; margin: 0 auto; padding: 44px 26px 20px; }
   .eyebrow { text-align: center; color: var(--accent); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; font-size: 13px; }
   .h2 { text-align: center; font-size: clamp(28px, 4vw, 40px); font-weight: 900; letter-spacing: -1px; margin-top: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 38px; }
-  .feat { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 24px; transition: .2s; }
-  .feat:hover { transform: translateY(-4px); box-shadow: 0 16px 34px var(--shadow); border-color: #f4d8c8; }
-  .feat .ico { font-size: 30px; }
+  .feat { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 24px; transition: transform .5s var(--spring), box-shadow .3s ease, border-color .3s ease; }
+  .feat:hover { transform: translateY(-6px); box-shadow: 0 18px 38px var(--shadow); border-color: #f4d8c8; }
+  .feat .ico { font-size: 30px; display: inline-block; transition: transform .5s var(--spring); }
+  .feat:hover .ico { transform: scale(1.2) rotate(-8deg); }
   .feat h3 { margin: 14px 0 8px; font-size: 18px; font-weight: 800; }
   .feat p { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
 
   /* ---------- steps ---------- */
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 38px; counter-reset: s; }
-  .step { position: relative; padding: 24px 22px; border-radius: 18px; background: var(--accent); color: #fff; overflow: hidden; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 38px; }
+  .step { position: relative; padding: 24px 22px; border-radius: 18px; background: var(--accent); color: #fff; overflow: hidden; transition: transform .5s var(--spring), box-shadow .35s ease; }
+  .step:hover { transform: translateY(-6px); box-shadow: 0 20px 42px rgba(0,0,0,.2); }
   .step:nth-child(even) { background: var(--text); }
   .step .n { font-size: 46px; font-weight: 900; font-style: italic; opacity: .35; }
   .step h4 { font-size: 17px; margin: 6px 0 8px; font-weight: 800; }
   .step p { font-size: 14px; opacity: .92; line-height: 1.5; }
 
   /* ---------- final cta ---------- */
-  .final { max-width: 1120px; margin: 46px auto 0; padding: 0 26px; }
-  .finalcard { background: linear-gradient(150deg, #ef6a2c, #e4571e 45%, #b93d0d); border-radius: 26px; padding: 56px 30px; text-align: center; color: #fff; box-shadow: 0 24px 60px var(--shadow); }
-  .finalcard h2 { font-size: clamp(28px, 5vw, 46px); font-weight: 900; letter-spacing: -1px; }
-  .finalcard p { margin: 14px auto 0; max-width: 520px; opacity: .95; font-size: 17px; }
-  .finalcard .cta { background: #fff; color: var(--accent-dark); margin-top: 28px; font-size: 18px; padding: 16px 36px; }
-  .finalcard .cta:hover { background: #fff; transform: translateY(-2px) scale(1.02); }
+  .final { max-width: 1120px; margin: 50px auto 0; padding: 0 26px; }
+  .finalcard { position: relative; background: linear-gradient(150deg, #ef6a2c, #e4571e 45%, #b93d0d); border-radius: 26px; padding: 58px 30px; text-align: center; color: #fff; box-shadow: 0 24px 60px var(--shadow); overflow: hidden; }
+  .finalcard::before { content: ''; position: absolute; width: 380px; height: 380px; border-radius: 50%; background: rgba(255,255,255,.12); top: -160px; right: -100px; animation: drift 22s ease-in-out infinite; }
+  .finalcard h2 { font-size: clamp(28px, 5vw, 46px); font-weight: 900; letter-spacing: -1px; position: relative; }
+  .finalcard p { margin: 14px auto 0; max-width: 520px; opacity: .95; font-size: 17px; position: relative; }
+  .finalcard .cta { background: #fff; color: var(--accent-dark); margin-top: 28px; font-size: 18px; padding: 16px 36px; position: relative; }
+  .finalcard .cta:hover { background: #fff; transform: translateY(-3px) scale(1.03); }
 
   /* ---------- footer ---------- */
-  footer { max-width: 1120px; margin: 56px auto 0; padding: 30px 26px 46px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
+  footer { max-width: 1120px; margin: 58px auto 0; padding: 32px 26px 48px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
   .fbrand { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 20px; color: var(--text); }
   .fbrand .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); }
   .flinks { margin: 18px 0 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .flinks a { display: inline-flex; align-items: center; gap: 7px; background: var(--panel); border: 1px solid var(--border); padding: 8px 15px; border-radius: 999px; font-weight: 700; font-size: 13.5px; color: var(--text); transition: .18s; }
-  .flinks a:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  .flinks a { display: inline-flex; align-items: center; gap: 7px; background: var(--panel); border: 1px solid var(--border); padding: 8px 15px; border-radius: 999px; font-weight: 700; font-size: 13.5px; color: var(--text); transition: transform .35s var(--spring), background .2s ease, color .2s ease; }
+  .flinks a:hover { background: var(--accent); color: #fff; transform: translateY(-3px); }
   .flinks a svg { width: 15px; height: 15px; }
   .fcopy { font-size: 13px; opacity: .85; line-height: 1.6; }
 
+  /* ---------- Framer-style scroll motion (JS + reduced-motion aware) ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-animate] { opacity: 0; transform: translateY(32px) scale(.985); filter: blur(8px); transition: opacity .8s var(--ease), transform .9s var(--ease), filter .8s var(--ease); transition-delay: calc(var(--d, 0) * 1ms); }
+    .js [data-animate].in { opacity: 1 !important; transform: none !important; filter: none !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .head .mark::after, .herocta .cta:first-child, .scrollcue::before, .finalcard::before { animation: none !important; }
+  }
+
   @media (max-width: 760px) {
     .navlinks { position: absolute; top: 66px; left: 0; right: 0; background: #fff; flex-direction: column; gap: 0; padding: 8px 0; border-bottom: 1px solid var(--border); display: none; box-shadow: 0 12px 24px var(--shadow); }
-    .navlinks.open { display: flex; }
+    .navlinks.open { display: flex; animation: dropdown .3s var(--ease); }
+    @keyframes dropdown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
     .navlinks a { padding: 14px 26px; width: 100%; text-align: center; }
     .navlinks .cta { margin: 10px 26px; }
     .menuBtn { display: block; }
@@ -90,7 +130,10 @@
 </style>
 </head>
 <body>
-<header>
+<div class="progress" id="progress"></div>
+<div class="blobs" id="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+<header id="header">
   <nav>
     <a href="/" class="logo">DAWASSI <span class="script">AI Clipper</span></a>
     <div class="navlinks" id="navlinks">
@@ -105,70 +148,71 @@
 </header>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="proof">
+<section class="hero" data-stagger>
+  <div class="proof" data-animate>
     <span class="stars">★★★★★</span> FREE &amp; 100% LOCAL · OPEN SOURCE
   </div>
-  <h1 class="head">The <span class="mark">#1 Local</span><br>Clipping Tool For Streamers</h1>
-  <p class="subhead">Buffer any Twitch or YouTube live stream on your own PC and turn its best moments into clips, GIFs and vertical Shorts — with AI hype detection. No subscriptions, no watermarks, nothing uploaded.</p>
-  <div class="herocta">
-    <a href="/app.html" class="cta big">⚡ Launch DAWASSI Clipper</a>
-    <a href="#how" class="cta big ghost">See how it works</a>
+  <h1 class="head" data-animate>The <span class="mark">#1 Local</span><br>Clipping Tool For Streamers</h1>
+  <p class="subhead" data-animate>Buffer any Twitch or YouTube live stream on your own PC and turn its best moments into clips, GIFs and vertical Shorts — with AI hype detection. No subscriptions, no watermarks, nothing uploaded.</p>
+  <div class="herocta" data-animate>
+    <a href="/app.html" class="cta big magnetic">⚡ Launch DAWASSI Clipper</a>
+    <a href="#how" class="cta big ghost magnetic">See how it works</a>
   </div>
-  <div class="micro">Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
+  <div class="micro" data-animate>Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
+  <div class="scrollcue" data-animate></div>
 </section>
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="eyebrow">Everything a clipper needs</div>
-  <div class="h2">Built to catch the moment — instantly</div>
-  <div class="grid">
-    <div class="feat"><div class="ico">🔴</div><h3>Rolling 2-hour buffer</h3><p>Records the live stream in the background. Every “Clip last 30s / 1 / 2 / 5 min” button cuts instantly — no re-encoding, no waiting for the VOD.</p></div>
-    <div class="feat"><div class="ico">🔥</div><h3>AI hype detection</h3><p>Listens for crowd pops and loudness spikes and flags hype moments automatically. One click grabs the whole reaction.</p></div>
-    <div class="feat"><div class="ico">📱</div><h3>Vertical 9:16 export</h3><p>Turn any clip into a 1080×1920 short for TikTok, Reels and YouTube Shorts with auto centered cropping.</p></div>
-    <div class="feat"><div class="ico">⚑</div><h3>Mark &amp; clip</h3><p>Tag a moment when it starts, clip it when it ends. Exact-length clips with zero guessing.</p></div>
-    <div class="feat"><div class="ico">✂️</div><h3>VOD section grab</h3><p>Paste a YouTube or Twitch VOD link with timestamps and download only that part — not the whole 6-hour stream.</p></div>
-    <div class="feat"><div class="ico">🎞️</div><h3>GIFs, thumbnails &amp; trim</h3><p>Make GIFs for replies, grab full-quality thumbnail frames, and trim clips to the exact second — all built in.</p></div>
-    <div class="feat"><div class="ico">⌨️</div><h3>Keyboard shortcuts</h3><p>Hit 1/2/3/5 to clip, M to mark, C to clip from mark. During chaos, keys beat clicks.</p></div>
-    <div class="feat"><div class="ico">🔒</div><h3>100% local &amp; private</h3><p>Everything runs on your computer. No cloud, no watermark, no account — your clips never leave your machine.</p></div>
+  <div class="eyebrow" data-animate>Everything a clipper needs</div>
+  <div class="h2" data-animate>Built to catch the moment — instantly</div>
+  <div class="grid" data-stagger>
+    <div class="feat" data-animate><div class="ico">🔴</div><h3>Rolling 2-hour buffer</h3><p>Records the live stream in the background. Every “Clip last 30s / 1 / 2 / 5 min” button cuts instantly — no re-encoding, no waiting for the VOD.</p></div>
+    <div class="feat" data-animate><div class="ico">🔥</div><h3>AI hype detection</h3><p>Listens for crowd pops and loudness spikes and flags hype moments automatically. One click grabs the whole reaction.</p></div>
+    <div class="feat" data-animate><div class="ico">📱</div><h3>Vertical 9:16 export</h3><p>Turn any clip into a 1080×1920 short for TikTok, Reels and YouTube Shorts with auto centered cropping.</p></div>
+    <div class="feat" data-animate><div class="ico">⚑</div><h3>Mark &amp; clip</h3><p>Tag a moment when it starts, clip it when it ends. Exact-length clips with zero guessing.</p></div>
+    <div class="feat" data-animate><div class="ico">✂️</div><h3>VOD section grab</h3><p>Paste a YouTube or Twitch VOD link with timestamps and download only that part — not the whole 6-hour stream.</p></div>
+    <div class="feat" data-animate><div class="ico">🎞️</div><h3>GIFs, thumbnails &amp; trim</h3><p>Make GIFs for replies, grab full-quality thumbnail frames, and trim clips to the exact second — all built in.</p></div>
+    <div class="feat" data-animate><div class="ico">⌨️</div><h3>Keyboard shortcuts</h3><p>Hit 1/2/3/5 to clip, M to mark, C to clip from mark. During chaos, keys beat clicks.</p></div>
+    <div class="feat" data-animate><div class="ico">🔒</div><h3>100% local &amp; private</h3><p>Everything runs on your computer. No cloud, no watermark, no account — your clips never leave your machine.</p></div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
 <section class="section" id="how">
-  <div class="eyebrow">How it works</div>
-  <div class="h2">From live stream to posted clip in seconds</div>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><h4>Paste the stream</h4><p>Drop any Twitch or YouTube live URL and hit Start buffering before the action begins.</p></div>
-    <div class="step"><div class="n">2</div><h4>Catch the moment</h4><p>When something pops, press one clip button — or let hype detection flag it for you.</p></div>
-    <div class="step"><div class="n">3</div><h4>Make it vertical</h4><p>One click exports a 9:16 short, a GIF, or a thumbnail — ready for any platform.</p></div>
-    <div class="step"><div class="n">4</div><h4>Post &amp; grow</h4><p>Your clip is a plain MP4 in your clips folder. Drag it into CapCut or upload it directly.</p></div>
+  <div class="eyebrow" data-animate>How it works</div>
+  <div class="h2" data-animate>From live stream to posted clip in seconds</div>
+  <div class="steps" data-stagger>
+    <div class="step" data-animate><div class="n">1</div><h4>Paste the stream</h4><p>Drop any Twitch or YouTube live URL and hit Start buffering before the action begins.</p></div>
+    <div class="step" data-animate><div class="n">2</div><h4>Catch the moment</h4><p>When something pops, press one clip button — or let hype detection flag it for you.</p></div>
+    <div class="step" data-animate><div class="n">3</div><h4>Make it vertical</h4><p>One click exports a 9:16 short, a GIF, or a thumbnail — ready for any platform.</p></div>
+    <div class="step" data-animate><div class="n">4</div><h4>Post &amp; grow</h4><p>Your clip is a plain MP4 in your clips folder. Drag it into CapCut or upload it directly.</p></div>
   </div>
 </section>
 
 <!-- PRICING -->
 <section class="section" id="pricing">
-  <div class="eyebrow">Pricing</div>
-  <div class="h2">Free. Forever. Open source.</div>
-  <p class="subhead" style="margin-top:16px">Other clipping tools charge $20–30/month and stamp their logo on your content. DAWASSI AI Clipper is completely free, runs on your own machine, and the full code is on GitHub — fork it, tweak it, make it yours.</p>
-  <div style="text-align:center;margin-top:26px">
-    <a href="/app.html" class="cta big">⚡ Launch it now</a>
+  <div class="eyebrow" data-animate>Pricing</div>
+  <div class="h2" data-animate>Free. Forever. Open source.</div>
+  <p class="subhead" style="margin-top:16px" data-animate>Other clipping tools charge $20–30/month and stamp their logo on your content. DAWASSI AI Clipper is completely free, runs on your own machine, and the full code is on GitHub — fork it, tweak it, make it yours.</p>
+  <div style="text-align:center;margin-top:26px" data-animate>
+    <a href="/app.html" class="cta big magnetic">⚡ Launch it now</a>
   </div>
 </section>
 
 <!-- FINAL CTA -->
 <section class="final">
-  <div class="finalcard">
+  <div class="finalcard" data-animate>
     <h2>Ready to catch the next big moment?</h2>
     <p>Start buffering your favorite stream and never miss a clip again.</p>
-    <a href="/app.html" class="cta">⚡ Launch DAWASSI Clipper</a>
+    <a href="/app.html" class="cta magnetic">⚡ Launch DAWASSI Clipper</a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="fbrand">DAWASSI <span class="script">AI Clipper</span></div>
-  <div class="flinks">
+  <div class="fbrand" data-animate>DAWASSI <span class="script">AI Clipper</span></div>
+  <div class="flinks" data-animate>
     <a href="https://darrylwassi.com" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Website</a>
     <a href="https://x.com/darryl_wassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>@darryl_wassi</a>
     <a href="https://youtube.com/@d_wassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube</a>
@@ -182,9 +226,65 @@
 </footer>
 
 <script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Mobile menu
   const nav = document.getElementById('navlinks');
   document.getElementById('menuBtn').onclick = () => nav.classList.toggle('open');
   nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+  // Stagger delays: each animated child gets a delay based on its order in the group
+  document.querySelectorAll('[data-stagger]').forEach(group => {
+    [...group.querySelectorAll('[data-animate]')].forEach((el, i) => el.style.setProperty('--d', i * 80));
+  });
+
+  // Reveal helper — reveal anything currently within (or above) the viewport
+  function revealInView() {
+    document.querySelectorAll('[data-animate]:not(.in)').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('in');
+    });
+  }
+
+  // Primary: IntersectionObserver (Framer-style blur + rise + spring, just-in-time)
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('[data-animate]').forEach(el => io.observe(el));
+
+  // Hero reveals immediately on load
+  requestAnimationFrame(revealInView);
+
+  // Header state, scroll progress, blob parallax — batched in one rAF
+  const header = document.getElementById('header');
+  const blobs = document.getElementById('blobs');
+  const progress = document.getElementById('progress');
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      header.classList.toggle('scrolled', y > 8);
+      progress.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
+      if (!reduce.matches) blobs.style.transform = 'translateY(' + (y * 0.12) + 'px)';
+      revealInView(); // fallback reveal path, independent of the observer
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // Magnetic buttons — gently pull toward the cursor
+  if (!reduce.matches && matchMedia('(pointer:fine)').matches) {
+    document.querySelectorAll('.magnetic').forEach(el => {
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const mx = e.clientX - r.left - r.width / 2;
+        const my = e.clientY - r.top - r.height / 2;
+        el.style.transform = 'translate(' + (mx * 0.18) + 'px,' + (my * 0.32) + 'px)';
+      });
+      el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+    });
+  }
 </script>
 </body>
 </html>

@@ -34,10 +34,13 @@
   .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, #ff9a5c, #e4571e); z-index: 60; box-shadow: 0 0 12px rgba(228,87,30,.5); }
 
   /* ---------- header ---------- */
-  header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); transition: box-shadow .35s ease, background .35s ease; }
-  header.scrolled { box-shadow: 0 8px 30px rgba(228,87,30,.1); background: rgba(255,255,255,.93); }
-  nav { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 26px; transition: padding .35s ease; }
-  header.scrolled nav { padding-top: 11px; padding-bottom: 11px; }
+  header { position: sticky; top: 0; z-index: 50; padding: 12px 16px 0; background: transparent; }
+  nav { max-width: 940px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 12px 22px; border-radius: 999px; background: rgba(255,255,255,.6); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255,255,255,.65); box-shadow: 0 10px 34px rgba(31,38,45,.14), inset 0 1px 0 rgba(255,255,255,.85); transition: box-shadow .35s ease; }
+  header.scrolled nav { box-shadow: 0 14px 42px rgba(31,38,45,.2), inset 0 1px 0 rgba(255,255,255,.9); }
+  .navdiscord { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.04); color: #4a4038; }
+  .navdiscord::after { display: none !important; }
+  .navdiscord svg { width: 20px; height: 20px; display: block; }
+  .navdiscord:hover { background: var(--accent); color: #fff; transform: translateY(-1px); }
   .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); transition: transform .35s var(--spring); }
   .logo:hover { transform: scale(1.04); }
   .logo .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
@@ -173,8 +176,16 @@
   .mockrail .ic .i3d, .feat .ico .i3d { filter: drop-shadow(0 3px 5px rgba(0,0,0,.18)); }
 
   /* ---------- Apple liquid glass ---------- */
-  header, .feat, .mockup, .makercard, .faqitem, .flinks a, .cta { -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%); }
-  header { background: rgba(255,255,255,.62); border-bottom: 1px solid rgba(255,255,255,.6); box-shadow: 0 4px 30px rgba(228,87,30,.08), inset 0 1px 0 rgba(255,255,255,.7); }
+  .feat, .mockup, .makercard, .faqitem, .flinks a, .cta { -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%); }
+  .maker .eyebrow { margin-bottom: 30px; }
+  .demo { max-width: 720px; margin: 40px auto 0; }
+  .demovideo { display: flex; align-items: center; gap: 18px; background: rgba(255,255,255,.55); -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,.65); border-radius: 18px; padding: 16px; box-shadow: 0 10px 34px rgba(31,38,45,.1), inset 0 1px 0 rgba(255,255,255,.75); transition: transform .3s var(--spring); }
+  .demovideo:hover { transform: translateY(-3px); }
+  .demovideo .thumb { position: relative; width: 150px; aspect-ratio: 16/10; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: #000; }
+  .demovideo .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .demovideo .playbtn { position: absolute; inset: 0; margin: auto; width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 18px; padding-left: 3px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .demotxt b { display: block; font-size: 18px; font-weight: 800; }
+  .demotxt span { color: var(--muted); font-size: 14.5px; }
   .feat, .mockup, .makercard, .faqitem { background: rgba(255,255,255,.55); border: 1px solid rgba(255,255,255,.65); box-shadow: 0 10px 34px rgba(31,38,45,.1), inset 0 1px 0 rgba(255,255,255,.75); }
   .feat:hover { background: rgba(255,255,255,.72); }
   .flinks a { background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.62); }
@@ -200,12 +211,9 @@
     <a href="/" class="logo">DAWASSI <span class="script">AI Clipper</span></a>
     <div class="navlinks" id="navlinks">
       <a href="#features">Features</a>
-      <a href="#editor">Editor</a>
       <a href="#how">How it works</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://github.com/darryl-17/dawassi-ai-clipper" target="_blank">GitHub</a>
       <a href="#pricing">Pricing</a>
-      <a href="/app.html" class="cta">⚡ Launch Clipper</a>
+      <a href="https://discord.gg/nFPU9Gteu" target="_blank" class="navdiscord" title="Join our Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369a19.8 19.8 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.3 18.3 0 0 0-5.487 0 12.6 12.6 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.7 19.7 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.891.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.8 19.8 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg></a>
     </div>
     <button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button>
   </nav>
@@ -251,6 +259,12 @@
     <div class="step" data-animate><div class="n">2</div><h4>Catch the moment</h4><p>When something pops, press one clip button — or let hype detection flag it for you.</p></div>
     <div class="step" data-animate><div class="n">3</div><h4>Make it vertical</h4><p>One click exports a 9:16 short, a GIF, or a thumbnail — ready for any platform.</p></div>
     <div class="step" data-animate><div class="n">4</div><h4>Post &amp; grow</h4><p>Your clip is a plain MP4 in your clips folder. Drag it into CapCut or upload it directly.</p></div>
+  </div>
+  <div class="demo" data-animate>
+    <a class="demovideo" href="https://x.com/darryl_wassi" target="_blank" id="demoLink" title="Watch the demo on X">
+      <div class="thumb"><img src="/kai-preview.jpg" alt="DAWASSI AI Clipper demo"><span class="playbtn">▶</span></div>
+      <div class="demotxt"><b>Watch the 60-second demo</b><span>See DAWASSI AI Clipper in action on X →</span></div>
+    </a>
   </div>
 </section>
 

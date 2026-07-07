@@ -31,7 +31,8 @@
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.28); border-radius: 999px; }
   body { margin: 0; background: var(--bg-grad); background-attachment: fixed; color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; transition: background .25s; min-height: 100vh; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; margin-bottom: 18px; border-radius: 16px; position: sticky; top: 10px; z-index: 20; background: rgba(255,255,255,.55); -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,.65); box-shadow: 0 8px 26px rgba(31,38,45,.08), inset 0 1px 0 rgba(255,255,255,.75); }
+  body.dark .topbar { background: rgba(30,30,40,.5); border-color: rgba(255,255,255,.09); box-shadow: 0 8px 26px rgba(0,0,0,.4); }
   .applogo { text-decoration: none; transition: transform .3s cubic-bezier(.34,1.56,.64,1); display: inline-block; }
   .applogo:hover { transform: scale(1.03); }
   h1 { font-size: 34px; margin: 0; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--on-bg); }

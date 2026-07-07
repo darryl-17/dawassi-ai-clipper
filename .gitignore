@@ -9,3 +9,6 @@ clips/
 # OS noise
 .DS_Store
 dawassi.log
+
+# local docs (not for public repo)
+LAUNCH_VIDEO_GUIDE.md

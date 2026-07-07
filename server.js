@@ -183,7 +183,56 @@ const live = {
   restarts: 0,
   stopRequested: false,
   nextSegStart: 0,
+  hypeSpikeAt: null,     // Date.now() of last detected audio spike
+  hypeBaseline: null,    // rolling median loudness (dB)
 };
+
+// ---------------------------------------------------------------- hype detection
+// Loud moments (crowd pops, screaming, hype) sit well above a stream's normal
+// loudness. We measure each buffered segment's mean volume and flag spikes.
+
+const volHistory = [];
+let analyzedUpTo = -1;
+let analyzing = false;
+
+function segIndex(file) {
+  const m = path.basename(file).match(/(\d+)/);
+  return m ? Number(m[1]) : -1;
+}
+
+function segmentVolume(fp) {
+  return new Promise((resolve) => {
+    execFile(FFMPEG, ['-hide_banner', '-i', fp, '-vn', '-af', 'volumedetect', '-f', 'null', '-'],
+      { timeout: 15000 }, (e, so, se) => {
+        const m = String(se).match(/mean_volume:\s*(-?[\d.]+)\s*dB/);
+        resolve(m ? Number(m[1]) : null);
+      });
+  });
+}
+
+function median(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  return s.length ? s[Math.floor(s.length / 2)] : null;
+}
+
+setInterval(async () => {
+  if (live.status !== 'recording' || analyzing) return;
+  analyzing = true;
+  try {
+    const segs = listSegments().slice(0, -1);
+    const fresh = segs.filter((s) => segIndex(s.file) > analyzedUpTo).slice(-5);
+    for (const s of fresh) {
+      analyzedUpTo = Math.max(analyzedUpTo, segIndex(s.file));
+      const db = await segmentVolume(s.file);
+      if (db == null || db < -70) continue; // silence/failed reads don't count
+      volHistory.push(db);
+      if (volHistory.length > 150) volHistory.shift();
+      live.hypeBaseline = median(volHistory);
+      // Need enough history to know "normal" before calling anything a spike.
+      if (volHistory.length >= 12 && db > live.hypeBaseline + 6) live.hypeSpikeAt = Date.now();
+    }
+  } catch (_) {} finally { analyzing = false; }
+}, 15000);
 
 function resolveStream(url, quality) {
   // Prints title on line 1, media URL(s) after. "best" = single muxed stream,
@@ -261,6 +310,10 @@ async function startLive(url, quality) {
   live.restarts = 0;
   live.stopRequested = false;
   live.nextSegStart = 0;
+  live.hypeSpikeAt = null;
+  live.hypeBaseline = null;
+  volHistory.length = 0;
+  analyzedUpTo = -1;
   live.segDir = path.join(BUFFER_DIR, 'live_' + Date.now());
   fs.mkdirSync(live.segDir, { recursive: true });
   try {
@@ -404,6 +457,53 @@ function verticalExport(file) {
   return job;
 }
 
+// ---------------------------------------------------------------- gif / thumbnail / trim
+
+function gifExport(file) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = file.replace(/\.mp4$/i, '');
+  const out = path.join(CLIPS_DIR, base + '.gif');
+  const job = newJob('gif', `GIF: ${base}.gif (first 8s, 480px)`);
+  runFfmpeg([
+    '-hide_banner', '-loglevel', 'error', '-t', '8', '-i', src,
+    '-vf', 'fps=12,scale=480:-2:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse',
+    '-y', out,
+  ]).then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.gif'; })
+    .catch((e) => { job.status = 'error'; job.detail = e.message.slice(0, 300); });
+  return job;
+}
+
+function thumbExport(file, at) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = file.replace(/\.mp4$/i, '');
+  const out = path.join(CLIPS_DIR, base + '_thumb.jpg');
+  const job = newJob('thumb', `Thumbnail: ${base}_thumb.jpg`);
+  runFfmpeg(['-hide_banner', '-loglevel', 'error', '-ss', String(at || 1), '-i', src,
+    '-frames:v', '1', '-q:v', '2', '-y', out])
+    .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '_thumb.jpg'; })
+    .catch((e) => { job.status = 'error'; job.detail = e.message.slice(0, 300); });
+  return job;
+}
+
+function trimClip(file, start, end) {
+  const s = parseTime(start), e = parseTime(end);
+  if (s == null || e == null || e <= s) throw new Error('invalid start/end time');
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = file.replace(/\.mp4$/i, '') + '_trim';
+  const out = path.join(CLIPS_DIR, base + '.mp4');
+  const job = newJob('trim', `Trim: ${base}.mp4 (${fmtTime(s)} → ${fmtTime(e)})`);
+  // Re-encode for frame-accurate cuts — clips are short, this stays fast.
+  runFfmpeg(['-hide_banner', '-loglevel', 'error', '-ss', String(s), '-i', src, '-t', String(e - s),
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '160k',
+    '-movflags', '+faststart', '-y', out])
+    .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
+    .catch((e2) => { job.status = 'error'; job.detail = e2.message.slice(0, 300); });
+  return job;
+}
+
 // ---------------------------------------------------------------- API
 
 app.get('/api/status', (req, res) => {
@@ -419,6 +519,8 @@ app.get('/api/status', (req, res) => {
       bufferedSeconds: segs.length ? Math.max(0, (segs.length - 1) * SEG_SECONDS) : 0,
       bufferBytes: segs.reduce((a, s) => a + s.size, 0),
       bufferMinutesMax: BUFFER_MINUTES,
+      hypeSpikeAgo: live.hypeSpikeAt ? Math.round((Date.now() - live.hypeSpikeAt) / 1000) : null,
+      hypeBaseline: live.hypeBaseline,
     },
     jobs: jobs.slice(0, 12),
   });
@@ -479,13 +581,14 @@ app.post('/api/vod/clip', (req, res) => {
 
 app.get('/api/clips', async (req, res) => {
   const files = fs.readdirSync(CLIPS_DIR)
-    .filter((f) => f.toLowerCase().endsWith('.mp4'))
+    .filter((f) => /\.(mp4|gif|jpe?g|png)$/i.test(f))
     .map((f) => {
       const st = fs.statSync(path.join(CLIPS_DIR, f));
-      return { file: f, size: st.size, mtime: st.mtimeMs };
+      return { file: f, size: st.size, mtime: st.mtimeMs, kind: /\.mp4$/i.test(f) ? 'video' : 'image' };
     })
     .sort((a, b) => b.mtime - a.mtime);
-  await Promise.all(files.map(async (f) => { f.duration = await clipDuration(f.file, f.mtime); }));
+  await Promise.all(files.filter((f) => f.kind === 'video')
+    .map(async (f) => { f.duration = await clipDuration(f.file, f.mtime); }));
   res.json(files);
 });
 
@@ -497,14 +600,31 @@ app.delete('/api/clips/:file', (req, res) => {
 });
 
 app.post('/api/clips/:file/rename', (req, res) => {
-  const from = path.join(CLIPS_DIR, path.basename(req.params.file));
-  const toName = sanitizeName(String(req.body.name || '').replace(/\.mp4$/i, ''));
+  const fromFile = path.basename(req.params.file);
+  const from = path.join(CLIPS_DIR, fromFile);
+  const ext = path.extname(fromFile).toLowerCase();
+  const toName = sanitizeName(String(req.body.name || '').replace(/\.(mp4|gif|jpe?g|png)$/i, ''));
   if (!fs.existsSync(from)) return res.status(404).json({ error: 'not found' });
   if (!toName) return res.status(400).json({ error: 'invalid name' });
-  const to = path.join(CLIPS_DIR, toName + '.mp4');
+  const to = path.join(CLIPS_DIR, toName + ext);
   if (fs.existsSync(to)) return res.status(400).json({ error: 'a clip with that name already exists' });
   fs.renameSync(from, to);
-  res.json({ ok: true, file: toName + '.mp4' });
+  res.json({ ok: true, file: toName + ext });
+});
+
+app.post('/api/clips/:file/gif', (req, res) => {
+  try { res.json({ ok: true, jobId: gifExport(path.basename(req.params.file)).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/thumb', (req, res) => {
+  try { res.json({ ok: true, jobId: thumbExport(path.basename(req.params.file), Number(req.body.at) || 1).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/trim', (req, res) => {
+  try { res.json({ ok: true, jobId: trimClip(path.basename(req.params.file), req.body.start, req.body.end).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.post('/api/clips/:file/vertical', (req, res) => {

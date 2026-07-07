@@ -119,6 +119,50 @@
     .blob, .head .mark::after, .herocta .cta:first-child, .scrollcue::before, .finalcard::before { animation: none !important; }
   }
 
+  /* ---------- editor showcase ---------- */
+  .showcase { max-width: 1120px; margin: 66px auto 0; padding: 0 26px; }
+  .showhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+  .showhead h2 { font-size: clamp(26px, 4.4vw, 40px); font-weight: 900; letter-spacing: -1.2px; line-height: 1.04; }
+  .mockup { background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 24px 60px var(--shadow); overflow: hidden; }
+  .mocktop { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+  .mockexport { background: var(--accent); color: #fff; border-radius: 999px; padding: 7px 16px; font-weight: 800; font-size: 12.5px; }
+  .mockbody { display: flex; min-height: 300px; }
+  .mockrail { width: 66px; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px 0; gap: 14px; align-items: center; color: var(--muted); font-size: 10px; }
+  .mockrail div { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .mockrail .ic { font-size: 16px; }
+  .mockrail div.act { color: var(--accent); font-weight: 800; }
+  .mockstage { flex: 1; display: flex; align-items: center; justify-content: center; background: #f3f1f6; padding: 22px; }
+  .mockphone { width: 154px; aspect-ratio: 9/16; border-radius: 10px; background: linear-gradient(#7ec8ff, #bfe3ff 55%, #86cf9a); position: relative; overflow: hidden; box-shadow: 0 12px 26px rgba(0,0,0,.22); }
+  .mockcap { position: absolute; top: 16px; left: 0; right: 0; text-align: center; color: #fff; font-weight: 900; font-size: 13px; text-shadow: 0 2px 0 #000, 0 0 5px #000; letter-spacing: .3px; }
+  .mocktimeline { padding: 12px 16px 16px; border-top: 1px solid var(--border); }
+  .mockbar { height: 24px; border-radius: 6px; margin-top: 8px; position: relative; }
+  .mockbar::before { content: attr(data-l); position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; }
+  .mockbar.cap { background: #e6f7f0; border: 1px solid #bfe9d8; } .mockbar.cap::before { color: #159e6b; content: '💬 ' attr(data-l); }
+  .mockbar.vid { background: #f3e9fb; border: 1px solid #e0cdf3; } .mockbar.vid::before { color: #8b5cd6; content: '🎬 ' attr(data-l); }
+  /* ---------- maker ---------- */
+  .maker { max-width: 940px; margin: 74px auto 0; padding: 0 26px; text-align: center; }
+  .makercard { background: var(--panel); border: 1px solid var(--border); border-radius: 22px; padding: 34px; display: flex; gap: 28px; align-items: center; text-align: left; flex-wrap: wrap; justify-content: center; box-shadow: 0 16px 44px var(--shadow); }
+  .makeravatar { width: 150px; height: 150px; border-radius: 18px; background: linear-gradient(150deg, #ef6a2c, #b93d0d); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-style: italic; font-size: 48px; flex-shrink: 0; box-shadow: 0 12px 26px var(--shadow); }
+  .makertxt { flex: 1; min-width: 260px; }
+  .makertxt .q { font-size: 18px; font-style: italic; line-height: 1.5; }
+  .makertxt .nm { margin-top: 16px; font-weight: 900; font-size: 20px; }
+  .makertxt .role { color: var(--muted); font-size: 14px; }
+  .makertxt .msoc { margin-top: 14px; display: flex; gap: 8px; }
+  .makertxt .msoc a { width: 38px; height: 38px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); transition: .18s; }
+  .makertxt .msoc a:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  .makertxt .msoc a svg { width: 18px; height: 18px; }
+  /* ---------- faq ---------- */
+  .faq { max-width: 900px; margin: 74px auto 0; padding: 0 26px; }
+  .faqlist { margin-top: 30px; }
+  .faqitem { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; margin-top: 12px; overflow: hidden; transition: border-color .2s; }
+  .faqitem.open { border-color: var(--accent); }
+  .faqq { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer; font-weight: 700; font-size: 15.5px; }
+  .faqq .pm { color: var(--accent); font-size: 24px; line-height: 1; transition: transform .25s; flex-shrink: 0; }
+  .faqitem.open .pm { transform: rotate(45deg); }
+  .faqa { max-height: 0; overflow: hidden; transition: max-height .3s ease; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+  .faqitem.open .faqa { max-height: 260px; }
+  .faqa div { padding: 0 20px 18px; }
+
   @media (max-width: 760px) {
     .navlinks { position: absolute; top: 66px; left: 0; right: 0; background: #fff; flex-direction: column; gap: 0; padding: 8px 0; border-bottom: 1px solid var(--border); display: none; box-shadow: 0 12px 24px var(--shadow); }
     .navlinks.open { display: flex; animation: dropdown .3s var(--ease); }
@@ -138,7 +182,9 @@
     <a href="/" class="logo">DAWASSI <span class="script">AI Clipper</span></a>
     <div class="navlinks" id="navlinks">
       <a href="#features">Features</a>
+      <a href="#editor">Editor</a>
       <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
       <a href="https://github.com/darryl-17/dawassi-ai-clipper" target="_blank">GitHub</a>
       <a href="#pricing">Pricing</a>
       <a href="/app.html" class="cta">⚡ Launch Clipper</a>
@@ -197,6 +243,67 @@
   <p class="subhead" style="margin-top:16px" data-animate>Other clipping tools charge $20–30/month and stamp their logo on your content. DAWASSI AI Clipper is completely free, runs on your own machine, and the full code is on GitHub — fork it, tweak it, make it yours.</p>
   <div style="text-align:center;margin-top:26px" data-animate>
     <a href="/app.html" class="cta big magnetic">⚡ Launch it now</a>
+  </div>
+</section>
+
+<!-- EDITOR SHOWCASE -->
+<section class="showcase" id="editor">
+  <div class="showhead" data-animate>
+    <h2>Full control with our<br>web editor. Feels like magic.</h2>
+    <a href="/app.html" class="cta">⚡ Open the editor</a>
+  </div>
+  <div class="mockup" data-animate>
+    <div class="mocktop"><span>streamer clip · editing</span><span class="mockexport">Export Video</span></div>
+    <div class="mockbody">
+      <div class="mockrail">
+        <div class="act"><span class="ic">🖼️</span>Media</div>
+        <div><span class="ic">💬</span>Subtitles</div>
+        <div><span class="ic">🔤</span>Text</div>
+        <div><span class="ic">🎵</span>Audio</div>
+        <div><span class="ic">🎬</span>Video</div>
+        <div><span class="ic">✨</span>Tools</div>
+      </div>
+      <div class="mockstage">
+        <div class="mockphone"><div class="mockcap">THIS IS INSANE 🔥</div></div>
+      </div>
+    </div>
+    <div class="mocktimeline">
+      <div class="mockbar cap" data-l="This is insane"></div>
+      <div class="mockbar vid" data-l="clip"></div>
+      <div class="mockbar vid" data-l="overlay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAKER -->
+<section class="maker">
+  <div class="eyebrow" data-animate>Meet the maker</div>
+  <div class="makercard" data-animate>
+    <div class="makeravatar">DW</div>
+    <div class="makertxt">
+      <div class="q">"I got tired of paying for clipping tools that watermark my content and upload my clips to their servers. So I built DAWASSI AI Clipper — fast, free, private, and made to catch the moment while the stream is still live."</div>
+      <div class="nm">Darryl Wassi</div>
+      <div class="role">Creator of DAWASSI AI Clipper</div>
+      <div class="msoc">
+        <a href="https://youtube.com/@d_wassi" target="_blank" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+        <a href="https://x.com/darryl_wassi" target="_blank" title="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+        <a href="https://instagram.com/k_rryl" target="_blank" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="eyebrow" data-animate>FAQs</div>
+  <div class="h2" data-animate>Frequently asked questions</div>
+  <div class="faqlist" data-animate>
+    <div class="faqitem"><div class="faqq">Is DAWASSI AI Clipper really free?<span class="pm">+</span></div><div class="faqa"><div>Yes — it's 100% free and open source under the MIT license. No subscription, no trial limits, no watermark. The full code is on GitHub for anyone to use or fork.</div></div></div>
+    <div class="faqitem"><div class="faqq">Do my clips get uploaded anywhere?<span class="pm">+</span></div><div class="faqa"><div>Never. Everything runs locally on your own computer — the buffer, the clipping, and the editor. Your clips stay on your machine and are never sent to any server.</div></div></div>
+    <div class="faqitem"><div class="faqq">Which platforms can I clip?<span class="pm">+</span></div><div class="faqa"><div>Twitch and YouTube — both live streams and VODs. Paste a live URL to buffer and clip in real time, or a VOD URL with timestamps to grab just a section.</div></div></div>
+    <div class="faqitem"><div class="faqq">What is AI hype detection?<span class="pm">+</span></div><div class="faqa"><div>While buffering a live stream, DAWASSI listens for loudness spikes — crowd pops, screaming, chaos — and automatically flags those hype moments so you can clip the whole reaction with one click.</div></div></div>
+    <div class="faqitem"><div class="faqq">Does it work on Windows?<span class="pm">+</span></div><div class="faqa"><div>Yes. DAWASSI AI Clipper runs on Windows, macOS and Linux. There's a one-click setup script for each, and it installs everything it needs automatically.</div></div></div>
+    <div class="faqitem"><div class="faqq">Can I edit clips into vertical Shorts?<span class="pm">+</span></div><div class="faqa"><div>Absolutely. The built-in web editor lets you trim, reframe to 9:16 / 1:1 / 16:9 with a draggable crop box, burn in captions, change speed, and export — all in the browser.</div></div></div>
   </div>
 </section>
 
@@ -272,6 +379,14 @@
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // FAQ accordion
+  document.querySelectorAll('.faqq').forEach(q => q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faqitem.open').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }));
 
   // Magnetic buttons — gently pull toward the cursor
   if (!reduce.matches && matchMedia('(pointer:fine)').matches) {

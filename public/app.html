@@ -9,13 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* default theme: orange main, white secondary (DAWASSI brand) */
-    --bg: #e4571e; --panel: #ffffff; --panel2: #faf6f2; --border: #efe2da;
+    /* app workspace: warm cream — same family as the landing, its own feel */
+    --bg: #fff7f2; --panel: #ffffff; --panel2: #fbf3ee; --border: #f0e2d9;
     --text: #221a15; --muted: #8d7f76; --accent: #e4571e; --accent-dark: #c44712;
-    --on-bg: #ffffff; --on-bg-muted: rgba(255,255,255,.88);
-    --ok: #1e9e5a; --warn: #d98b00; --danger: #d93025; --shadow: rgba(0,0,0,.15);
-    --bg-grad: linear-gradient(165deg, #ef6a2c 0%, #e4571e 45%, #b93d0d 100%);
-    --chip: rgba(255,255,255,.16); --chip-hover: rgba(255,255,255,.3);
+    --on-bg: #221a15; --on-bg-muted: #7a6d64;
+    --ok: #1e9e5a; --warn: #d98b00; --danger: #d93025; --shadow: rgba(228,87,30,.1);
+    --bg-grad: linear-gradient(180deg, #ffeee2 0%, #fff7f2 26%, #ffffff 100%);
+    --chip: #fbf3ee; --chip-hover: #e4571e;
   }
   body.dark {
     --bg: #0d0d10; --panel: #17171d; --panel2: #20202a; --border: #2b2b36;
@@ -31,10 +31,15 @@
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.28); border-radius: 999px; }
   body { margin: 0; background: var(--bg-grad); background-attachment: fixed; color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; transition: background .25s; min-height: 100vh; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-  .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  h1 { font-size: 38px; margin: 0 0 4px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--on-bg); text-shadow: 0 2px 8px var(--shadow); }
-  h1 .script { font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive; font-style: normal; text-transform: none; font-weight: 700; font-size: 0.95em; letter-spacing: 0; }
-  #themeBtn { background: var(--panel); border: none; color: var(--text); border-radius: 999px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px var(--shadow); margin-top: 6px; white-space: nowrap; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .applogo { text-decoration: none; transition: transform .3s cubic-bezier(.34,1.56,.64,1); display: inline-block; }
+  .applogo:hover { transform: scale(1.03); }
+  h1 { font-size: 34px; margin: 0; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.5px; color: var(--on-bg); }
+  h1 .script { font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive; font-style: normal; text-transform: none; font-weight: 700; font-size: 1em; letter-spacing: 0; color: var(--accent); }
+  .topctrl { display: flex; align-items: center; gap: 8px; }
+  .homebtn, #themeBtn { background: var(--panel); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px var(--shadow); white-space: nowrap; text-decoration: none; transition: .18s; }
+  .homebtn:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-1px); }
+  #themeBtn:hover { border-color: var(--accent); color: var(--accent); }
   .sub { color: var(--on-bg-muted); margin: 0 0 24px; font-size: 14px; }
   .sub b { color: var(--on-bg); }
   .card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 12px 32px var(--shadow); animation: rise .35s ease both; }
@@ -98,8 +103,11 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a href="/" style="text-decoration:none" title="Back to home"><h1>DAWASSI <span class="script">AI Clipper</span></h1></a>
-    <button id="themeBtn" title="Switch theme">🌙 Black</button>
+    <a href="/" class="applogo" title="Back to home"><h1>DAWASSI <span class="script">AI Clipper</span></h1></a>
+    <div class="topctrl">
+      <a href="/" class="homebtn" title="Back to landing page">← Home</a>
+      <button id="themeBtn" title="Switch theme">🌙 Black</button>
+    </div>
   </div>
   <p class="sub">Local Twitch &amp; YouTube clipper — live streams and VODs. Clips are saved to the <b>clips/</b> folder.</p>
 

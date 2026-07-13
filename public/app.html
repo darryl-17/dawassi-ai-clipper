@@ -99,6 +99,11 @@
   footer a svg { width: 15px; height: 15px; display: block; }
   footer a:hover { background: var(--chip-hover); transform: translateY(-2px); }
   footer .fcopy { opacity: .85; line-height: 1.6; }
+  /* ---------- multi-stream cards ---------- */
+  .streamcard { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
+  .streamhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sttitle { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .streamcard .status { margin-top: 8px; }
   /* ---------- web editor (timeline) ---------- */
   .edwrap { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; }
   .edwrap.open { display: flex; }
@@ -179,7 +184,7 @@
 
   <!-- LIVE -->
   <div class="card">
-    <h2>Live stream</h2>
+    <h2>Live streams <span id="streamCount" style="color:var(--muted);font-weight:600;text-transform:none;font-style:normal;letter-spacing:0"></span></h2>
     <div class="row">
       <input type="text" id="liveUrl" class="grow" placeholder="https://twitch.tv/kaicenat  or  YouTube live URL">
       <select id="liveQuality">
@@ -188,24 +193,10 @@
         <option value="720">720p max</option>
         <option value="480" selected>480p max</option>
       </select>
-      <button id="btnStart" class="primary big">▶ Start buffering</button>
-      <button id="btnStop" class="danger" style="display:none">■ Stop</button>
+      <button id="btnStart" class="primary big">▶ Add &amp; buffer</button>
     </div>
-    <div class="status" id="liveStatus"></div>
-    <div class="row" id="clipButtons" style="margin-top:14px; display:none">
-      <button class="clipbtn big" data-sec="30">Clip last 30s</button>
-      <button class="clipbtn big" data-sec="60">Clip last 1 min</button>
-      <button class="clipbtn big" data-sec="120">Clip last 2 min</button>
-      <button class="clipbtn big" data-sec="300">Clip last 5 min</button>
-      <input type="text" id="customSec" placeholder="custom sec" style="width:100px">
-      <button id="btnCustomClip">Clip</button>
-      <span style="width:14px"></span>
-      <button id="btnMark">⚑ Mark start</button>
-      <button id="btnClipMark" disabled>✂ Clip from mark</button>
-      <button id="btnHype" class="clipbtn big" style="display:none">🔥 Clip hype</button>
-    </div>
-    <div class="hint">Start buffering <b>before</b> the moment happens — the app records a rolling 2-hour buffer, and every “Clip last …” button cuts instantly from it. Use <b>Mark start</b> right when something begins, then <b>Clip from mark</b> when it ends.<br>
-    ⌨️ Keyboard shortcuts while recording: <b>1</b> = 30s · <b>2</b> = 1 min · <b>3</b> = 2 min · <b>5</b> = 5 min · <b>M</b> = mark · <b>C</b> = clip from mark</div>
+    <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 2-hour buffer. Use <b>⚑ Mark</b> when a moment begins → <b>✂ from mark</b> when it ends. 🔥 = an auto-detected hype spike.</div>
+    <div id="streams"></div>
   </div>
 
   <!-- VOD -->
@@ -374,7 +365,7 @@ function fmtDur(s) {
 }
 function fmtSize(b) { return b > 1e9 ? (b/1e9).toFixed(2)+' GB' : (b/1e6).toFixed(1)+' MB'; }
 
-// ---- live controls
+// ---- live controls (multi-stream)
 $('btnStart').onclick = async () => {
   const url = $('liveUrl').value.trim();
   if (!url) return toast('Paste a stream URL first', true);
@@ -383,44 +374,62 @@ $('btnStart').onclick = async () => {
   try {
     const r = await post('/api/live/start', { url, quality: $('liveQuality').value });
     toast('Buffering: ' + (r.title || url));
+    $('liveUrl').value = '';
   } catch (e) { toast(e.message, true); }
   $('btnStart').disabled = false;
-  $('btnStart').textContent = '▶ Start buffering';
+  $('btnStart').textContent = '▶ Add & buffer';
   refresh();
 };
-$('btnStop').onclick = async () => { await post('/api/live/stop'); toast('Stopped'); refresh(); };
-$('btnMark').onclick = async () => {
-  try { await post('/api/live/mark'); toast('Mark set — press “Clip from mark” when the moment ends'); refresh(); }
+window.liveStop = async (id) => { await post('/api/live/stop', { id }); toast('Stopped'); refresh(); };
+window.liveMark = async (id) => {
+  try { await post('/api/live/mark', { id }); toast('Mark set — hit “✂ from mark” when the moment ends'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
-$('btnClipMark').onclick = () => doClip({ fromMark: true });
-document.querySelectorAll('#clipButtons [data-sec]').forEach((b) => b.onclick = () => doClip({ seconds: Number(b.dataset.sec) }));
-$('btnCustomClip').onclick = () => {
-  const s = Number($('customSec').value);
-  if (!s || s < 1) return toast('Enter a number of seconds', true);
-  doClip({ seconds: s });
+window.liveClip = async (id, body) => {
+  try { const r = await post('/api/live/clip', { id, ...body }); toast('✂ Saved ' + r.file); refresh(); }
+  catch (e) { toast(e.message, true); }
 };
-async function doClip(body) {
-  try {
-    const r = await post('/api/live/clip', body);
-    toast('✂ Saved ' + r.file);
-    refresh();
-  } catch (e) { toast(e.message, true); }
-}
+window.liveCustom = (id) => {
+  const s = Number(prompt('Clip the last how many seconds?', '45'));
+  if (!s || s < 1) return;
+  window.liveClip(id, { seconds: s });
+};
 
-// ---- keyboard shortcuts (active while recording, ignored while typing)
-let isRec = false;
-document.addEventListener('keydown', (e) => {
-  if (!isRec || e.metaKey || e.ctrlKey || e.altKey) return;
-  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
-  const k = e.key.toLowerCase();
-  if (k === '1') doClip({ seconds: 30 });
-  else if (k === '2') doClip({ seconds: 60 });
-  else if (k === '3') doClip({ seconds: 120 });
-  else if (k === '5') doClip({ seconds: 300 });
-  else if (k === 'm') $('btnMark').click();
-  else if (k === 'c' && !$('btnClipMark').disabled) doClip({ fromMark: true });
-});
+// Render one stream's card (controls + status)
+function streamCardHTML(s) {
+  const rec = s.status === 'recording';
+  const hype = s.hypeSpikeAgo != null && s.hypeSpikeAgo < 150;
+  let head = '';
+  if (rec) {
+    head += `<span class="pill rec">REC</span>`;
+    head += `<span class="pill">buffered ${fmtDur(s.bufferedSeconds)}${s.bufferBytes ? ' · ' + fmtSize(s.bufferBytes) : ''}</span>`;
+    if (s.markAt) head += `<span class="pill" style="color:var(--warn)">⚑ mark ${fmtDur((Date.now() - s.markAt) / 1000)} ago</span>`;
+    if (hype) head += `<span class="pill" style="color:var(--accent);font-weight:800">🔥 hype ${fmtDur(s.hypeSpikeAgo)} ago</span>`;
+  } else if (s.status === 'resolving') head += `<span class="pill">connecting…</span>`;
+  else if (s.status === 'error') head += `<span class="pill" style="color:var(--danger)">error: ${(s.error || 'unknown').slice(0, 90)}</span>`;
+  const title = (s.title || s.url || 'stream');
+  const t = title.replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const buttons = rec ? `
+    <div class="row" style="margin-top:10px">
+      <button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:30})">Clip 30s</button>
+      <button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:60})">1 min</button>
+      <button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:120})">2 min</button>
+      <button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:300})">5 min</button>
+      <button onclick="liveCustom('${s.id}')">custom</button>
+      <span style="width:8px"></span>
+      <button onclick="liveMark('${s.id}')">⚑ Mark</button>
+      <button ${s.markAt ? '' : 'disabled'} onclick="liveClip('${s.id}',{fromMark:true})">✂ from mark</button>
+      ${hype ? `<button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:${Math.min(600, s.hypeSpikeAgo + 25)}})">🔥 Clip hype</button>` : ''}
+    </div>` : '';
+  return `<div class="streamcard">
+    <div class="streamhead">
+      <div class="sttitle" title="${t}">${t}</div>
+      <button class="danger" onclick="liveStop('${s.id}')">■ Stop</button>
+    </div>
+    <div class="status">${head}</div>
+    ${buttons}
+  </div>`;
+}
 
 // ---- VOD
 $('btnVod').onclick = async () => {
@@ -505,32 +514,14 @@ async function loadClips() {
 async function refresh() {
   try {
     const st = await api('/api/status');
-    const L = st.live;
-    const rec = L.status === 'recording';
-    isRec = rec;
-    $('btnStop').style.display = rec ? '' : 'none';
-    $('btnStart').style.display = rec ? 'none' : '';
-    $('clipButtons').style.display = rec ? 'flex' : 'none';
-    $('btnClipMark').disabled = !L.markAt;
-    let html = '';
-    if (rec) {
-      html += `<span class="pill rec">REC</span>`;
-      if (L.title) html += `<span class="pill">${L.title}</span>`;
-      html += `<span class="pill">buffered: ${fmtDur(L.bufferedSeconds)}${L.bufferBytes ? ' · ' + fmtSize(L.bufferBytes) : ''}</span>`;
-      if (L.markAt) html += `<span class="pill" style="color:var(--warn)">⚑ mark ${fmtDur((Date.now() - L.markAt)/1000)} ago</span>`;
-      const hype = L.hypeSpikeAgo != null && L.hypeSpikeAgo < 150;
-      if (hype) html += `<span class="pill" style="color:var(--accent);font-weight:800">🔥 hype ${fmtDur(L.hypeSpikeAgo)} ago</span>`;
-      $('btnHype').style.display = hype ? '' : 'none';
-      if (hype) {
-        $('btnHype').textContent = `🔥 Clip hype (${fmtDur(L.hypeSpikeAgo)} ago)`;
-        $('btnHype').onclick = () => doClip({ seconds: Math.min(600, L.hypeSpikeAgo + 25) });
-      }
-    } else if (L.status === 'resolving') {
-      html += `<span class="pill">connecting…</span>`;
-    } else if (L.status === 'error') {
-      html += `<span class="pill" style="color:var(--danger)">error: ${L.error || 'unknown'}</span>`;
-    }
-    $('liveStatus').innerHTML = html;
+    const list = st.streams || [];
+    const max = st.maxStreams || 5;
+    $('streamCount').textContent = `${list.length} / ${max} active`;
+    $('btnStart').disabled = list.length >= max;
+    $('btnStart').title = list.length >= max ? `Max ${max} streams — stop one first` : '';
+    $('streams').innerHTML = list.length
+      ? list.map((s) => streamCardHTML(s)).join('')
+      : '<div class="hint" style="margin-top:10px">No streams yet — paste a URL above and hit <b>Add &amp; buffer</b>.</div>';
 
     const jobs = st.jobs || [];
     $('jobsCard').style.display = jobs.length ? '' : 'none';

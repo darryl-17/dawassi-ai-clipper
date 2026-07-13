@@ -170,30 +170,34 @@ function newJob(kind, label) {
 
 // ---------------------------------------------------------------- live recorder
 
-const live = {
-  status: 'idle',        // idle | resolving | recording | error
-  url: null,
-  title: null,
-  quality: null,
-  error: null,
-  proc: null,
-  segDir: null,
-  startedAt: null,
-  markAt: null,          // Date.now() when "mark" was pressed
-  restarts: 0,
-  stopRequested: false,
-  nextSegStart: 0,
-  hypeSpikeAt: null,     // Date.now() of last detected audio spike
-  hypeBaseline: null,    // rolling median loudness (dB)
-};
+const MAX_STREAMS = 5;             // buffer up to this many streams at once
+const streams = new Map();         // id -> live session
+let streamSeq = 0;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function newStream(url, quality) {
+  const id = String(++streamSeq);
+  const st = {
+    id, status: 'resolving', url, title: null, quality: quality || 'best',
+    error: null, proc: null, segDir: path.join(BUFFER_DIR, `live_${id}_${Date.now()}`),
+    startedAt: null, markAt: null, restarts: 0, stopRequested: false, nextSegStart: 0,
+    hypeSpikeAt: null, hypeBaseline: null, volHistory: [], analyzedUpTo: -1, analyzing: false,
+  };
+  fs.mkdirSync(st.segDir, { recursive: true });
+  streams.set(id, st);
+  return st;
+}
+
+// Short label from the stream title, used in default clip filenames so clips
+// from different streams don't collide and are easy to tell apart.
+function shortName(st) {
+  const t = sanitizeName((st.title || 'stream').split(/[\s|:\-]+/).filter(Boolean).slice(0, 3).join('_'));
+  return (t || 'stream').slice(0, 40);
+}
 
 // ---------------------------------------------------------------- hype detection
 // Loud moments (crowd pops, screaming, hype) sit well above a stream's normal
 // loudness. We measure each buffered segment's mean volume and flag spikes.
-
-const volHistory = [];
-let analyzedUpTo = -1;
-let analyzing = false;
 
 function segIndex(file) {
   const m = path.basename(file).match(/(\d+)/);
@@ -216,22 +220,23 @@ function median(arr) {
 }
 
 setInterval(async () => {
-  if (live.status !== 'recording' || analyzing) return;
-  analyzing = true;
-  try {
-    const segs = listSegments().slice(0, -1);
-    const fresh = segs.filter((s) => segIndex(s.file) > analyzedUpTo).slice(-5);
-    for (const s of fresh) {
-      analyzedUpTo = Math.max(analyzedUpTo, segIndex(s.file));
-      const db = await segmentVolume(s.file);
-      if (db == null || db < -70) continue; // silence/failed reads don't count
-      volHistory.push(db);
-      if (volHistory.length > 150) volHistory.shift();
-      live.hypeBaseline = median(volHistory);
-      // Need enough history to know "normal" before calling anything a spike.
-      if (volHistory.length >= 12 && db > live.hypeBaseline + 6) live.hypeSpikeAt = Date.now();
-    }
-  } catch (_) {} finally { analyzing = false; }
+  for (const st of streams.values()) {
+    if (st.status !== 'recording' || st.analyzing) continue;
+    st.analyzing = true;
+    try {
+      const segs = listSegments(st).slice(0, -1);
+      const fresh = segs.filter((s) => segIndex(s.file) > st.analyzedUpTo).slice(-5);
+      for (const s of fresh) {
+        st.analyzedUpTo = Math.max(st.analyzedUpTo, segIndex(s.file));
+        const db = await segmentVolume(s.file);
+        if (db == null || db < -70) continue; // silence/failed reads don't count
+        st.volHistory.push(db);
+        if (st.volHistory.length > 150) st.volHistory.shift();
+        st.hypeBaseline = median(st.volHistory);
+        if (st.volHistory.length >= 12 && db > st.hypeBaseline + 6) st.hypeSpikeAt = Date.now();
+      }
+    } catch (_) {} finally { st.analyzing = false; }
+  }
 }, 15000);
 
 function resolveStream(url, quality) {
@@ -249,18 +254,18 @@ function resolveStream(url, quality) {
   });
 }
 
-function listSegments() {
-  if (!live.segDir || !fs.existsSync(live.segDir)) return [];
-  return fs.readdirSync(live.segDir)
+function listSegments(st) {
+  if (!st || !st.segDir || !fs.existsSync(st.segDir)) return [];
+  return fs.readdirSync(st.segDir)
     .filter((f) => f.endsWith('.ts'))
     .map((f) => {
-      const st = fs.statSync(path.join(live.segDir, f));
-      return { file: path.join(live.segDir, f), mtime: st.mtimeMs, size: st.size };
+      const s = fs.statSync(path.join(st.segDir, f));
+      return { file: path.join(st.segDir, f), mtime: s.mtimeMs, size: s.size };
     })
     .sort((a, b) => a.mtime - b.mtime);
 }
 
-function spawnRecorder(mediaUrl) {
+function spawnRecorder(st, mediaUrl) {
   const args = [
     '-hide_banner', '-loglevel', 'warning',
     '-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '10',
@@ -269,77 +274,69 @@ function spawnRecorder(mediaUrl) {
     '-f', 'segment',
     '-segment_time', String(SEG_SECONDS),
     '-reset_timestamps', '1',
-    '-segment_start_number', String(live.nextSegStart),
+    '-segment_start_number', String(st.nextSegStart),
     '-segment_format', 'mpegts',
-    path.join(live.segDir, 'seg_%08d.ts'),
+    path.join(st.segDir, 'seg_%08d.ts'),
   ];
   const proc = spawn(FFMPEG, args);
-  live.proc = proc;
+  st.proc = proc;
   proc.stderr.on('data', () => {});
   proc.on('close', async () => {
-    live.proc = null;
-    if (live.stopRequested) { live.status = 'idle'; return; }
+    st.proc = null;
+    if (st.stopRequested) return;
     // Stream hiccup or expired playlist token: re-resolve and resume.
-    if (live.restarts >= 20) {
-      live.status = 'error';
-      live.error = 'recorder stopped too many times — stream probably ended';
+    if (st.restarts >= 20) {
+      st.status = 'error';
+      st.error = 'recorder stopped too many times — stream probably ended';
       return;
     }
-    live.restarts++;
-    const segs = listSegments();
-    live.nextSegStart = segs.length ? Number(path.basename(segs[segs.length - 1].file).match(/(\d+)/)[1]) + 1 : 0;
-    await new Promise((r) => setTimeout(r, 3000));
-    if (live.stopRequested) { live.status = 'idle'; return; }
+    st.restarts++;
+    const segs = listSegments(st);
+    st.nextSegStart = segs.length ? Number(path.basename(segs[segs.length - 1].file).match(/(\d+)/)[1]) + 1 : 0;
+    await sleep(3000);
+    if (st.stopRequested) return;
     try {
-      const { mediaUrl: fresh } = await resolveStream(live.url, live.quality);
-      spawnRecorder(fresh);
+      const { mediaUrl: fresh } = await resolveStream(st.url, st.quality);
+      spawnRecorder(st, fresh);
     } catch (e) {
-      live.status = 'error';
-      live.error = 'stream ended or unreachable: ' + e.message;
+      st.status = 'error';
+      st.error = 'stream ended or unreachable: ' + e.message;
     }
   });
 }
 
 async function startLive(url, quality) {
-  if (live.status === 'recording' || live.status === 'resolving') throw new Error('already recording — stop first');
-  live.status = 'resolving';
-  live.url = url;
-  live.quality = quality || 'best';
-  live.error = null;
-  live.markAt = null;
-  live.restarts = 0;
-  live.stopRequested = false;
-  live.nextSegStart = 0;
-  live.hypeSpikeAt = null;
-  live.hypeBaseline = null;
-  volHistory.length = 0;
-  analyzedUpTo = -1;
-  live.segDir = path.join(BUFFER_DIR, 'live_' + Date.now());
-  fs.mkdirSync(live.segDir, { recursive: true });
+  if (streams.size >= MAX_STREAMS) throw new Error(`max ${MAX_STREAMS} streams at once — stop one first`);
+  for (const s of streams.values()) if (s.url === url) throw new Error('that stream is already buffering');
+  const st = newStream(url, quality);
   try {
-    const { title, mediaUrl } = await resolveStream(url, live.quality);
-    live.title = title;
-    live.startedAt = Date.now();
-    live.status = 'recording';
-    spawnRecorder(mediaUrl);
+    const { title, mediaUrl } = await resolveStream(url, st.quality);
+    st.title = title;
+    st.startedAt = Date.now();
+    st.status = 'recording';
+    spawnRecorder(st, mediaUrl);
+    return st;
   } catch (e) {
-    live.status = 'error';
-    live.error = e.message;
-    throw e;
+    try { fs.rmSync(st.segDir, { recursive: true, force: true }); } catch (_) {}
+    streams.delete(st.id);
+    throw new Error(e.message);
   }
 }
 
-function stopLive() {
-  live.stopRequested = true;
-  if (live.proc) live.proc.kill('SIGINT');
-  live.status = 'idle';
+function stopLive(id) {
+  const st = streams.get(id);
+  if (!st) return;
+  st.stopRequested = true;
+  if (st.proc) st.proc.kill('SIGINT');
+  setTimeout(() => { try { fs.rmSync(st.segDir, { recursive: true, force: true }); } catch (_) {} }, 1500);
+  streams.delete(id);
 }
 
-// Trim old segments so the buffer doesn't eat the disk.
+// Trim old segments (all streams) so the buffer doesn't eat the disk.
 setInterval(() => {
-  if (!live.segDir) return;
   const cutoff = Date.now() - BUFFER_MINUTES * 60 * 1000;
-  for (const s of listSegments()) if (s.mtime < cutoff) { try { fs.unlinkSync(s.file); } catch (_) {} }
+  for (const st of streams.values())
+    for (const s of listSegments(st)) if (s.mtime < cutoff) { try { fs.unlinkSync(s.file); } catch (_) {} }
 }, 60 * 1000);
 
 // Clean abandoned buffer dirs from previous runs on boot.
@@ -348,17 +345,18 @@ for (const d of fs.readdirSync(BUFFER_DIR)) {
   try { fs.rmSync(full, { recursive: true, force: true }); } catch (_) {}
 }
 
-async function clipLive({ seconds, fromMark, name }) {
-  if (live.status !== 'recording') throw new Error('not recording a live stream');
-  const segs = listSegments();
+async function clipLive(id, { seconds, fromMark, name }) {
+  const st = streams.get(id);
+  if (!st || st.status !== 'recording') throw new Error('not recording that stream');
+  const segs = listSegments(st);
   if (segs.length < 2) throw new Error('buffer is still warming up — wait a few seconds');
   const usable = segs.slice(0, -1); // last segment is still being written
   // Segment mtimes are unreliable on slow links (data arrives in bursts), but
   // each segment holds ~SEG_SECONDS of video — so select by count, not clock.
   let wantSeconds;
   if (fromMark) {
-    if (!live.markAt) throw new Error('no mark set');
-    wantSeconds = (Date.now() - live.markAt) / 1000;
+    if (!st.markAt) throw new Error('no mark set');
+    wantSeconds = (Date.now() - st.markAt) / 1000;
   } else {
     wantSeconds = seconds || 60;
   }
@@ -366,19 +364,23 @@ async function clipLive({ seconds, fromMark, name }) {
   const chosen = usable.slice(-count);
   if (!chosen.length) throw new Error('no buffered video in that window yet');
 
-  const base = sanitizeName(name) || tsName(fromMark ? 'marked' : `last${seconds}s`);
+  const base = sanitizeName(name) || tsName(`${shortName(st)}_${fromMark ? 'marked' : 'last' + seconds + 's'}`);
   const out = path.join(CLIPS_DIR, base + '.mp4');
-  const listFile = path.join(BUFFER_DIR, `concat_${Date.now()}.txt`);
+  const listFile = path.join(BUFFER_DIR, `concat_${id}_${Date.now()}.txt`);
   fs.writeFileSync(listFile, chosen.map((s) => `file '${s.file.replace(/'/g, "'\\''")}'`).join('\n'));
 
-  const job = newJob('live-clip', `Clip: ${base}.mp4 (${fromMark ? 'from mark' : 'last ' + seconds + 's'})`);
+  const job = newJob('live-clip', `Clip: ${base}.mp4 (${st.title ? st.title.slice(0, 22) + ' · ' : ''}${fromMark ? 'from mark' : 'last ' + seconds + 's'})`);
   try {
-    // Twitch TS carries a timed_id3 data stream MP4 can't hold — take A/V only.
-    await runFfmpeg(['-hide_banner', '-loglevel', 'error', '-f', 'concat', '-safe', '0',
-      '-i', listFile, '-map', '0:v', '-map', '0:a', '-c', 'copy', '-movflags', '+faststart', '-y', out]);
+    // Long-running streams carry huge PTS; copying would give the clip a giant
+    // duration/gap. Re-encode with fresh timestamps so every clip is clean,
+    // zero-based, and ready to edit/upload. (Take A/V only — TS timed_id3 can't go in MP4.)
+    await runFfmpeg(['-hide_banner', '-loglevel', 'error', '-fflags', '+genpts', '-f', 'concat', '-safe', '0',
+      '-i', listFile, '-map', '0:v', '-map', '0:a',
+      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '160k',
+      '-movflags', '+faststart', '-y', out]);
     job.status = 'done';
     job.output = base + '.mp4';
-    if (fromMark) live.markAt = null;
+    if (fromMark) st.markAt = null;
   } catch (e) {
     job.status = 'error';
     job.detail = e.message;
@@ -559,21 +561,27 @@ function trimClip(file, start, end) {
 // ---------------------------------------------------------------- API
 
 app.get('/api/status', (req, res) => {
-  const segs = live.status === 'recording' ? listSegments() : [];
-  res.json({
-    live: {
-      status: live.status,
-      url: live.url,
-      title: live.title,
-      error: live.error,
-      startedAt: live.startedAt,
-      markAt: live.markAt,
+  const list = [];
+  for (const st of streams.values()) {
+    const segs = st.status === 'recording' ? listSegments(st) : [];
+    list.push({
+      id: st.id,
+      status: st.status,
+      url: st.url,
+      title: st.title,
+      quality: st.quality,
+      error: st.error,
+      startedAt: st.startedAt,
+      markAt: st.markAt,
       bufferedSeconds: segs.length ? Math.max(0, (segs.length - 1) * SEG_SECONDS) : 0,
       bufferBytes: segs.reduce((a, s) => a + s.size, 0),
-      bufferMinutesMax: BUFFER_MINUTES,
-      hypeSpikeAgo: live.hypeSpikeAt ? Math.round((Date.now() - live.hypeSpikeAt) / 1000) : null,
-      hypeBaseline: live.hypeBaseline,
-    },
+      hypeSpikeAgo: st.hypeSpikeAt ? Math.round((Date.now() - st.hypeSpikeAt) / 1000) : null,
+    });
+  }
+  res.json({
+    streams: list,
+    maxStreams: MAX_STREAMS,
+    bufferMinutesMax: BUFFER_MINUTES,
     jobs: jobs.slice(0, 12),
   });
 });
@@ -596,22 +604,23 @@ function clipDuration(file, mtime) {
 
 app.post('/api/live/start', async (req, res) => {
   try {
-    await startLive(String(req.body.url || '').trim(), String(req.body.quality || 'best'));
-    res.json({ ok: true, title: live.title });
+    const st = await startLive(String(req.body.url || '').trim(), String(req.body.quality || 'best'));
+    res.json({ ok: true, id: st.id, title: st.title });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-app.post('/api/live/stop', (req, res) => { stopLive(); res.json({ ok: true }); });
+app.post('/api/live/stop', (req, res) => { stopLive(String(req.body.id || '')); res.json({ ok: true }); });
 
 app.post('/api/live/mark', (req, res) => {
-  if (live.status !== 'recording') return res.status(400).json({ error: 'not recording' });
-  live.markAt = Date.now();
+  const st = streams.get(String(req.body.id || ''));
+  if (!st || st.status !== 'recording') return res.status(400).json({ error: 'not recording' });
+  st.markAt = Date.now();
   res.json({ ok: true });
 });
 
 app.post('/api/live/clip', async (req, res) => {
   try {
-    const file = await clipLive({
+    const file = await clipLive(String(req.body.id || ''), {
       seconds: Number(req.body.seconds) || 60,
       fromMark: !!req.body.fromMark,
       name: req.body.name,

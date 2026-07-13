@@ -11,6 +11,7 @@ const express = require('express');
 const { spawn, execFile, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const IS_WIN = process.platform === 'win32';
@@ -95,16 +96,26 @@ const ytdlp = (args, opts, cb) => execFile(YTDLP_INFO.cmd, [...YTDLP_INFO.baseAr
 const ytdlpSpawn = (args) => spawn(YTDLP_INFO.cmd, [...YTDLP_INFO.baseArgs, ...args]);
 const BUFFER_DIR = path.join(ROOT, 'buffer');
 const CLIPS_DIR = path.join(ROOT, 'clips');
+const ASSETS_DIR = path.join(BUFFER_DIR, 'assets'); // uploaded overlays / music (gitignored)
 const SEG_SECONDS = 4;            // segment length of the live buffer
 const BUFFER_MINUTES = 120;       // how much live history to keep on disk
 const PORT = Number(process.env.PORT) || 3547;
 
-for (const d of [BUFFER_DIR, CLIPS_DIR]) fs.mkdirSync(d, { recursive: true });
+for (const d of [BUFFER_DIR, CLIPS_DIR, ASSETS_DIR]) fs.mkdirSync(d, { recursive: true });
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(ROOT, 'public')));
 app.use('/clips', express.static(CLIPS_DIR));
+app.use('/assets', express.static(ASSETS_DIR));
+
+// Resolve an uploaded asset filename to an on-disk path (basename-guarded).
+function assetPath(name) {
+  const b = path.basename(String(name || ''));
+  if (!b) return null;
+  const p = path.join(ASSETS_DIR, b);
+  return fs.existsSync(p) ? p : null;
+}
 
 // ---------------------------------------------------------------- helpers
 
@@ -339,8 +350,9 @@ setInterval(() => {
     for (const s of listSegments(st)) if (s.mtime < cutoff) { try { fs.unlinkSync(s.file); } catch (_) {} }
 }, 60 * 1000);
 
-// Clean abandoned buffer dirs from previous runs on boot.
+// Clean abandoned buffer dirs from previous runs on boot (keep uploaded assets).
 for (const d of fs.readdirSync(BUFFER_DIR)) {
+  if (d === 'assets') continue;
   const full = path.join(BUFFER_DIR, d);
   try { fs.rmSync(full, { recursive: true, force: true }); } catch (_) {}
 }
@@ -491,69 +503,187 @@ function thumbExport(file, at) {
 
 function clamp01(v) { v = Number(v); return isNaN(v) ? 0 : Math.max(0, Math.min(1, v)); }
 
-// Full web-editor render: trim + reframe(crop) + caption + speed + mute, one pass.
+// Probe a video file's pixel dimensions via `ffmpeg -i` (no ffprobe in our toolchain).
+function probeDims(absPath) {
+  return new Promise((resolve) => {
+    execFile(FFMPEG, ['-i', absPath], { timeout: 10000 }, (err, so, se) => {
+      const m = String(se).match(/Video:.*?,\s*(\d{2,5})x(\d{2,5})/);
+      resolve(m ? { w: Number(m[1]), h: Number(m[2]) } : null);
+    });
+  });
+}
+// Probe any file's duration in seconds via `ffmpeg -i`.
+function probeDuration(absPath) {
+  return new Promise((resolve) => {
+    execFile(FFMPEG, ['-i', absPath], { timeout: 10000 }, (err, so, se) => {
+      const m = String(se).match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+      resolve(m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : null);
+    });
+  });
+}
+
+// Full web-editor render: trim + reframe(crop) + text layers + speed + mute +
+// fade transitions + image/video overlays + background music, one pass.
+// Simple edits use -vf; overlays/music switch to -filter_complex.
 function editClip(file, o) {
   const src = path.join(CLIPS_DIR, file);
   if (!fs.existsSync(src)) throw new Error('clip not found');
   const base = sanitizeName(o.name) || (file.replace(/\.mp4$/i, '') + '_edit');
   const out = path.join(CLIPS_DIR, base + '.mp4');
   const job = newJob('edit', `Edit: ${base}.mp4`);
-
-  const args = ['-hide_banner', '-loglevel', 'error'];
-  const s = o.start != null && o.start !== '' ? Math.max(0, Number(o.start)) : null;
-  const e = o.end != null && o.end !== '' ? Number(o.end) : null;
-  if (s != null && s > 0) args.push('-ss', String(s));
-  args.push('-i', src);
-  if (e != null && e > (s || 0)) args.push('-t', String(e - (s || 0)));
-
-  const vf = [];
-  const R = { '9:16': 9 / 16, '1:1': 1, '16:9': 16 / 9 }[o.aspect];
-  const scaleTo = { '9:16': '1080:1920', '1:1': '1080:1080', '16:9': '1920:1080' }[o.aspect];
-  if (R) {
-    const cx = clamp01(o.cropX), cy = clamp01(o.cropY);
-    vf.push(`crop='min(iw,ih*${R})':'min(ih,iw/${R})':'(iw-ow)*${cx}':'(ih-oh)*${cy}'`);
-    vf.push(`scale=${scaleTo}:flags=lanczos`, 'setsar=1');
-  }
-  const speed = [0.5, 1, 1.5, 2].includes(Number(o.speed)) ? Number(o.speed) : 1;
-  if (speed !== 1) vf.push(`setpts=PTS/${speed}`);
-
-  // Text layers: multiple on-screen texts, each with position, size, color and
-  // optional start/end timing (CapCut-style). Backward compatible with the old
-  // single { caption, captionPos } fields.
   const capFiles = [];
-  const layers = Array.isArray(o.texts) && o.texts.length
-    ? o.texts
-    : (o.caption && String(o.caption).trim() ? [{ text: o.caption, pos: o.captionPos, color: 'white', size: 'medium' }] : []);
-  const FONT = '/System/Library/Fonts/Supplemental/Arial.ttf';
-  const SIZES = { small: 'h/22', medium: 'h/14', large: 'h/9' };
-  const POSY = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' };
-  for (const t of layers) {
-    const txt = String(t.text || '').trim();
-    if (!txt) continue;
-    const cf = path.join(BUFFER_DIR, `cap_${Date.now()}_${capFiles.length}.txt`);
-    fs.writeFileSync(cf, txt.slice(0, 300));
-    capFiles.push(cf);
-    const y = POSY[t.pos] || (t.y != null ? `h*${clamp01(t.y)}` : 'h*0.84');
-    const size = SIZES[t.size] || 'h/14';
-    const color = /^#?[a-zA-Z0-9]+$/.test(String(t.color || '')) ? t.color : 'white';
-    let dt = `drawtext=fontfile='${FONT}':textfile='${cf}':fontcolor=${color}:bordercolor=black:borderw=6:fontsize=${size}:x=(w-text_w)/2:y=${y}`;
-    const ts = t.start != null && t.start !== '' ? Math.max(0, Number(t.start)) : null;
-    const te = t.end != null && t.end !== '' ? Number(t.end) : null;
-    if (ts != null || te != null) dt += `:enable='between(t,${ts != null ? ts : 0},${te != null ? te : 1e9})'`;
-    vf.push(dt);
-  }
-  if (vf.length) args.push('-vf', vf.join(','));
 
-  if (o.mute) args.push('-an');
-  else if (speed !== 1) args.push('-af', `atempo=${speed}`);
+  (async () => {
+    const s = o.start != null && o.start !== '' ? Math.max(0, Number(o.start)) : null;
+    const e = o.end != null && o.end !== '' ? Number(o.end) : null;
+    const trimDur = (e != null && e > (s || 0)) ? e - (s || 0) : null;
+    const speed = [0.5, 1, 1.5, 2].includes(Number(o.speed)) ? Number(o.speed) : 1;
 
-  args.push('-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20');
-  if (!o.mute) args.push('-c:a', 'aac', '-b:a', '160k');
-  args.push('-movflags', '+faststart', '-y', out);
+    // --- resolve overlay + music assets up front (need their inputs / dims) ---
+    const overlays = (Array.isArray(o.overlays) ? o.overlays : [])
+      .map((ov) => ({ ...ov, path: assetPath(ov && ov.file) }))
+      .filter((ov) => ov.path);
+    const music = (o.music && assetPath(o.music.file)) ? { ...o.music, path: assetPath(o.music.file) } : null;
+    const useComplex = overlays.length > 0 || !!music;
 
-  runFfmpeg(args)
+    // Output frame size — needed to scale overlays proportionally.
+    const scaleMap = { '9:16': [1080, 1920], '1:1': [1080, 1080], '16:9': [1920, 1080] };
+    let outW = 0, outH = 0;
+    if (scaleMap[o.aspect]) { [outW, outH] = scaleMap[o.aspect]; }
+    else if (useComplex) { const d = await probeDims(src); if (d) { outW = d.w; outH = d.h; } }
+
+    // Fade timings live in the OUTPUT timebase (after the speed change).
+    const fadeIn = Math.max(0, Number(o.fadeIn) || 0);
+    let fadeOut = Math.max(0, Number(o.fadeOut) || 0);
+    let outDur = trimDur != null ? trimDur : await probeDuration(src);
+    if (outDur != null) outDur = outDur / speed;
+    const fadeOutSt = (fadeOut > 0 && outDur) ? Math.max(0, outDur - fadeOut) : null;
+    if (fadeOutSt == null) fadeOut = 0;
+
+    // --- build the base video filter chain (shared by both paths) ---
+    const vf = [];
+    const R = { '9:16': 9 / 16, '1:1': 1, '16:9': 16 / 9 }[o.aspect];
+    if (R) {
+      const cx = clamp01(o.cropX), cy = clamp01(o.cropY);
+      vf.push(`crop='min(iw,ih*${R})':'min(ih,iw/${R})':'(iw-ow)*${cx}':'(ih-oh)*${cy}'`);
+      vf.push(`scale=${scaleMap[o.aspect][0]}:${scaleMap[o.aspect][1]}:flags=lanczos`, 'setsar=1');
+    }
+    if (speed !== 1) vf.push(`setpts=PTS/${speed}`);
+
+    // Text layers: multiple on-screen texts (CapCut-style). Back-compat with
+    // the old single { caption, captionPos }.
+    const layers = Array.isArray(o.texts) && o.texts.length
+      ? o.texts
+      : (o.caption && String(o.caption).trim() ? [{ text: o.caption, pos: o.captionPos, color: 'white', size: 'medium' }] : []);
+    const FONT = '/System/Library/Fonts/Supplemental/Arial.ttf';
+    const SIZES = { small: 'h/22', medium: 'h/14', large: 'h/9' };
+    const POSY = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' };
+    for (const t of layers) {
+      const txt = String(t.text || '').trim();
+      if (!txt) continue;
+      const cf = path.join(BUFFER_DIR, `cap_${Date.now()}_${capFiles.length}.txt`);
+      fs.writeFileSync(cf, txt.slice(0, 300));
+      capFiles.push(cf);
+      const y = POSY[t.pos] || (t.y != null ? `h*${clamp01(t.y)}` : 'h*0.84');
+      const size = SIZES[t.size] || 'h/14';
+      const color = /^#?[a-zA-Z0-9]+$/.test(String(t.color || '')) ? t.color : 'white';
+      let dt = `drawtext=fontfile='${FONT}':textfile='${cf}':fontcolor=${color}:bordercolor=black:borderw=6:fontsize=${size}:x=(w-text_w)/2:y=${y}`;
+      const ts = t.start != null && t.start !== '' ? Math.max(0, Number(t.start)) : null;
+      const te = t.end != null && t.end !== '' ? Number(t.end) : null;
+      if (ts != null || te != null) dt += `:enable='between(t,${ts != null ? ts : 0},${te != null ? te : 1e9})'`;
+      vf.push(dt);
+    }
+    if (fadeIn > 0) vf.push(`fade=t=in:st=0:d=${fadeIn}`);
+    if (fadeOut > 0) vf.push(`fade=t=out:st=${fadeOutSt.toFixed(3)}:d=${fadeOut}`);
+
+    // --- assemble ffmpeg args ---
+    const args = ['-hide_banner', '-loglevel', 'error'];
+    // trim as INPUT options so it only limits the source clip (not the
+    // overlay/music inputs that follow).
+    if (s != null && s > 0) args.push('-ss', String(s));
+    if (trimDur != null) args.push('-t', String(trimDur));
+    args.push('-i', src);
+    // overlay inputs
+    for (const ov of overlays) args.push('-i', ov.path);
+    // music input (looped so it always covers the clip; -shortest caps the render)
+    let musicIdx = null;
+    if (music) { args.push('-stream_loop', '-1', '-i', music.path); musicIdx = 1 + overlays.length; }
+
+    const wantAudio = !o.mute || !!music;
+
+    if (!useComplex) {
+      if (vf.length) args.push('-vf', vf.join(','));
+      if (o.mute) args.push('-an');
+      else {
+        const af = [];
+        if (speed !== 1) af.push(`atempo=${speed}`);
+        if (fadeIn > 0) af.push(`afade=t=in:st=0:d=${fadeIn}`);
+        if (fadeOut > 0) af.push(`afade=t=out:st=${fadeOutSt.toFixed(3)}:d=${fadeOut}`);
+        if (af.length) args.push('-af', af.join(','));
+      }
+    } else {
+      const fc = [];
+      fc.push(`[0:v]${vf.length ? vf.join(',') : 'null'}[vb]`);
+      let cur = 'vb';
+      overlays.forEach((ov, i) => {
+        const inIdx = i + 1;
+        const w = Math.max(2, Math.round(outW * clamp01(ov.scale || 0.3)));
+        const ox = `(main_w-overlay_w)*${clamp01(ov.x)}`;
+        const oy = `(main_h-overlay_h)*${clamp01(ov.y)}`;
+        let en = '';
+        const ovs = ov.start != null && ov.start !== '' ? Math.max(0, Number(ov.start)) : null;
+        const ove = ov.end != null && ov.end !== '' ? Number(ov.end) : null;
+        if (ovs != null || ove != null) en = `:enable='between(t,${ovs != null ? ovs : 0},${ove != null ? ove : 1e9})'`;
+        fc.push(`[${inIdx}:v]scale=${w}:-2[ov${i}]`);
+        const next = `v${i}`;
+        fc.push(`[${cur}][ov${i}]overlay=${ox}:${oy}${en}[${next}]`);
+        cur = next;
+      });
+
+      let aout = null;
+      if (wantAudio) {
+        const aChain = [];
+        if (speed !== 1) aChain.push(`atempo=${speed}`);
+        if (fadeIn > 0) aChain.push(`afade=t=in:st=0:d=${fadeIn}`);
+        if (fadeOut > 0) aChain.push(`afade=t=out:st=${fadeOutSt.toFixed(3)}:d=${fadeOut}`);
+        const origVol = o.mute ? 0 : 1;
+        if (music) {
+          const mvol = Math.max(0, Math.min(3, Number(music.volume != null ? music.volume : 0.5)));
+          if (!o.mute) {
+            fc.push(`[0:a]${aChain.length ? aChain.join(',') + ',' : ''}volume=${origVol}[a0]`);
+            fc.push(`[${musicIdx}:a]volume=${mvol}[am]`);
+            fc.push(`[a0][am]amix=inputs=2:duration=first:dropout_transition=0[aout]`);
+          } else {
+            // music only, trimmed to the video via -shortest
+            const mf = [`volume=${mvol}`];
+            if (fadeIn > 0) mf.push(`afade=t=in:st=0:d=${fadeIn}`);
+            if (fadeOut > 0) mf.push(`afade=t=out:st=${fadeOutSt.toFixed(3)}:d=${fadeOut}`);
+            fc.push(`[${musicIdx}:a]${mf.join(',')}[aout]`);
+          }
+          aout = 'aout';
+        } else if (aChain.length) {
+          fc.push(`[0:a]${aChain.join(',')}[aout]`);
+          aout = 'aout';
+        } else {
+          aout = '0:a';
+        }
+      }
+
+      args.push('-filter_complex', fc.join(';'));
+      args.push('-map', `[${cur}]`);
+      if (aout) args.push('-map', aout.startsWith('0:') ? aout : `[${aout}]`);
+      else args.push('-an');
+      if (music) args.push('-shortest');
+    }
+
+    args.push('-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20');
+    if (wantAudio) args.push('-c:a', 'aac', '-b:a', '160k');
+    args.push('-movflags', '+faststart', '-y', out);
+
+    await runFfmpeg(args);
+  })()
     .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
-    .catch((err) => { job.status = 'error'; job.detail = err.message.slice(0, 300); })
+    .catch((err) => { job.status = 'error'; job.detail = (err.message || String(err)).slice(0, 300); })
     .finally(() => { for (const cf of capFiles) try { fs.unlinkSync(cf); } catch (_) {} });
   return job;
 }
@@ -708,6 +838,20 @@ app.post('/api/clips/:file/trim', (req, res) => {
 app.post('/api/clips/:file/edit', (req, res) => {
   try { res.json({ ok: true, jobId: editClip(path.basename(req.params.file), req.body || {}).id }); }
   catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// Upload an overlay image/video or a music track. Raw binary body; ?ext=.png.
+const UP_EXT = { image: '.png', '.png': '.png', '.jpg': '.jpg', '.jpeg': '.jpg', '.gif': '.gif', '.webp': '.webp', '.mp4': '.mp4', '.mov': '.mp4', '.webm': '.webm', '.mp3': '.mp3', '.m4a': '.m4a', '.aac': '.aac', '.wav': '.wav', '.ogg': '.ogg' };
+app.post('/api/upload', express.raw({ type: () => true, limit: '120mb' }), (req, res) => {
+  try {
+    if (!req.body || !req.body.length) return res.status(400).json({ error: 'empty upload' });
+    let ext = String(req.query.ext || '').toLowerCase();
+    if (!ext.startsWith('.')) ext = '.' + ext;
+    ext = UP_EXT[ext] || (/^(\.png|\.jpg|\.jpeg|\.gif|\.webp|\.mp4|\.mov|\.webm|\.mp3|\.m4a|\.aac|\.wav|\.ogg)$/.test(ext) ? ext : '.bin');
+    const name = `asset_${Date.now()}_${crypto.randomBytes(3).toString('hex')}${ext}`;
+    fs.writeFileSync(path.join(ASSETS_DIR, name), req.body);
+    res.json({ ok: true, file: name });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.post('/api/clips/:file/vertical', (req, res) => {

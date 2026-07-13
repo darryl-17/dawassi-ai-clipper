@@ -517,13 +517,30 @@ function editClip(file, o) {
   const speed = [0.5, 1, 1.5, 2].includes(Number(o.speed)) ? Number(o.speed) : 1;
   if (speed !== 1) vf.push(`setpts=PTS/${speed}`);
 
-  let capFile = null;
-  if (o.caption && String(o.caption).trim()) {
-    capFile = path.join(BUFFER_DIR, `cap_${Date.now()}.txt`);
-    fs.writeFileSync(capFile, String(o.caption).slice(0, 200));
-    const y = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' }[o.captionPos] || 'h*0.84';
-    const font = '/System/Library/Fonts/Supplemental/Arial.ttf';
-    vf.push(`drawtext=fontfile='${font}':textfile='${capFile}':fontcolor=white:bordercolor=black:borderw=6:fontsize=h/14:x=(w-text_w)/2:y=${y}`);
+  // Text layers: multiple on-screen texts, each with position, size, color and
+  // optional start/end timing (CapCut-style). Backward compatible with the old
+  // single { caption, captionPos } fields.
+  const capFiles = [];
+  const layers = Array.isArray(o.texts) && o.texts.length
+    ? o.texts
+    : (o.caption && String(o.caption).trim() ? [{ text: o.caption, pos: o.captionPos, color: 'white', size: 'medium' }] : []);
+  const FONT = '/System/Library/Fonts/Supplemental/Arial.ttf';
+  const SIZES = { small: 'h/22', medium: 'h/14', large: 'h/9' };
+  const POSY = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' };
+  for (const t of layers) {
+    const txt = String(t.text || '').trim();
+    if (!txt) continue;
+    const cf = path.join(BUFFER_DIR, `cap_${Date.now()}_${capFiles.length}.txt`);
+    fs.writeFileSync(cf, txt.slice(0, 300));
+    capFiles.push(cf);
+    const y = POSY[t.pos] || (t.y != null ? `h*${clamp01(t.y)}` : 'h*0.84');
+    const size = SIZES[t.size] || 'h/14';
+    const color = /^#?[a-zA-Z0-9]+$/.test(String(t.color || '')) ? t.color : 'white';
+    let dt = `drawtext=fontfile='${FONT}':textfile='${cf}':fontcolor=${color}:bordercolor=black:borderw=6:fontsize=${size}:x=(w-text_w)/2:y=${y}`;
+    const ts = t.start != null && t.start !== '' ? Math.max(0, Number(t.start)) : null;
+    const te = t.end != null && t.end !== '' ? Number(t.end) : null;
+    if (ts != null || te != null) dt += `:enable='between(t,${ts != null ? ts : 0},${te != null ? te : 1e9})'`;
+    vf.push(dt);
   }
   if (vf.length) args.push('-vf', vf.join(','));
 
@@ -537,7 +554,7 @@ function editClip(file, o) {
   runFfmpeg(args)
     .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
     .catch((err) => { job.status = 'error'; job.detail = err.message.slice(0, 300); })
-    .finally(() => { if (capFile) try { fs.unlinkSync(capFile); } catch (_) {} });
+    .finally(() => { for (const cf of capFiles) try { fs.unlinkSync(cf); } catch (_) {} });
   return job;
 }
 

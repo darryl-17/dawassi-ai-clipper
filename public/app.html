@@ -305,7 +305,17 @@
       </div>
       <div class="edpane" data-pane="subs">
         <h3>Select Subtitles</h3>
-        <div class="subcard" id="edAiSub"><div class="ci">✨</div><b>AI Subtitles</b><span>Automatically recognize speech and add subtitles</span></div>
+        <div class="subcard" id="edAiSub"><div class="ci">✨</div><b>AI Subtitles</b><span>Auto-transcribe speech into timed captions — runs on your device</span></div>
+        <div id="edAiBox" style="display:none;margin:0 0 12px">
+          <div class="txrow" style="margin-bottom:10px">
+            <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Language</span>
+            <div class="chips" id="edAiLang"><button class="chip on" data-l="en">English</button><button class="chip" data-l="multi">Other / mixed</button></div>
+          </div>
+          <button class="txadd" id="edAiRun">✨ Transcribe this clip</button>
+          <div id="edAiStatus" style="display:none;font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px"></div>
+          <div id="edAiBar" style="display:none;height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:8px"><div id="edAiBarFill" style="height:100%;width:0;background:var(--accent);transition:width .2s"></div></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px">First run downloads a small speech model (~40&nbsp;MB) to your browser, then it works offline and instantly. Captions appear in the <b>Text</b> tab where you can edit, restyle and re-time them.</div>
+        </div>
         <div class="subcard" id="edManualSub"><div class="ci">💬</div><b>Manual Subtitles</b><span>Add a caption with custom position</span></div>
         <div id="edSubEditor" style="display:none;margin-top:4px">
           <div class="egroup"><label>Caption text</label><input type="text" id="edCaption" placeholder="Type a caption…" maxlength="120"></div>
@@ -600,6 +610,7 @@ window.openEditor = function(file){
   edVideo.src = '/clips/' + encodeURIComponent(file);
   E('edCaption').value = ''; edCapPrev.style.display = 'none'; edCrop.style.display = 'none';
   E('edSubEditor').style.display = 'none';
+  E('edAiBox').style.display = 'none'; E('edAiStatus').style.display = 'none'; E('edAiStatus').textContent = '';
   setChips('edAspect','a','original'); setChips('edCapPos','p','bottom'); setChips('edSpeed','s','1');
   setChips('edFadeIn','f','0'); setChips('edFadeOut','f','0');
   E('edMute').classList.remove('on'); E('edMute').textContent = '🔊 Sound on'; E('edCapLbl').textContent = 'No caption';
@@ -616,7 +627,74 @@ document.querySelectorAll('.edtab').forEach(tb => tb.onclick = () => switchTab(t
 
 // subtitles / caption
 E('edManualSub').onclick = () => { E('edSubEditor').style.display = 'block'; E('edCaption').focus(); };
-E('edAiSub').onclick = () => toast('Auto-captioning needs online speech-to-text — use Manual Subtitles (works offline).', true);
+E('edAiSub').onclick = () => { const b = E('edAiBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; };
+
+// ---- AI auto-captions (in-browser Whisper via transformers.js)
+let edAiLang = 'en';
+document.querySelectorAll('#edAiLang .chip').forEach(c => c.onclick = () => { edAiLang = c.dataset.l; setChips('edAiLang','l',c.dataset.l); });
+const asrPipes = {}; // cache pipelines by model id
+function aiStatus(msg){ const s = E('edAiStatus'); s.style.display = 'block'; s.textContent = msg; }
+function aiProgress(p){ const bar = E('edAiBar'); bar.style.display = p == null ? 'none' : 'block'; if (p != null) E('edAiBarFill').style.width = Math.round(p) + '%'; }
+async function decodeClipAudio(url){
+  const ab = await (await fetch(url)).arrayBuffer();
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ac = new AC();
+  const buf = await ac.decodeAudioData(ab);
+  try { ac.close(); } catch (_) {}
+  const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(buf.duration * 16000)), 16000);
+  const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start(0);
+  const rendered = await off.startRendering();
+  return rendered.getChannelData(0);
+}
+E('edAiRun').onclick = async () => {
+  const btn = E('edAiRun'); if (btn.disabled) return;
+  const model = edAiLang === 'en' ? 'Xenova/whisper-tiny.en' : 'Xenova/whisper-tiny';
+  btn.disabled = true; btn.textContent = '⏳ Working…';
+  try {
+    aiStatus('Loading speech model…'); aiProgress(0);
+    const TF = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    TF.env.allowLocalModels = false;
+    if (!asrPipes[model]) {
+      const seen = {};
+      asrPipes[model] = await TF.pipeline('automatic-speech-recognition', model, {
+        quantized: true,
+        progress_callback: (d) => {
+          if (d.status === 'progress' && d.file) { seen[d.file] = d.progress || 0;
+            const vals = Object.values(seen); const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+            aiProgress(avg); aiStatus('Downloading speech model… ' + Math.round(avg) + '% (one-time)'); }
+          else if (d.status === 'ready') { aiProgress(null); }
+        },
+      });
+    }
+    aiProgress(null); aiStatus('Listening to the audio…');
+    const audio = await decodeClipAudio('/clips/' + encodeURIComponent(ed.file));
+    aiStatus('Transcribing… this can take a moment.');
+    const out = await asrPipes[model](audio, { return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
+    const chunks = (out.chunks && out.chunks.length) ? out.chunks : [{ text: out.text, timestamp: [0, null] }];
+    const inPt = ed.inPt || 0, outPt = ed.outPt != null ? ed.outPt : ed.dur;
+    let added = 0;
+    for (const c of chunks) {
+      const txt = (c.text || '').trim(); if (!txt) continue;
+      if (/^[\[(][^\])]*[\])]$/.test(txt)) continue; // skip non-speech tags like [Music]
+      let s = c.timestamp && c.timestamp[0] != null ? c.timestamp[0] : 0;
+      let e = c.timestamp ? c.timestamp[1] : null;
+      if (e != null && e < inPt) continue; if (s > outPt) continue;
+      const rs = Math.max(0, s - inPt);
+      const re = e != null ? Math.max(rs + 0.3, e - inPt) : null;
+      ed.texts.push({ text: txt.slice(0, 120), pos: 'bottom', size: 'medium', color: 'white', start: Math.round(rs * 10) / 10, end: re != null ? Math.round(re * 10) / 10 : null });
+      added++;
+    }
+    renderTextList(); updateTextPreview();
+    aiProgress(null); aiStatus('');
+    E('edAiBox').style.display = 'none';
+    if (added) { switchTab('text'); toast('✨ Added ' + added + ' caption' + (added > 1 ? 's' : '') + ' — edit them in the Text tab'); }
+    else toast('No speech detected in this clip.', true);
+  } catch (err) {
+    aiProgress(null);
+    aiStatus('Could not run AI captions (needs internet on first use to fetch the model). You can use Manual Subtitles or the Text tab instead.');
+    toast('AI captions failed: ' + (err.message || err), true);
+  } finally { btn.disabled = false; btn.textContent = '✨ Transcribe this clip'; }
+};
 E('edCaption').addEventListener('input', updCap);
 document.querySelectorAll('#edCapPos .chip').forEach(c => c.onclick = () => { ed.capPos = c.dataset.p; setChips('edCapPos','p',ed.capPos); updCap(); });
 function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textContent = t ? ('💬 ' + t) : 'No caption';

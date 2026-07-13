@@ -158,6 +158,28 @@
   .edhandle.l { left: -7px; } .edhandle.r { right: -7px; }
   .edph { position: absolute; top: 0; bottom: 0; width: 2px; background: #2f6bff; z-index: 6; pointer-events: none; }
   .edph::before { content: ''; position: absolute; top: -1px; left: -5px; border: 6px solid transparent; border-top-color: #2f6bff; }
+  /* ---------- text layers ---------- */
+  .edtexts { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+  .edtxprev { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; line-height: 1.12; padding: 0 10px; white-space: pre-wrap; word-break: break-word; text-shadow: 0 2px 0 #000, 0 0 6px #000, -2px 0 0 #000, 2px 0 0 #000, 0 -2px 0 #000, 2px 2px 0 #000; }
+  .txempty { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+  .txlayer { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: var(--panel2); }
+  .txhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .txnum { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .txdel { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 2px 5px; border-radius: 6px; line-height: 1; }
+  .txdel:hover { color: #e0473b; background: rgba(224,71,59,.12); }
+  .txinput { width: 100%; background: var(--panel); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 11px; font-size: 14px; margin-bottom: 10px; }
+  .txinput:focus { outline: none; border-color: var(--accent); }
+  .txrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .txrow:last-child { margin-bottom: 0; }
+  .txrow .chips { gap: 5px; }
+  .txrow .chip { padding: 6px 10px; font-size: 12px; }
+  .txcolors { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .txsw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; padding: 0; }
+  .txsw.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .txcolors input[type=color] { width: 28px; height: 28px; border: 1.5px solid var(--border); border-radius: 6px; background: none; cursor: pointer; padding: 0; }
+  .txtimelbl { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 2px; }
+  .txadd { width: 100%; padding: 11px; border: 1.5px dashed var(--border); border-radius: 10px; background: var(--panel2); color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; }
+  .txadd:hover { border-color: var(--accent); color: var(--accent); }
   @media (max-width: 820px) { .edpanel { width: 220px; } .edrail { width: 62px; } }
   /* ---------- 3D icons ---------- */
   .i3d { height: 1.15em; width: auto; vertical-align: -0.2em; object-fit: contain; }
@@ -276,8 +298,9 @@
       </div>
       <div class="edpane" data-pane="text">
         <h3>Text</h3>
-        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px">On-screen captions are burned in from the <b>Subtitles</b> tab.</div>
-        <button class="chip" id="edGotoSubs">💬 Edit caption</button>
+        <p class="txempty">Add one or more text layers over your video. Each has its own position, size, colour and on-screen timing. Move the playhead, then <b>Start</b>/<b>End</b> to time a layer.</p>
+        <div id="edTextList"></div>
+        <button class="txadd" id="edAddText">＋ Add text</button>
       </div>
       <div class="edpane" data-pane="audio">
         <h3>Audio</h3>
@@ -302,6 +325,7 @@
         <video id="edVideo" preload="metadata"></video>
         <div class="edcrop" id="edCrop"></div>
         <div class="edcap" id="edCapPrev"></div>
+        <div class="edtexts" id="edTextOverlay"></div>
       </div>
     </div>
   </div>
@@ -539,22 +563,23 @@ refresh();
 setInterval(refresh, 2500);
 
 // ================= web editor (timeline) =================
-const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34 };
+const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [] };
 const E = id => document.getElementById(id);
 const edw = E('edWrap'), edVideo = E('edVideo'), edCrop = E('edCrop'), edCapPrev = E('edCapPrev');
 function fmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 function setChips(gid, attr, val){ document.querySelectorAll('#'+gid+' .chip').forEach(c => c.classList.toggle('on', c.dataset[attr] === val)); }
 
 window.openEditor = function(file){
-  Object.assign(ed, { file, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 } });
+  Object.assign(ed, { file, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, texts: [] });
   E('edName').textContent = file; E('edMediaInfo').textContent = file;
   edVideo.src = '/clips/' + encodeURIComponent(file);
   E('edCaption').value = ''; edCapPrev.style.display = 'none'; edCrop.style.display = 'none';
   E('edSubEditor').style.display = 'none';
   setChips('edAspect','a','original'); setChips('edCapPos','p','bottom'); setChips('edSpeed','s','1');
   E('edMute').classList.remove('on'); E('edMute').textContent = '🔊 Sound on'; E('edCapLbl').textContent = 'No caption';
+  renderTextList(); updateTextPreview();
   switchTab('media'); edw.classList.add('open');
-  edVideo.onloadedmetadata = () => { ed.dur = edVideo.duration || 0; ed.outPt = ed.dur; E('edTot').textContent = fmtT(ed.dur); fitZoom(); renderTL(); };
+  edVideo.onloadedmetadata = () => { ed.dur = edVideo.duration || 0; ed.outPt = ed.dur; E('edTot').textContent = fmtT(ed.dur); fitZoom(); renderTL(); updateTextPreview(); };
 };
 function closeEditor(){ edw.classList.remove('open'); edVideo.pause(); edVideo.removeAttribute('src'); }
 E('edBack').onclick = closeEditor;
@@ -562,7 +587,6 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && edw.classL
 
 function switchTab(t){ document.querySelectorAll('.edtab').forEach(x => x.classList.toggle('on', x.dataset.tab === t)); document.querySelectorAll('.edpane').forEach(x => x.classList.toggle('on', x.dataset.pane === t)); if (t === 'video') layoutCrop(); }
 document.querySelectorAll('.edtab').forEach(tb => tb.onclick = () => switchTab(tb.dataset.tab));
-E('edGotoSubs').onclick = () => { switchTab('subs'); E('edManualSub').click(); };
 
 // subtitles / caption
 E('edManualSub').onclick = () => { E('edSubEditor').style.display = 'block'; E('edCaption').focus(); };
@@ -575,6 +599,74 @@ function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textCont
   if (ed.capPos === 'top') { edCapPrev.style.top = '6%'; edCapPrev.style.bottom = 'auto'; }
   else if (ed.capPos === 'middle') { edCapPrev.style.top = '44%'; edCapPrev.style.bottom = 'auto'; }
   else { edCapPrev.style.top = 'auto'; edCapPrev.style.bottom = '8%'; } }
+
+// ---- text layers (multiple, CapCut-style)
+const TX_SWATCHES = ['white','black','#FFD400','#FF3B30','#E4571E','#2F6BFF','#1E9E5A','#B15CFF'];
+function txTimeLabel(l){
+  if (l.start == null && l.end == null) return 'Whole clip';
+  if (l.start != null && l.end != null) return fmtT(l.start) + ' → ' + fmtT(l.end);
+  if (l.start != null) return 'from ' + fmtT(l.start);
+  return 'until ' + fmtT(l.end);
+}
+function renderTextList(){
+  const box = E('edTextList'); if (!box) return; box.innerHTML = '';
+  ed.texts.forEach((l, i) => {
+    const row = document.createElement('div'); row.className = 'txlayer'; row.dataset.i = i;
+    row.innerHTML =
+      '<div class="txhead"><span class="txnum">Text ' + (i + 1) + '</span><button class="txdel" title="Delete layer">🗑</button></div>'
+      + '<input type="text" class="txinput" maxlength="120" placeholder="Type text…">'
+      + '<div class="txrow"><div class="chips txpos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Mid</button><button class="chip" data-p="bottom">Bottom</button></div></div>'
+      + '<div class="txrow"><div class="chips txsize"><button class="chip" data-s="small">S</button><button class="chip" data-s="medium">M</button><button class="chip" data-s="large">L</button></div><div class="txcolors"></div></div>'
+      + '<div class="txrow txtime"><button class="chip txsetstart">⏮ Start</button><button class="chip txsetend">End ⏭</button><button class="chip txfull">Full</button><span class="txtimelbl"></span></div>';
+    box.appendChild(row);
+    const inp = row.querySelector('.txinput'); inp.value = l.text || '';
+    inp.addEventListener('input', () => { l.text = inp.value; updateTextPreview(); });
+    row.querySelector('.txdel').onclick = () => { ed.texts.splice(i, 1); renderTextList(); updateTextPreview(); };
+    row.querySelectorAll('.txpos .chip').forEach(c => { c.classList.toggle('on', c.dataset.p === (l.pos || 'bottom'));
+      c.onclick = () => { l.pos = c.dataset.p; row.querySelectorAll('.txpos .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
+    row.querySelectorAll('.txsize .chip').forEach(c => { c.classList.toggle('on', c.dataset.s === (l.size || 'medium'));
+      c.onclick = () => { l.size = c.dataset.s; row.querySelectorAll('.txsize .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
+    const cbox = row.querySelector('.txcolors');
+    const ci = document.createElement('input'); ci.type = 'color'; ci.title = 'Custom colour';
+    ci.value = /^#[0-9a-fA-F]{6}$/.test(l.color || '') ? l.color : '#ffffff';
+    TX_SWATCHES.forEach(col => { const b = document.createElement('button'); b.className = 'txsw'; b.style.background = col;
+      b.classList.toggle('on', (l.color || 'white') === col);
+      b.onclick = () => { l.color = col; cbox.querySelectorAll('.txsw').forEach(x => x.classList.remove('on')); b.classList.add('on');
+        if (/^#[0-9a-fA-F]{6}$/.test(col)) ci.value = col; updateTextPreview(); };
+      cbox.appendChild(b); });
+    ci.oninput = () => { l.color = ci.value; cbox.querySelectorAll('.txsw').forEach(x => x.classList.remove('on')); updateTextPreview(); };
+    cbox.appendChild(ci);
+    const lbl = row.querySelector('.txtimelbl'); lbl.textContent = txTimeLabel(l);
+    row.querySelector('.txsetstart').onclick = () => { l.start = Math.round(edVideo.currentTime * 10) / 10; if (l.end != null && l.end <= l.start) l.end = null; lbl.textContent = txTimeLabel(l); updateTextPreview(); };
+    row.querySelector('.txsetend').onclick = () => { l.end = Math.round(edVideo.currentTime * 10) / 10; if (l.start != null && l.start >= l.end) l.start = null; lbl.textContent = txTimeLabel(l); updateTextPreview(); };
+    row.querySelector('.txfull').onclick = () => { l.start = null; l.end = null; lbl.textContent = txTimeLabel(l); updateTextPreview(); };
+  });
+}
+E('edAddText').onclick = () => {
+  ed.texts.push({ text: '', pos: 'bottom', size: 'medium', color: 'white', start: null, end: null });
+  renderTextList();
+  const inputs = E('edTextList').querySelectorAll('.txinput'); const last = inputs[inputs.length - 1]; if (last) last.focus();
+};
+function updateTextPreview(){
+  const wrap = E('edTextOverlay'); if (!wrap) return; wrap.innerHTML = '';
+  const H = edVideo.clientHeight || 1, SIZEPX = { small: H / 22, medium: H / 14, large: H / 9 };
+  const now = edVideo.currentTime, paused = edVideo.paused;
+  ed.texts.forEach(l => {
+    const txt = (l.text || '').trim(); if (!txt) return;
+    // While paused/editing show every layer; during playback respect its timing (matches export).
+    if (!paused) { const a = l.start != null ? l.start : 0, b = l.end != null ? l.end : 1e9; if (now < a || now > b) return; }
+    const d = document.createElement('div'); d.className = 'edtxprev'; d.textContent = txt;
+    d.style.fontSize = (SIZEPX[l.size] || SIZEPX.medium) + 'px';
+    d.style.color = l.color || 'white';
+    if (l.pos === 'top') d.style.top = '6%';
+    else if (l.pos === 'middle') { d.style.top = '50%'; d.style.transform = 'translateY(-50%)'; }
+    else d.style.top = '84%';
+    wrap.appendChild(d);
+  });
+}
+edVideo.addEventListener('timeupdate', updateTextPreview);
+edVideo.addEventListener('play', updateTextPreview);
+edVideo.addEventListener('pause', updateTextPreview);
 
 // audio
 E('edMute').onclick = () => { ed.mute = !ed.mute; E('edMute').classList.toggle('on', ed.mute); E('edMute').textContent = ed.mute ? '🔇 Muted' : '🔊 Sound on'; };
@@ -625,10 +717,12 @@ function fitZoom(){ const cw = E('edScroll').clientWidth - 8; ed.pps = ed.dur > 
 E('edZoomIn').onclick = () => { ed.pps = Math.min(160, ed.pps * 1.4); renderTL(); };
 E('edZoomOut').onclick = () => { ed.pps = Math.max(4, ed.pps / 1.4); renderTL(); };
 E('edFit').onclick = () => { fitZoom(); renderTL(); };
-window.addEventListener('resize', () => { if (edw.classList.contains('open')) { renderTL(); if (ed.aspect !== 'original') layoutCrop(); } });
+window.addEventListener('resize', () => { if (edw.classList.contains('open')) { renderTL(); if (ed.aspect !== 'original') layoutCrop(); updateTextPreview(); } });
 
 E('edExport').onclick = async () => {
-  const body = { start: ed.inPt, end: ed.outPt, aspect: ed.aspect, cropX: ed.crop.x, cropY: ed.crop.y, caption: E('edCaption').value.trim(), captionPos: ed.capPos, speed: ed.speed, mute: ed.mute };
+  const texts = ed.texts.filter(t => (t.text || '').trim())
+    .map(t => ({ text: t.text.trim(), pos: t.pos, size: t.size, color: t.color, start: t.start, end: t.end }));
+  const body = { start: ed.inPt, end: ed.outPt, aspect: ed.aspect, cropX: ed.crop.x, cropY: ed.crop.y, caption: E('edCaption').value.trim(), captionPos: ed.capPos, texts, speed: ed.speed, mute: ed.mute };
   try { await post('/api/clips/' + encodeURIComponent(ed.file) + '/edit', body); toast('✨ Rendering edited clip…'); closeEditor(); refresh(); }
   catch (e) { toast(e.message, true); }
 };

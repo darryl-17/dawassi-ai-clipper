@@ -160,7 +160,16 @@
   .edph::before { content: ''; position: absolute; top: -1px; left: -5px; border: 6px solid transparent; border-top-color: #2f6bff; }
   /* ---------- text layers ---------- */
   .edtexts { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
-  .edtxprev { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; line-height: 1.12; padding: 0 10px; white-space: pre-wrap; word-break: break-word; text-shadow: 0 2px 0 #000, 0 0 6px #000, -2px 0 0 #000, 2px 0 0 #000, 0 -2px 0 #000, 2px 2px 0 #000; }
+  .edtxprev { position: absolute; font-weight: 800; line-height: 1.12; max-width: 92%; white-space: pre-wrap; word-break: break-word; pointer-events: auto; cursor: move; user-select: none; touch-action: none; }
+  .edtxprev.sel { outline: 1.5px dashed rgba(255,255,255,.85); outline-offset: 3px; }
+  .txhandle { position: absolute; right: -9px; bottom: -9px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; cursor: nwse-resize; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  .txfont { width: 100%; background: var(--panel); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+  .txsizerow { align-items: center; gap: 9px; }
+  .txsizerow .tzlbl { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .txsizerow input[type=range] { flex: 1; accent-color: var(--accent); }
+  .txsizerow .val { font-size: 12px; color: var(--muted); min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+  .txlayer.sel { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(228,87,30,.25); }
+  .txalign .chip, .txeffect .chip { padding: 6px 9px; }
   .txempty { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
   .txlayer { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: var(--panel2); }
   .txhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -550,7 +559,7 @@
       </div>
       <div class="edpane" data-pane="text">
         <h3>Text</h3>
-        <p class="txempty">Add one or more text layers over your video. Each has its own position, size, colour and on-screen timing. Move the playhead, then <b>Start</b>/<b>End</b> to time a layer.</p>
+        <p class="txempty">Add text layers with their own <b>font, colour, size, alignment</b> and <b>effect</b> (outline / shadow / box). <b>Drag</b> any text on the preview to move it, or drag its corner handle to resize — or use the panel. Set <b>Start</b>/<b>End</b> from the playhead to time a layer.</p>
         <div id="edTextList"></div>
         <button class="txadd" id="edAddText"><i data-ic="plus"></i>Add text</button>
       </div>
@@ -664,6 +673,10 @@ const ICONS = {
   arrowupright: '<line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>',
   movehoriz: '<polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/><line x1="2" y1="12" x2="22" y2="12"/>',
   tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  alignleft: '<line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>',
+  aligncenter: '<line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/>',
+  alignright: '<line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>',
+  droplet: '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
 };
 function icon(name, cls) {
   const p = ICONS[name];
@@ -1038,14 +1051,14 @@ window.upscaleClipUI = async function (encFile) {
 setView('home');
 
 // ================= web editor (timeline) =================
-const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [], overlays: [], music: null, fadeIn: 0, fadeOut: 0 };
+const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [], selText: null, overlays: [], music: null, fadeIn: 0, fadeOut: 0 };
 const E = id => document.getElementById(id);
 const edw = E('edWrap'), edVideo = E('edVideo'), edCrop = E('edCrop'), edCapPrev = E('edCapPrev');
 function fmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 function setChips(gid, attr, val){ document.querySelectorAll('#'+gid+' .chip').forEach(c => c.classList.toggle('on', c.dataset[attr] === val)); }
 
 window.openEditor = function(file){
-  Object.assign(ed, { file, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, texts: [], overlays: [], music: null, fadeIn: 0, fadeOut: 0 });
+  Object.assign(ed, { file, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, texts: [], selText: null, overlays: [], music: null, fadeIn: 0, fadeOut: 0 });
   E('edName').textContent = file; E('edMediaInfo').textContent = file;
   edVideo.src = '/clips/' + encodeURIComponent(file);
   E('edCaption').value = ''; edCapPrev.style.display = 'none'; edCrop.style.display = 'none';
@@ -1121,7 +1134,7 @@ E('edAiRun').onclick = async () => {
       if (e != null && e < inPt) continue; if (s > outPt) continue;
       const rs = Math.max(0, s - inPt);
       const re = e != null ? Math.max(rs + 0.3, e - inPt) : null;
-      ed.texts.push({ text: txt.slice(0, 120), pos: 'bottom', size: 'medium', color: 'white', start: Math.round(rs * 10) / 10, end: re != null ? Math.round(re * 10) / 10 : null });
+      ed.texts.push(newTextLayer({ text: txt.slice(0, 120), start: Math.round(rs * 10) / 10, end: re != null ? Math.round(re * 10) / 10 : null }));
       added++;
     }
     renderTextList(); updateTextPreview();
@@ -1146,30 +1159,88 @@ function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textCont
 
 // ---- text layers (multiple, CapCut-style)
 const TX_SWATCHES = ['white','black','#FFD400','#FF3B30','#E4571E','#2F6BFF','#1E9E5A','#B15CFF'];
+const CAP_FONTS = [
+  { id: 'arialblack', name: 'Arial Black', css: '"Arial Black","Arial",sans-serif' },
+  { id: 'impact', name: 'Impact', css: 'Impact,"Arial Black",sans-serif' },
+  { id: 'arial', name: 'Arial', css: 'Arial,Helvetica,sans-serif' },
+  { id: 'verdana', name: 'Verdana', css: 'Verdana,Geneva,sans-serif' },
+  { id: 'trebuchet', name: 'Trebuchet MS', css: '"Trebuchet MS",sans-serif' },
+  { id: 'georgia', name: 'Georgia', css: 'Georgia,"Times New Roman",serif' },
+  { id: 'times', name: 'Times New Roman', css: '"Times New Roman",Times,serif' },
+  { id: 'comic', name: 'Comic Sans', css: '"Comic Sans MS","Comic Sans",cursive' },
+  { id: 'courier', name: 'Courier New', css: '"Courier New",Courier,monospace' },
+  { id: 'sf', name: 'SF Pro', css: '-apple-system,"SF Pro Display","Helvetica Neue",sans-serif' },
+];
+const CAP_FONT_CSS = {}; CAP_FONTS.forEach(f => CAP_FONT_CSS[f.id] = f.css);
+const TX_EFFECTS = [{ id: 'outline', name: 'Outline' }, { id: 'shadow', name: 'Shadow' }, { id: 'box', name: 'Box' }, { id: 'plain', name: 'None' }];
 function txTimeLabel(l){
   if (l.start == null && l.end == null) return 'Whole clip';
   if (l.start != null && l.end != null) return fmtT(l.start) + ' → ' + fmtT(l.end);
   if (l.start != null) return 'from ' + fmtT(l.start);
   return 'until ' + fmtT(l.end);
 }
+function newTextLayer(over){
+  return Object.assign({ text: '', font: 'arialblack', color: 'white', align: 'center', sizePct: 0.07, x: 0.5, y: 0.88, effect: 'outline', start: null, end: null }, over || {});
+}
+// Fill in any missing fields (back-compat with older {pos,size} layers).
+function normTx(l){
+  if (l.font == null) l.font = 'arialblack';
+  if (l.color == null) l.color = 'white';
+  if (l.align == null) l.align = 'center';
+  if (l.sizePct == null) l.sizePct = ({ small: 1 / 22, medium: 1 / 14, large: 1 / 9 })[l.size] || 1 / 14;
+  if (l.x == null) l.x = ({ left: 0.05, center: 0.5, right: 0.95 })[l.align] != null ? ({ left: 0.05, center: 0.5, right: 0.95 })[l.align] : 0.5;
+  if (l.y == null) l.y = ({ top: 0.06, middle: 0.5, bottom: 0.88 })[l.pos] || 0.88;
+  if (l.effect == null) l.effect = 'outline';
+  return l;
+}
+function selectTextRow(){ document.querySelectorAll('#edTextList .txlayer').forEach(r => r.classList.toggle('sel', Number(r.dataset.i) === ed.selText)); }
+function syncSizeSlider(l){
+  const i = ed.texts.indexOf(l); const r = document.querySelector('#edTextList .txlayer[data-i="' + i + '"]'); if (!r) return;
+  const s = r.querySelector('.txsize'), v = r.querySelector('.txsizerow .val');
+  if (s) { s.value = Math.round(l.sizePct * 100); if (v) v.textContent = s.value + '%'; }
+}
+function applyTxEffect(d, effect){
+  const fs = parseFloat(d.style.fontSize) || 24;
+  d.style.background = 'none'; d.style.padding = '0 6px'; d.style.textShadow = 'none'; d.style.borderRadius = '0';
+  if (effect === 'outline') { const b = Math.max(1, fs * 0.055); d.style.textShadow = [b+'px 0 #000','-'+b+'px 0 #000','0 '+b+'px #000','0 -'+b+'px #000',b+'px '+b+'px #000','-'+b+'px -'+b+'px #000',b+'px -'+b+'px #000','-'+b+'px '+b+'px #000'].join(','); }
+  else if (effect === 'shadow') { const s = Math.max(1, fs * 0.05); d.style.textShadow = s+'px '+s+'px '+(s*1.6)+'px rgba(0,0,0,.85)'; }
+  else if (effect === 'box') { d.style.background = 'rgba(0,0,0,.6)'; d.style.padding = (fs*0.14)+'px '+(fs*0.32)+'px'; d.style.borderRadius = (fs*0.1)+'px'; }
+}
 function renderTextList(){
   const box = E('edTextList'); if (!box) return; box.innerHTML = '';
   ed.texts.forEach((l, i) => {
+    normTx(l);
     const row = document.createElement('div'); row.className = 'txlayer'; row.dataset.i = i;
+    if (ed.selText === i) row.classList.add('sel');
+    const fontOpts = CAP_FONTS.map(f => '<option value="' + f.id + '"' + (f.id === l.font ? ' selected' : '') + ' style="font-family:' + f.css + '">' + f.name + '</option>').join('');
     row.innerHTML =
       '<div class="txhead"><span class="txnum">Text ' + (i + 1) + '</span><button class="txdel" title="Delete layer">' + icon('trash') + '</button></div>'
       + '<input type="text" class="txinput" maxlength="120" placeholder="Type text…">'
-      + '<div class="txrow"><div class="chips txpos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Mid</button><button class="chip" data-p="bottom">Bottom</button></div></div>'
-      + '<div class="txrow"><div class="chips txsize"><button class="chip" data-s="small">S</button><button class="chip" data-s="medium">M</button><button class="chip" data-s="large">L</button></div><div class="txcolors"></div></div>'
+      + '<div class="txrow"><select class="txfont">' + fontOpts + '</select></div>'
+      + '<div class="txrow"><div class="chips txalign">'
+        + '<button class="chip" data-a="left" title="Left">' + icon('alignleft') + '</button><button class="chip" data-a="center" title="Center">' + icon('aligncenter') + '</button><button class="chip" data-a="right" title="Right">' + icon('alignright') + '</button>'
+      + '</div><div class="chips txpos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Mid</button><button class="chip" data-p="bottom">Bottom</button></div></div>'
+      + '<div class="txrow txsizerow"><span class="tzlbl">Size</span><input type="range" class="txsize" min="2" max="30" step="1"><span class="val"></span></div>'
+      + '<div class="txrow"><div class="chips txeffect">' + TX_EFFECTS.map(e => '<button class="chip" data-e="' + e.id + '">' + e.name + '</button>').join('') + '</div></div>'
+      + '<div class="txrow"><div class="txcolors"></div></div>'
       + '<div class="txrow txtime"><button class="chip txsetstart">' + icon('skipback') + 'Start</button><button class="chip txsetend">End' + icon('skipforward') + '</button><button class="chip txfull">Full</button><span class="txtimelbl"></span></div>';
     box.appendChild(row);
     const inp = row.querySelector('.txinput'); inp.value = l.text || '';
     inp.addEventListener('input', () => { l.text = inp.value; updateTextPreview(); });
-    row.querySelector('.txdel').onclick = () => { ed.texts.splice(i, 1); renderTextList(); updateTextPreview(); };
-    row.querySelectorAll('.txpos .chip').forEach(c => { c.classList.toggle('on', c.dataset.p === (l.pos || 'bottom'));
-      c.onclick = () => { l.pos = c.dataset.p; row.querySelectorAll('.txpos .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
-    row.querySelectorAll('.txsize .chip').forEach(c => { c.classList.toggle('on', c.dataset.s === (l.size || 'medium'));
-      c.onclick = () => { l.size = c.dataset.s; row.querySelectorAll('.txsize .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
+    inp.addEventListener('focus', () => { ed.selText = i; selectTextRow(); updateTextPreview(); });
+    row.querySelector('.txdel').onclick = () => { ed.texts.splice(i, 1); if (ed.selText === i) ed.selText = null; renderTextList(); updateTextPreview(); };
+    row.querySelector('.txfont').onchange = (e) => { l.font = e.target.value; updateTextPreview(); };
+    row.querySelectorAll('.txalign .chip').forEach(c => { c.classList.toggle('on', c.dataset.a === l.align);
+      c.onclick = () => { l.align = c.dataset.a; l.x = ({ left: 0.05, center: 0.5, right: 0.95 })[c.dataset.a]; row.querySelectorAll('.txalign .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
+    row.querySelectorAll('.txpos .chip').forEach(c => {
+      const cur = l.y <= 0.2 ? 'top' : (l.y >= 0.7 ? 'bottom' : 'middle');
+      c.classList.toggle('on', c.dataset.p === cur);
+      c.onclick = () => { l.y = ({ top: 0.06, middle: 0.5, bottom: 0.88 })[c.dataset.p]; row.querySelectorAll('.txpos .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
+    const sz = row.querySelector('.txsize'), szv = row.querySelector('.txsizerow .val');
+    sz.value = Math.round(l.sizePct * 100); szv.textContent = sz.value + '%';
+    sz.addEventListener('input', () => { l.sizePct = Number(sz.value) / 100; szv.textContent = sz.value + '%'; updateTextPreview(); });
+    row.querySelectorAll('.txeffect .chip').forEach(c => { c.classList.toggle('on', c.dataset.e === l.effect);
+      c.onclick = () => { l.effect = c.dataset.e; row.querySelectorAll('.txeffect .chip').forEach(x => x.classList.toggle('on', x === c)); updateTextPreview(); }; });
     const cbox = row.querySelector('.txcolors');
     const ci = document.createElement('input'); ci.type = 'color'; ci.title = 'Custom colour';
     ci.value = /^#[0-9a-fA-F]{6}$/.test(l.color || '') ? l.color : '#ffffff';
@@ -1187,26 +1258,56 @@ function renderTextList(){
   });
 }
 E('edAddText').onclick = () => {
-  ed.texts.push({ text: '', pos: 'bottom', size: 'medium', color: 'white', start: null, end: null });
+  ed.texts.push(newTextLayer());
+  ed.selText = ed.texts.length - 1;
   renderTextList();
   const inputs = E('edTextList').querySelectorAll('.txinput'); const last = inputs[inputs.length - 1]; if (last) last.focus();
+  updateTextPreview();
 };
 function updateTextPreview(){
   const wrap = E('edTextOverlay'); if (!wrap) return; wrap.innerHTML = '';
-  const H = edVideo.clientHeight || 1, SIZEPX = { small: H / 22, medium: H / 14, large: H / 9 };
+  const W = edVideo.clientWidth || 1, H = edVideo.clientHeight || 1;
   const now = edVideo.currentTime, paused = edVideo.paused;
-  ed.texts.forEach(l => {
+  ed.texts.forEach((l, i) => {
+    normTx(l);
     const txt = (l.text || '').trim(); if (!txt) return;
     // While paused/editing show every layer; during playback respect its timing (matches export).
     if (!paused) { const a = l.start != null ? l.start : 0, b = l.end != null ? l.end : 1e9; if (now < a || now > b) return; }
-    const d = document.createElement('div'); d.className = 'edtxprev'; d.textContent = txt;
-    d.style.fontSize = (SIZEPX[l.size] || SIZEPX.medium) + 'px';
+    const d = document.createElement('div'); d.className = 'edtxprev'; d.dataset.i = i; d.textContent = txt;
+    d.style.fontFamily = CAP_FONT_CSS[l.font] || CAP_FONT_CSS.arialblack;
+    d.style.fontSize = (H * l.sizePct) + 'px';
     d.style.color = l.color || 'white';
-    if (l.pos === 'top') d.style.top = '6%';
-    else if (l.pos === 'middle') { d.style.top = '50%'; d.style.transform = 'translateY(-50%)'; }
-    else d.style.top = '84%';
+    d.style.textAlign = l.align || 'center';
+    applyTxEffect(d, l.effect);
     wrap.appendChild(d);
+    positionTx(d, l, W, H);
+    if (ed.selText === i) { d.classList.add('sel'); const hnd = document.createElement('span'); hnd.className = 'txhandle'; d.appendChild(hnd); txResize(hnd, d, l); }
+    txDragText(d, l);
   });
+}
+function positionTx(d, l, W, H){ const ew = d.offsetWidth, eh = d.offsetHeight; d.style.left = ((W - ew) * clamp01n(l.x)) + 'px'; d.style.top = ((H - eh) * clamp01n(l.y)) + 'px'; }
+function txDragText(d, l){
+  const pt = e => e.touches ? e.touches[0] : e; let s = null;
+  const mv = e => { if (!s) return; const p = pt(e); const W = edVideo.clientWidth, H = edVideo.clientHeight, ew = d.offsetWidth, eh = d.offsetHeight;
+    const nl = Math.max(0, Math.min(W - ew, s.l + p.clientX - s.px)), nt = Math.max(0, Math.min(H - eh, s.t + p.clientY - s.py));
+    d.style.left = nl + 'px'; d.style.top = nt + 'px'; l.x = (W - ew > 0) ? nl / (W - ew) : 0; l.y = (H - eh > 0) ? nt / (H - eh) : 0; };
+  const en = () => { s = null; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', en); window.removeEventListener('touchmove', mv); window.removeEventListener('touchend', en); };
+  const st = e => { if (e.target.classList.contains('txhandle')) return; e.preventDefault(); e.stopPropagation();
+    const wasSel = ed.selText === Number(d.dataset.i); ed.selText = Number(d.dataset.i); selectTextRow();
+    const p = pt(e); s = { px: p.clientX, py: p.clientY, l: parseFloat(d.style.left) || 0, t: parseFloat(d.style.top) || 0 };
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', en); window.addEventListener('touchmove', mv, { passive: false }); window.addEventListener('touchend', en);
+    if (!wasSel) updateTextPreview(); };
+  d.addEventListener('mousedown', st); d.addEventListener('touchstart', st, { passive: false });
+}
+function txResize(hnd, d, l){
+  const pt = e => e.touches ? e.touches[0] : e; let s = null;
+  const mv = e => { if (!s) return; const p = pt(e); const H = edVideo.clientHeight || 1;
+    l.sizePct = Math.max(0.02, Math.min(0.35, s.size + (p.clientY - s.py) / H * 0.9));
+    d.style.fontSize = (H * l.sizePct) + 'px'; applyTxEffect(d, l.effect); positionTx(d, l, edVideo.clientWidth, H); syncSizeSlider(l); };
+  const en = () => { s = null; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', en); window.removeEventListener('touchmove', mv); window.removeEventListener('touchend', en); };
+  const st = e => { e.preventDefault(); e.stopPropagation(); const p = pt(e); s = { py: p.clientY, size: l.sizePct };
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', en); window.addEventListener('touchmove', mv, { passive: false }); window.addEventListener('touchend', en); };
+  hnd.addEventListener('mousedown', st); hnd.addEventListener('touchstart', st, { passive: false });
 }
 edVideo.addEventListener('timeupdate', updateTextPreview);
 edVideo.addEventListener('play', updateTextPreview);
@@ -1380,7 +1481,7 @@ window.addEventListener('resize', () => { if (edw.classList.contains('open')) { 
 
 E('edExport').onclick = async () => {
   const texts = ed.texts.filter(t => (t.text || '').trim())
-    .map(t => ({ text: t.text.trim(), pos: t.pos, size: t.size, color: t.color, start: t.start, end: t.end }));
+    .map(t => (normTx(t), { text: t.text.trim(), font: t.font, color: t.color, align: t.align, sizePct: t.sizePct, x: t.x, y: t.y, effect: t.effect, start: t.start, end: t.end }));
   const overlays = ed.overlays.map(o => ({ file: o.file, scale: o.scale, x: o.x, y: o.y, start: o.start, end: o.end }));
   const music = ed.music ? { file: ed.music.file, volume: ed.music.volume } : null;
   const body = { start: ed.inPt, end: ed.outPt, aspect: ed.aspect, cropX: ed.crop.x, cropY: ed.crop.y, caption: E('edCaption').value.trim(), captionPos: ed.capPos, texts, overlays, music, fadeIn: ed.fadeIn, fadeOut: ed.fadeOut, speed: ed.speed, mute: ed.mute };

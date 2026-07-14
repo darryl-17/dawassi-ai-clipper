@@ -504,6 +504,19 @@ function thumbExport(file, at) {
 
 function clamp01(v) { v = Number(v); return isNaN(v) ? 0 : Math.max(0, Math.min(1, v)); }
 
+// Caption fonts (macOS system .ttf files) → drawtext fontfile paths.
+const CAP_FONT_FILES = {
+  arial: 'Supplemental/Arial.ttf', arialblack: 'Supplemental/Arial Black.ttf',
+  impact: 'Supplemental/Impact.ttf', verdana: 'Supplemental/Verdana.ttf',
+  trebuchet: 'Supplemental/Trebuchet MS.ttf', georgia: 'Supplemental/Georgia.ttf',
+  times: 'Supplemental/Times New Roman.ttf', comic: 'Supplemental/Comic Sans MS.ttf',
+  courier: 'Supplemental/Courier New.ttf', sf: 'SFNS.ttf',
+};
+function capFontFile(id) {
+  const rel = CAP_FONT_FILES[id] || CAP_FONT_FILES.arial;
+  return '/System/Library/Fonts/' + rel;
+}
+
 // Probe a video file's pixel dimensions via `ffmpeg -i` (no ffprobe in our toolchain).
 function probeDims(absPath) {
   return new Promise((resolve) => {
@@ -549,9 +562,10 @@ function editClip(file, o) {
 
     // Output frame size — needed to scale overlays proportionally.
     const scaleMap = { '9:16': [1080, 1920], '1:1': [1080, 1080], '16:9': [1920, 1080] };
+    const hasText = (Array.isArray(o.texts) && o.texts.length) || (o.caption && String(o.caption).trim());
     let outW = 0, outH = 0;
     if (scaleMap[o.aspect]) { [outW, outH] = scaleMap[o.aspect]; }
-    else if (useComplex) { const d = await probeDims(src); if (d) { outW = d.w; outH = d.h; } }
+    else if (useComplex || hasText) { const d = await probeDims(src); if (d) { outW = d.w; outH = d.h; } }
 
     // Fade timings live in the OUTPUT timebase (after the speed change).
     const fadeIn = Math.max(0, Number(o.fadeIn) || 0);
@@ -576,19 +590,31 @@ function editClip(file, o) {
     const layers = Array.isArray(o.texts) && o.texts.length
       ? o.texts
       : (o.caption && String(o.caption).trim() ? [{ text: o.caption, pos: o.captionPos, color: 'white', size: 'medium' }] : []);
-    const FONT = '/System/Library/Fonts/Supplemental/Arial.ttf';
-    const SIZES = { small: 'h/22', medium: 'h/14', large: 'h/9' };
+    const SIZE_PCT = { small: 1 / 22, medium: 1 / 14, large: 1 / 9 };
     const POSY = { top: 'h*0.06', middle: '(h-text_h)/2', bottom: 'h*0.84' };
+    const H = outH || 1080;
     for (const t of layers) {
       const txt = String(t.text || '').trim();
       if (!txt) continue;
       const cf = path.join(BUFFER_DIR, `cap_${Date.now()}_${capFiles.length}.txt`);
       fs.writeFileSync(cf, txt.slice(0, 300));
       capFiles.push(cf);
-      const y = POSY[t.pos] || (t.y != null ? `h*${clamp01(t.y)}` : 'h*0.84');
-      const size = SIZES[t.size] || 'h/14';
+      const sizePct = t.sizePct != null ? Math.max(0.02, Math.min(0.4, Number(t.sizePct)))
+        : (SIZE_PCT[t.size] || 1 / 14);
+      const fontsize = `h*${sizePct.toFixed(4)}`;
+      const font = capFontFile(t.font);
       const color = /^#?[a-zA-Z0-9]+$/.test(String(t.color || '')) ? t.color : 'white';
-      let dt = `drawtext=fontfile='${FONT}':textfile='${cf}':fontcolor=${color}:bordercolor=black:borderw=6:fontsize=${size}:x=(w-text_w)/2:y=${y}`;
+      // horizontal: free x fraction (drag) or alignment; vertical: free y or preset
+      const xExpr = t.x != null ? `(w-text_w)*${clamp01(t.x)}`
+        : ({ left: '(w*0.05)', center: '(w-text_w)/2', right: 'w-text_w-(w*0.05)' }[t.align] || '(w-text_w)/2');
+      const yExpr = t.y != null ? `(h-text_h)*${clamp01(t.y)}` : (POSY[t.pos] || 'h*0.84');
+      const px = (f) => Math.max(1, Math.round(H * sizePct * f));
+      let fx = `fontcolor=${color}`;
+      const eff = t.effect || 'outline';
+      if (eff === 'outline') fx += `:bordercolor=black:borderw=${Math.min(16, px(0.09))}`;
+      else if (eff === 'shadow') fx += `:shadowcolor=black@0.7:shadowx=${Math.min(10, px(0.05))}:shadowy=${Math.min(10, px(0.05))}`;
+      else if (eff === 'box') fx += `:box=1:boxcolor=black@0.55:boxborderw=${Math.min(40, px(0.32))}`;
+      let dt = `drawtext=fontfile='${font}':textfile='${cf}':${fx}:fontsize=${fontsize}:x=${xExpr}:y=${yExpr}`;
       const ts = t.start != null && t.start !== '' ? Math.max(0, Number(t.start)) : null;
       const te = t.end != null && t.end !== '' ? Number(t.end) : null;
       if (ts != null || te != null) dt += `:enable='between(t,${ts != null ? ts : 0},${te != null ? te : 1e9})'`;

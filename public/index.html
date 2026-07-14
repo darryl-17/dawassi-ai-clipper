@@ -142,8 +142,8 @@
   .mocktimeline { padding: 12px 16px 16px; border-top: 1px solid var(--border); }
   .mockbar { height: 26px; border-radius: 6px; margin-top: 8px; position: relative; overflow: hidden; }
   .mockbar::before { content: attr(data-l); position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; z-index: 1; }
-  .mockbar.cap { background: #e6f7f0; border: 1px solid #bfe9d8; } .mockbar.cap::before { color: #159e6b; content: '💬 ' attr(data-l); }
-  .mockbar.vid { background: #f3e9fb; border: 1px solid #e0cdf3; } .mockbar.vid::before { color: #8b5cd6; content: '🎬 ' attr(data-l); }
+  .mockbar.cap { background: #e6f7f0; border: 1px solid #bfe9d8; } .mockbar.cap::before { color: #159e6b; content: attr(data-l); }
+  .mockbar.vid { background: #f3e9fb; border: 1px solid #e0cdf3; } .mockbar.vid::before { color: #8b5cd6; content: attr(data-l); }
   .mockbar.film { background-image: url('/kai-preview.jpg'); background-size: auto 100%; background-position: center; background-repeat: repeat-x; border: 1px solid #e0cdf3; }
   .mockbar.film::before { content: none; }
   .mockbar .filmlbl { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); padding: 3px 8px; border-radius: 6px; z-index: 1; }
@@ -193,6 +193,60 @@
   .cta, .mockexport, .finalcard .cta { position: relative; overflow: hidden; }
   .cta::after, .finalcard .cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 55%); pointer-events: none; }
 
+  /* ---------- inline SVG icons ---------- */
+  .lic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.18em; }
+  .feat .ico .lic { width: 30px; height: 30px; }
+  .mockrail .ic .lic { width: 17px; height: 17px; }
+  .menuBtn .lic { width: 20px; height: 20px; vertical-align: middle; }
+  .cta .lic, .flinks a .lic { width: 16px; height: 16px; margin-right: 4px; }
+  .demovideo .playbtn .lic { width: 18px; height: 18px; }
+  /* ---------- what's new: interface shots ---------- */
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 22px; margin-top: 40px; }
+  .shot { margin: 0; }
+  .shot figcaption { margin-top: 12px; text-align: center; color: var(--muted); font-size: 13.5px; }
+  .nu { border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.28); border: 1px solid #26262f; background: #0c0c11; }
+  /* dashboard mock */
+  .nu-app { display: flex; height: 300px; font-family: -apple-system, sans-serif; }
+  .nu-side { width: 118px; background: #141419; border-right: 1px solid #26262f; padding: 12px 9px; flex-shrink: 0; }
+  .nu-logo { display: flex; align-items: center; gap: 7px; font-weight: 900; font-style: italic; font-size: 12px; color: #fff; margin-bottom: 12px; }
+  .nu-mark { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg,#e4571e,#ff8a3d); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; }
+  .nu-nav { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 11.5px; color: #9a97a8; font-weight: 600; margin-bottom: 3px; }
+  .nu-nav.on { background: rgba(228,87,30,.16); color: #ff7a3d; }
+  .nu-nav .lic { width: 14px; height: 14px; }
+  .nu-main { flex: 1; padding: 16px; background: radial-gradient(500px 240px at 70% -20%, #23142b 0%, transparent 60%), #0a0a0d; min-width: 0; }
+  .nu-hero { border: 1px solid #26262f; border-radius: 12px; background: linear-gradient(180deg,#141419,#1c1c24); padding: 16px; text-align: center; }
+  .nu-htitle { color: #fff; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
+  .nu-input { display: flex; align-items: center; gap: 7px; background: #0a0a0d; border: 1px solid #26262f; border-radius: 9px; padding: 9px 11px; color: #6f6c7d; font-size: 11px; margin-bottom: 9px; }
+  .nu-input .lic { width: 13px; height: 13px; color: #9a97a8; }
+  .nu-go { background: #fff; color: #111; border-radius: 9px; padding: 9px; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .nu-go .lic { width: 14px; height: 14px; }
+  .nu-tiles { display: flex; gap: 9px; margin-top: 14px; flex-wrap: wrap; }
+  .nu-tiles .t { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .nu-tiles .t .lic { width: 20px; height: 20px; }
+  .nu-tiles .ga { background: linear-gradient(135deg,#e4571e,#ff8a3d); } .nu-tiles .gb { background: linear-gradient(135deg,#22c55e,#0ea5e9); }
+  .nu-tiles .gc { background: linear-gradient(135deg,#8b5cf6,#ec4899); } .nu-tiles .gd { background: linear-gradient(135deg,#3b82f6,#6366f1); }
+  /* caption editor mock */
+  .nu-ed { display: flex; height: 300px; }
+  .nu-panel { width: 176px; flex-shrink: 0; background: #141419; border-right: 1px solid #26262f; padding: 14px; }
+  .nu-ptitle { color: #fff; font-weight: 800; font-size: 15px; margin-bottom: 10px; }
+  .nu-field { background: #0a0a0d; border: 1px solid #26262f; border-radius: 7px; padding: 8px 10px; color: #fff; font-size: 12px; font-weight: 800; margin-bottom: 9px; }
+  .nu-sel { background: #0a0a0d; border: 1px solid #26262f; border-radius: 7px; padding: 8px 10px; color: #eee; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 9px; font-family: Impact, sans-serif; }
+  .nu-crow { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
+  .nu-c { background: #1c1c24; border: 1px solid #26262f; border-radius: 6px; padding: 5px 8px; font-size: 10.5px; color: #cfcdd8; display: flex; align-items: center; gap: 4px; }
+  .nu-c.on { background: #e4571e; border-color: #e4571e; color: #fff; }
+  .nu-c .lic { width: 12px; height: 12px; }
+  .nu-sw { display: flex; gap: 5px; margin-top: 2px; }
+  .nu-sw i { width: 15px; height: 15px; border-radius: 50%; display: inline-block; border: 1.5px solid #33333f; }
+  .nu-stage { flex: 1; background: #1c1c24; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .nu-phone { width: 128px; aspect-ratio: 9/16; border-radius: 9px; overflow: hidden; position: relative; background: #000; box-shadow: 0 10px 24px rgba(0,0,0,.4); }
+  .nu-phone img { width: 100%; height: 100%; object-fit: cover; }
+  .nu-cap { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; color: #FFD400; font-family: Impact, "Arial Black", sans-serif; font-size: 17px; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; letter-spacing: .5px; }
+  /* news log */
+  .news { max-width: 780px; margin: 44px auto 0; }
+  .newsitem { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; background: rgba(255,255,255,.55); border: 1px solid rgba(255,255,255,.65); box-shadow: 0 8px 24px rgba(31,38,45,.07); margin-top: 12px; font-size: 14.5px; line-height: 1.5; }
+  .newsitem b { color: var(--text); }
+  .newsitem .newstag { flex-shrink: 0; font-size: 10px; font-weight: 800; letter-spacing: .5px; background: var(--accent); color: #fff; border-radius: 6px; padding: 3px 8px; margin-top: 2px; }
+  .newsitem .newstag.date { background: var(--panel); color: var(--muted); border: 1px solid var(--border); }
   @media (max-width: 760px) {
     .navlinks { position: absolute; top: 66px; left: 0; right: 0; background: rgba(255,255,255,.85); backdrop-filter: blur(16px) saturate(180%); flex-direction: column; gap: 0; padding: 8px 0; border-bottom: 1px solid var(--border); display: none; box-shadow: 0 12px 24px var(--shadow); }
     .navlinks.open { display: flex; animation: dropdown .3s var(--ease); }
@@ -211,12 +265,13 @@
   <nav>
     <a href="/" class="logo">DAWASSI <span class="script">AI Clipper</span></a>
     <div class="navlinks" id="navlinks">
+      <a href="#whatsnew">What's new</a>
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
       <a href="https://discord.gg/nFPU9Gteu" target="_blank" class="navdiscord" title="Join our Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369a19.8 19.8 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.3 18.3 0 0 0-5.487 0 12.6 12.6 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.7 19.7 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.891.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.8 19.8 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg></a>
     </div>
-    <button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button>
+    <button class="menuBtn" id="menuBtn" aria-label="Menu" data-ic="menu"></button>
   </nav>
 </header>
 
@@ -228,7 +283,7 @@
   <h1 class="head" data-animate>The <span class="mark">#1 Local</span><br>Clipping Tool For Streamers</h1>
   <p class="subhead" data-animate>Buffer any Twitch or YouTube live stream on your own PC and turn its best moments into clips, GIFs and vertical Shorts — with AI hype detection. No subscriptions, no watermarks, nothing uploaded.</p>
   <div class="herocta" data-animate>
-    <a href="/app.html" class="cta big magnetic">⚡ Launch DAWASSI Clipper</a>
+    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i>Launch DAWASSI Clipper</a>
     <a href="#how" class="cta big ghost magnetic">See how it works</a>
   </div>
   <div class="micro" data-animate>Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
@@ -240,14 +295,77 @@
   <div class="eyebrow" data-animate>Everything a clipper needs</div>
   <div class="h2" data-animate>Built to catch the moment — instantly</div>
   <div class="grid" data-stagger>
-    <div class="feat" data-animate><div class="ico">🔴</div><h3>Rolling 2-hour buffer</h3><p>Records the live stream in the background. Every “Clip last 30s / 1 / 2 / 5 min” button cuts instantly — no re-encoding, no waiting for the VOD.</p></div>
-    <div class="feat" data-animate><div class="ico">🔥</div><h3>AI hype detection</h3><p>Listens for crowd pops and loudness spikes and flags hype moments automatically. One click grabs the whole reaction.</p></div>
-    <div class="feat" data-animate><div class="ico">📱</div><h3>Vertical 9:16 export</h3><p>Turn any clip into a 1080×1920 short for TikTok, Reels and YouTube Shorts with auto centered cropping.</p></div>
-    <div class="feat" data-animate><div class="ico">⚑</div><h3>Mark &amp; clip</h3><p>Tag a moment when it starts, clip it when it ends. Exact-length clips with zero guessing.</p></div>
-    <div class="feat" data-animate><div class="ico">✂️</div><h3>VOD section grab</h3><p>Paste a YouTube or Twitch VOD link with timestamps and download only that part — not the whole 6-hour stream.</p></div>
-    <div class="feat" data-animate><div class="ico">🎞️</div><h3>GIFs, thumbnails &amp; trim</h3><p>Make GIFs for replies, grab full-quality thumbnail frames, and trim clips to the exact second — all built in.</p></div>
-    <div class="feat" data-animate><div class="ico">⌨️</div><h3>Keyboard shortcuts</h3><p>Hit 1/2/3/5 to clip, M to mark, C to clip from mark. During chaos, keys beat clicks.</p></div>
-    <div class="feat" data-animate><div class="ico">🔒</div><h3>100% local &amp; private</h3><p>Everything runs on your computer. No cloud, no watermark, no account — your clips never leave your machine.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="radio"></div><h3>Rolling 2-hour buffer</h3><p>Records the live stream in the background. Every “Clip last 30s / 1 / 2 / 5 min” button cuts instantly — no re-encoding, no waiting for the VOD.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="sparkles"></div><h3>AI captions &amp; auto-shorts</h3><p>Transcribe speech on-device into timed captions, and auto-cut a long video into the liveliest vertical shorts — in one click.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="type"></div><h3>Caption designer</h3><p>10 fonts, custom colours, size, alignment and effects (outline / shadow / box). Drag captions on screen or resize by the corner handle.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="flame"></div><h3>AI hype detection</h3><p>Listens for crowd pops and loudness spikes and flags hype moments automatically. One click grabs the whole reaction.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="smartphone"></div><h3>Vertical 9:16 export</h3><p>Turn any clip into a 1080×1920 short for TikTok, Reels and YouTube Shorts with auto centered cropping.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="mic"></div><h3>Enhance &amp; upscale</h3><p>Denoise and loudness-normalise speech, and upscale clips to crisp 1080p or 4K — all locally with ffmpeg.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="youtube"></div><h3>One-click YouTube publish</h3><p>Connect your channel once, then upload finished clips straight from your library — title, description and privacy included.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="lock"></div><h3>100% local &amp; private</h3><p>Everything runs on your computer. No cloud, no watermark, no account — your clips never leave your machine.</p></div>
+  </div>
+</section>
+
+<!-- WHAT'S NEW -->
+<section class="section" id="whatsnew">
+  <div class="eyebrow" data-animate>What's new</div>
+  <div class="h2" data-animate>A brand-new studio, packed with AI tools</div>
+  <p class="subhead" data-animate style="text-align:center;max-width:660px;margin:14px auto 0;color:var(--muted);font-size:16px;line-height:1.6">We rebuilt DAWASSI from the ground up — a sleek dark workspace, one-click auto-shorts, on-device AI captions, a full caption designer and direct YouTube publishing. Still 100% local, free and watermark-free.</p>
+
+  <div class="shots" data-stagger>
+    <figure class="shot" data-animate>
+      <div class="nu nu-app">
+        <aside class="nu-side">
+          <div class="nu-logo"><span class="nu-mark">D</span>DAWASSI</div>
+          <div class="nu-nav on"><i data-ic="home"></i>Home</div>
+          <div class="nu-nav"><i data-ic="video"></i>Capture</div>
+          <div class="nu-nav"><i data-ic="film"></i>Library</div>
+          <div class="nu-nav"><i data-ic="youtube"></i>Publish</div>
+        </aside>
+        <div class="nu-main">
+          <div class="nu-hero">
+            <div class="nu-htitle">Turn any stream into viral shorts</div>
+            <div class="nu-input"><i data-ic="link"></i>Drop a YouTube or Twitch link</div>
+            <div class="nu-go"><i data-ic="sparkles"></i>Get clips in 1 click</div>
+          </div>
+          <div class="nu-tiles">
+            <span class="t ga"><i data-ic="sparkles"></i></span>
+            <span class="t gb"><i data-ic="captions"></i></span>
+            <span class="t gc"><i data-ic="type"></i></span>
+            <span class="t gd"><i data-ic="film"></i></span>
+            <span class="t gb"><i data-ic="mic"></i></span>
+            <span class="t gc"><i data-ic="gem"></i></span>
+          </div>
+        </div>
+      </div>
+      <figcaption>The new dashboard — sidebar, one-click auto-shorts and a full local tool grid.</figcaption>
+    </figure>
+
+    <figure class="shot" data-animate>
+      <div class="nu nu-ed">
+        <div class="nu-panel">
+          <div class="nu-ptitle">Text</div>
+          <div class="nu-field">STREAMER U</div>
+          <div class="nu-sel">Impact <span>▾</span></div>
+          <div class="nu-crow"><span class="nu-c"><i data-ic="alignleft"></i></span><span class="nu-c on"><i data-ic="aligncenter"></i></span><span class="nu-c"><i data-ic="alignright"></i></span></div>
+          <div class="nu-crow"><span class="nu-c on">Outline</span><span class="nu-c">Shadow</span><span class="nu-c">Box</span></div>
+          <div class="nu-sw"><i style="background:#fff"></i><i style="background:#FFD400"></i><i style="background:#FF3B30"></i><i style="background:#2F6BFF"></i><i style="background:#1E9E5A"></i></div>
+        </div>
+        <div class="nu-stage">
+          <div class="nu-phone"><img src="/kai-preview.jpg" alt="caption preview"><div class="nu-cap">STREAMER U</div></div>
+        </div>
+      </div>
+      <figcaption>The caption designer — 10 fonts, colours, effects &amp; drag-to-resize on screen.</figcaption>
+    </figure>
+  </div>
+
+  <div class="news" data-stagger>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Auto long→shorts.</b> Paste a link (or pick a clip) and DAWASSI finds the liveliest moments by loudness and cuts vertical 9:16 shorts in one click.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>On-device AI captions.</b> Transcribe any clip with Whisper — right in your browser, offline after the first run — into timed, fully-editable caption layers.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Caption designer.</b> 10 fonts, custom colours, size, alignment and effects (outline / shadow / box) — drag captions on the preview or resize them by their corner handle.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Overlays, music &amp; transitions.</b> Drop image/video overlays and stickers, add a background music track, and fade clips in and out.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Enhance speech &amp; Upscale.</b> Clean up audio (denoise + broadcast loudness) and upscale clips to 1080p or 4K.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>One-click YouTube publishing.</b> Connect your channel and upload finished clips straight from the library.</div></div>
   </div>
 </section>
 
@@ -263,7 +381,7 @@
   </div>
   <div class="demo" data-animate>
     <a class="demovideo" href="https://x.com/darryl_wassi" target="_blank" id="demoLink" title="Watch the demo on X">
-      <div class="thumb"><img src="/kai-preview.jpg" alt="DAWASSI AI Clipper demo"><span class="playbtn">▶</span></div>
+      <div class="thumb"><img src="/kai-preview.jpg" alt="DAWASSI AI Clipper demo"><span class="playbtn" data-ic="play"></span></div>
       <div class="demotxt"><b>Watch the 60-second demo</b><span>See DAWASSI AI Clipper in action on X →</span></div>
     </a>
   </div>
@@ -275,7 +393,7 @@
   <div class="h2" data-animate>Free. Forever. Open source.</div>
   <p class="subhead" style="margin-top:16px" data-animate>Other clipping tools charge $20–30/month and stamp their logo on your content. DAWASSI AI Clipper is completely free, runs on your own machine, and the full code is on GitHub — fork it, tweak it, make it yours.</p>
   <div style="text-align:center;margin-top:26px" data-animate>
-    <a href="/app.html" class="cta big magnetic">⚡ Launch it now</a>
+    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i>Launch it now</a>
   </div>
 </section>
 
@@ -283,26 +401,26 @@
 <section class="showcase" id="editor">
   <div class="showhead" data-animate>
     <h2>Full control with our<br>web editor. Feels like magic.</h2>
-    <a href="/app.html" class="cta">⚡ Open the editor</a>
+    <a href="/app.html" class="cta"><i data-ic="zap"></i>Open the editor</a>
   </div>
   <div class="mockup" data-animate>
     <div class="mocktop"><span>streamer clip · editing</span><span class="mockexport">Export Video</span></div>
     <div class="mockbody">
       <div class="mockrail">
-        <div class="act"><span class="ic">🖼️</span>Media</div>
-        <div><span class="ic">💬</span>Subtitles</div>
-        <div><span class="ic">🔤</span>Text</div>
-        <div><span class="ic">🎵</span>Audio</div>
-        <div><span class="ic">🎬</span>Video</div>
-        <div><span class="ic">✨</span>Tools</div>
+        <div><span class="ic" data-ic="video"></span>Media</div>
+        <div><span class="ic" data-ic="captions"></span>Subs</div>
+        <div class="act"><span class="ic" data-ic="type"></span>Text</div>
+        <div><span class="ic" data-ic="music"></span>Audio</div>
+        <div><span class="ic" data-ic="film"></span>Video</div>
+        <div><span class="ic" data-ic="tool"></span>Tools</div>
       </div>
       <div class="mockstage">
-        <div class="mockphone"><img src="/kai-preview.jpg" alt="Kai Cenat clip"><div class="mockcap">STREAMER UNIVERSITY 🔥</div></div>
+        <div class="mockphone"><img src="/kai-preview.jpg" alt="Kai Cenat clip"><div class="mockcap">STREAMER UNIVERSITY</div></div>
       </div>
     </div>
     <div class="mocktimeline">
       <div class="mockbar cap" data-l="Streamer University reveal"></div>
-      <div class="mockbar vid film"><span class="filmlbl">🎬 Kai Cenat — Streamer University</span></div>
+      <div class="mockbar vid film"><span class="filmlbl">Kai Cenat — Streamer University</span></div>
     </div>
   </div>
 </section>
@@ -346,7 +464,7 @@
   <div class="finalcard" data-animate>
     <h2>Ready to catch the next big moment?</h2>
     <p>Start buffering your favorite stream and never miss a clip again.</p>
-    <a href="/app.html" class="cta magnetic">⚡ Launch DAWASSI Clipper</a>
+    <a href="/app.html" class="cta magnetic"><i data-ic="zap"></i>Launch DAWASSI Clipper</a>
   </div>
 </section>
 
@@ -437,13 +555,36 @@
   }
 </script>
 <script>
-(function(){
-  const M = { '🖼':'framed_picture','💬':'speech_balloon','🔤':'input_latin_letters','🎵':'musical_note','🎬':'clapper_board','✨':'sparkles','⚡':'high_voltage','🔴':'red_circle','🔥':'fire','📱':'mobile_phone','⚑':'triangular_flag','🚩':'triangular_flag','✂':'scissors','🎞':'film_frames','⌨':'keyboard','🔒':'locked','📷':'camera','▶':'play_button','⏮':'prev','⏭':'next' };
-  document.querySelectorAll('.ic, .ico').forEach(el => {
-    const k = el.textContent.trim().replace(/️/g, ''); const f = M[k];
-    if (f) el.innerHTML = '<img class="i3d" src="/icons/' + f + '.png" alt="' + k + '" onerror="this.replaceWith(document.createTextNode(this.alt))">';
-  });
-})();
+// Inline SVG icons (Feather/Lucide-style) — no emojis, no external files.
+const ICONS = {
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  video: '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  film: '<rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>',
+  youtube: '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  sparkles: '<path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/><path d="M5 3v4M3 5h4M19 16v3M17.5 17.5h3"/>',
+  captions: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="7" y1="9" x2="13" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/>',
+  type: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
+  mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+  gem: '<path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+  radio: '<circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  smartphone: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+  scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>',
+  keyboard: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  menu: '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>',
+  alignleft: '<line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>',
+  aligncenter: '<line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/>',
+  alignright: '<line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>',
+  music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+};
+function icon(n) { const p = ICONS[n]; return p ? '<svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>' : ''; }
+document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = icon(el.getAttribute('data-ic')); });
 </script>
 </body>
 </html>

@@ -706,6 +706,144 @@ function trimClip(file, start, end) {
   return job;
 }
 
+// Enhance speech: denoise, de-hum, gentle compression + broadcast loudness.
+function enhanceSpeech(file) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = file.replace(/\.mp4$/i, '') + '_enhanced';
+  const out = path.join(CLIPS_DIR, base + '.mp4');
+  const job = newJob('enhance', `Enhance speech: ${base}.mp4`);
+  const af = 'highpass=f=90,afftdn=nf=-25,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,loudnorm=I=-16:TP=-1.5:LRA=11';
+  runFfmpeg(['-hide_banner', '-loglevel', 'error', '-i', src, '-c:v', 'copy',
+    '-af', af, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-y', out])
+    .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
+    .catch((e2) => { job.status = 'error'; job.detail = e2.message.slice(0, 300); });
+  return job;
+}
+
+// Upscale to 1080p or 4K (Lanczos + light sharpen).
+function upscaleClip(file, target) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const h = target === '2160' ? 2160 : 1080;
+  const base = file.replace(/\.mp4$/i, '') + '_' + h + 'p';
+  const out = path.join(CLIPS_DIR, base + '.mp4');
+  const job = newJob('upscale', `Upscale ${h}p: ${base}.mp4`);
+  runFfmpeg(['-hide_banner', '-loglevel', 'error', '-i', src,
+    '-vf', `scale=-2:${h}:flags=lanczos,unsharp=5:5:0.6:5:5:0.0`,
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '18',
+    '-c:a', 'copy', '-movflags', '+faststart', '-y', out])
+    .then(() => { job.status = 'done'; job.progress = 100; job.output = base + '.mp4'; })
+    .catch((e2) => { job.status = 'error'; job.detail = e2.message.slice(0, 300); });
+  return job;
+}
+
+// Momentary-loudness timeline via ebur128 — used to find lively "highlight" moments.
+function analyzeLoudness(src) {
+  return new Promise((resolve) => {
+    const p = spawn(FFMPEG, ['-hide_banner', '-nostats', '-i', src, '-af', 'ebur128=metadata=1', '-f', 'null', '-']);
+    let buf = '';
+    const pts = [];
+    const take = (chunk) => {
+      buf += chunk;
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const l of lines) {
+        const m = l.match(/t:\s*([\d.]+).*?M:\s*(-?[\d.]+)/);
+        if (m) { const lufs = Number(m[2]); pts.push({ t: Number(m[1]), lufs: lufs < -70 ? -70 : lufs }); }
+      }
+    };
+    p.stderr.on('data', (d) => take(d.toString()));
+    p.stdout.on('data', (d) => take(d.toString()));
+    p.on('error', () => resolve([]));
+    p.on('close', () => resolve(pts));
+  });
+}
+
+// Auto "long → shorts": find the K liveliest moments by loudness and cut a
+// vertical 9:16 short around each. Works on any local clip.
+function autoShorts(file, count) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  const base = file.replace(/\.mp4$/i, '');
+  const job = newJob('shorts', `Auto shorts: ${file}`);
+  (async () => {
+    const dur = await probeDuration(src) || 0;
+    const CLIP = 30, SPACING = 40;
+    const want = Math.max(1, Math.min(Number(count) || 3, 6, Math.max(1, Math.floor(dur / CLIP))));
+    let windows;
+    if (dur <= CLIP + 4) {
+      windows = [[0, Math.min(dur, CLIP)]];
+    } else {
+      const pts = await analyzeLoudness(src);
+      const peaks = [];
+      if (pts.length) {
+        const sorted = [...pts].sort((a, b) => b.lufs - a.lufs);
+        for (const p of sorted) {
+          if (p.t < 2 || p.t > dur - 4) continue;
+          if (peaks.every((q) => Math.abs(q - p.t) >= SPACING)) peaks.push(p.t);
+          if (peaks.length >= want) break;
+        }
+      }
+      // fallback: evenly spaced if loudness analysis gave nothing usable
+      if (!peaks.length) for (let i = 0; i < want; i++) peaks.push((dur / (want + 1)) * (i + 1));
+      peaks.sort((a, b) => a - b);
+      windows = peaks.map((t) => {
+        let s = Math.max(0, t - 8), e = Math.min(dur, s + CLIP);
+        s = Math.max(0, e - CLIP);
+        return [s, e];
+      });
+    }
+    job.progress = 5;
+    let made = 0;
+    for (let i = 0; i < windows.length; i++) {
+      const [s, e] = windows[i];
+      const out = path.join(CLIPS_DIR, `${base}_short${i + 1}.mp4`);
+      await runFfmpeg(['-hide_banner', '-loglevel', 'error', '-ss', String(s), '-t', String(e - s), '-i', src,
+        '-vf', "crop='min(iw,ih*9/16)':'min(ih,iw/9*16)':'(iw-ow)/2':'(ih-oh)/2',scale=1080:1920:flags=lanczos,setsar=1",
+        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '160k',
+        '-movflags', '+faststart', '-y', out]);
+      made++;
+      job.progress = 5 + Math.round((made / windows.length) * 95);
+      job.output = `${base}_short${i + 1}.mp4`;
+    }
+    job.detail = `${made} short${made > 1 ? 's' : ''} created`;
+  })()
+    .then(() => { job.status = 'done'; job.progress = 100; })
+    .catch((err) => { job.status = 'error'; job.detail = (err.message || String(err)).slice(0, 300); });
+  return job;
+}
+
+// "Get clips in 1 click": download a whole video from a URL, then auto-cut shorts.
+function autoShortsFromUrl(url, count) {
+  if (!url) throw new Error('paste a video URL');
+  const base = tsName('auto');
+  const out = path.join(CLIPS_DIR, base + '.%(ext)s');
+  const job = newJob('shorts-dl', `Auto shorts from link`);
+  const args = ['--no-warnings', '--no-playlist', '--ffmpeg-location', FFMPEG,
+    '-f', 'bv*[height<=?1080]+ba/b[height<=?1080]/b', '--merge-output-format', 'mp4',
+    '--newline', '--progress', '-o', out, url];
+  const p = ytdlpSpawn(args);
+  const onData = (d) => {
+    for (const line of d.toString().split('\n')) {
+      const m = line.match(/\[download\]\s+([\d.]+)%/);
+      if (m) job.progress = Number(m[1]);
+      if (line.trim()) job.detail = line.trim().slice(0, 150);
+    }
+  };
+  p.stdout.on('data', onData); p.stderr.on('data', onData);
+  p.on('close', (code) => {
+    if (code === 0 && fs.existsSync(path.join(CLIPS_DIR, base + '.mp4'))) {
+      job.status = 'done'; job.progress = 100; job.output = base + '.mp4';
+      job.detail = 'Downloaded — cutting shorts…';
+      try { autoShorts(base + '.mp4', count); } catch (_) {}
+    } else {
+      job.status = 'error';
+      if (!job.detail.toLowerCase().includes('error')) job.detail = 'download failed (code ' + code + ') ' + job.detail;
+    }
+  });
+  return job;
+}
+
 // ---------------------------------------------------------------- YouTube
 // One-click publishing of finished clips to the user's own channel via the
 // YouTube Data API v3. The user supplies their own Google OAuth client
@@ -971,6 +1109,37 @@ app.post('/api/youtube/disconnect', (req, res) => {
 app.post('/api/clips/:file/publish', (req, res) => {
   try { res.json({ ok: true, jobId: publishToYouTube(path.basename(req.params.file), req.body || {}).id }); }
   catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/enhance', (req, res) => {
+  try { res.json({ ok: true, jobId: enhanceSpeech(path.basename(req.params.file)).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/upscale', (req, res) => {
+  try { res.json({ ok: true, jobId: upscaleClip(path.basename(req.params.file), String(req.body.target || '1080')).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/clips/:file/shorts', (req, res) => {
+  try { res.json({ ok: true, jobId: autoShorts(path.basename(req.params.file), req.body.count).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/shorts/url', (req, res) => {
+  try { res.json({ ok: true, jobId: autoShortsFromUrl(String(req.body.url || '').trim(), req.body.count).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// Import a local video file straight into the clip library (hero Upload button).
+app.post('/api/clips/import', express.raw({ type: () => true, limit: '600mb' }), (req, res) => {
+  try {
+    if (!req.body || !req.body.length) return res.status(400).json({ error: 'empty upload' });
+    const name = sanitizeName(String(req.query.name || '').replace(/\.[^.]+$/, '')) || tsName('import');
+    const out = path.join(CLIPS_DIR, name + '.mp4');
+    fs.writeFileSync(out, req.body);
+    res.json({ ok: true, file: name + '.mp4' });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // Upload an overlay image/video or a music track. Raw binary body; ?ext=.png.

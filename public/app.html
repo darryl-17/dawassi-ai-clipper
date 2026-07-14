@@ -18,12 +18,12 @@
     --chip: #fbf3ee; --chip-hover: #e4571e;
   }
   body.dark {
-    --bg: #0d0d10; --panel: #17171d; --panel2: #20202a; --border: #2b2b36;
-    --text: #eceaf0; --muted: #8f8c9c;
-    --on-bg: #ffffff; --on-bg-muted: rgba(255,255,255,.75);
-    --shadow: rgba(0,0,0,.5);
-    --bg-grad: linear-gradient(165deg, #16161c 0%, #0d0d10 55%, #1a110c 100%);
-    --chip: rgba(255,255,255,.08); --chip-hover: rgba(228,87,30,.35);
+    --bg: #0a0a0d; --panel: #141419; --panel2: #1c1c24; --border: #26262f;
+    --text: #f2f1f5; --muted: #9a97a8;
+    --on-bg: #ffffff; --on-bg-muted: rgba(255,255,255,.72);
+    --shadow: rgba(0,0,0,.55);
+    --bg-grad: radial-gradient(1100px 560px at 72% -12%, #23142b 0%, rgba(35,20,43,0) 58%), #0a0a0d;
+    --chip: rgba(255,255,255,.06); --chip-hover: rgba(228,87,30,.35);
   }
   * { box-sizing: border-box; }
   html { scrollbar-color: #e4571e transparent; }
@@ -228,21 +228,124 @@
   .ytmbox textarea { resize: vertical; min-height: 68px; }
   .ytmact { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
   .joblink { color: var(--accent); font-size: 12px; text-decoration: none; font-weight: 700; }
+  /* ==================== OpusClip-style app shell ==================== */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 244px; flex-shrink: 0; position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--border); padding: 18px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .sblogo { display: flex; align-items: center; gap: 10px; padding: 4px 8px 14px; }
+  .sblogo .mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), #ff8a3d); display: flex; align-items: center; justify-content: center; font-weight: 900; font-style: italic; color: #fff; font-size: 20px; box-shadow: 0 4px 14px rgba(228,87,30,.45); }
+  .sblogo .wm { font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -.3px; font-size: 17px; color: var(--on-bg); line-height: 1; }
+  .sblogo .wm small { display: block; font-family: 'Caveat', cursive; font-style: normal; text-transform: none; font-size: 15px; color: var(--accent); letter-spacing: 0; font-weight: 700; }
+  .sbplan { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .sbplan .pn { font-size: 13px; font-weight: 700; }
+  .sbplan .credits { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .sbgroup { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); padding: 12px 10px 4px; }
+  .sbnav { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: var(--on-bg-muted); font-size: 14px; font-weight: 600; border: 1px solid transparent; transition: .14s; }
+  .sbnav:hover { background: var(--panel2); color: var(--on-bg); }
+  .sbnav.on { background: rgba(228,87,30,.14); color: var(--accent); border-color: rgba(228,87,30,.28); }
+  .sbnav .ci { width: 20px; text-align: center; font-size: 16px; flex-shrink: 0; }
+  .sbnav .pill { margin-left: auto; font-size: 10px; font-weight: 800; background: var(--accent); color: #fff; border-radius: 6px; padding: 1px 6px; }
+  .sbspacer { flex: 1; }
+  .sbfoot { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; }
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .appbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: 14px 26px; background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .appbar .abtitle { font-size: 16px; font-weight: 800; }
+  .appbar .abspace { flex: 1; }
+  .abchip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 700; color: var(--on-bg-muted); }
+  .abchip.accent { color: #fff; background: linear-gradient(135deg, var(--accent), #ff8a3d); border: none; }
+  .mainpad { padding: 26px; max-width: 1180px; width: 100%; margin: 0 auto; }
+  .view { display: none; } .view.on { display: block; animation: rise .3s ease both; }
+  /* hero */
+  .hero { position: relative; border-radius: 22px; border: 1px solid var(--border); background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%); padding: 40px 34px 34px; overflow: hidden; margin-bottom: 26px; }
+  .hero .ghost { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-style: italic; font-size: clamp(90px, 16vw, 230px); color: var(--on-bg); opacity: .028; letter-spacing: -6px; pointer-events: none; user-select: none; white-space: nowrap; }
+  .hero .htitle { position: relative; text-align: center; font-size: 24px; font-weight: 800; margin: 0 0 4px; }
+  .hero .hsub { position: relative; text-align: center; color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .herobox { position: relative; max-width: 660px; margin: 0 auto; }
+  .herolink { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 15px 16px; margin-bottom: 12px; }
+  .herolink:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(228,87,30,.16); }
+  .herolink .lk { color: var(--muted); font-size: 17px; }
+  .herolink input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 15px; }
+  .heroactions { display: flex; align-items: center; gap: 18px; padding: 0 4px 14px; }
+  .heroactions .ha { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--on-bg-muted); cursor: pointer; background: none; border: none; padding: 0; }
+  .heroactions .ha:hover { color: var(--accent); }
+  .herogo { width: 100%; padding: 16px; border-radius: 14px; background: #fff; color: #111; border: none; font-weight: 800; font-size: 16px; cursor: pointer; transition: .15s; }
+  .herogo:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+  body:not(.dark) .herogo { background: var(--accent); color: #fff; }
+  .herohint { position: relative; text-align: center; margin-top: 14px; }
+  .herohint a { color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
+  .herohint a:hover { color: var(--accent); }
+  /* feature grid */
+  .featgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px 8px; margin-bottom: 8px; }
+  .feattile { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 8px 4px; border-radius: 14px; cursor: pointer; border: 1px solid transparent; transition: .15s; background: none; color: var(--text); position: relative; }
+  .feattile:hover { background: var(--panel); border-color: var(--border); transform: translateY(-2px); color: var(--text); }
+  .feattile .fic { width: 58px; height: 58px; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: var(--panel2); border: 1px solid var(--border); }
+  .feattile .fl { font-size: 12.5px; font-weight: 600; text-align: center; line-height: 1.2; }
+  .feattile .fnew { position: absolute; top: -4px; right: 8px; font-size: 9px; font-weight: 800; background: var(--accent); color: #fff; border-radius: 6px; padding: 1px 5px; }
+  .feattile.grad-a .fic { background: linear-gradient(135deg,#f59e0b,#ef4444); border: none; color: #fff; }
+  .feattile.grad-b .fic { background: linear-gradient(135deg,#22c55e,#0ea5e9); border: none; color: #fff; }
+  .feattile.grad-c .fic { background: linear-gradient(135deg,#8b5cf6,#ec4899); border: none; color: #fff; }
+  .feattile.grad-d .fic { background: linear-gradient(135deg,#3b82f6,#6366f1); border: none; color: #fff; }
+  .feattile.grad-e .fic { background: linear-gradient(135deg,#e4571e,#ff8a3d); border: none; color: #fff; }
+  .sectionhead { display: flex; align-items: baseline; gap: 12px; margin: 26px 0 14px; }
+  .sectionhead h2 { margin: 0; font-size: 18px; font-weight: 800; font-style: normal; text-transform: none; letter-spacing: 0; color: var(--on-bg); }
+  .sectionhead .sh-sub { font-size: 13px; color: var(--muted); }
+  .mobsbtoggle { display: none; }
+  @media (max-width: 900px) {
+    .sidebar { position: fixed; z-index: 60; transform: translateX(-100%); transition: transform .25s; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+    .app.navopen .sidebar { transform: none; }
+    .mobsbtoggle { display: inline-flex; }
+    .mainpad { padding: 18px 14px; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <a href="/" class="applogo" title="Back to home"><h1>DAWASSI <span class="script">AI Clipper</span></h1></a>
-    <div class="topctrl">
-      <a href="/" class="homebtn" title="Back to landing page">← Home</a>
-      <button id="themeBtn" title="Switch theme">🌙 Black</button>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sblogo"><div class="mark">D</div><div class="wm">DAWASSI<small>AI Clipper</small></div></div>
+    <div class="sbplan"><span class="pn">🖥️ Local · Free</span><span class="credits">✨ no watermark</span></div>
+    <div class="sbgroup">Create</div>
+    <div class="sbnav on" data-nav="home"><span class="ci">🏠</span>Home</div>
+    <div class="sbnav" data-nav="create"><span class="ci">🎥</span>Capture &amp; import</div>
+    <div class="sbnav" data-nav="library"><span class="ci">🎬</span>Clip library</div>
+    <div class="sbgroup">Post</div>
+    <div class="sbnav" data-nav="publish"><span class="ci">▶️</span>Publish<span class="pill">YT</span></div>
+    <div class="sbspacer"></div>
+    <div class="sbfoot">
+      <a class="sbnav" href="/"><span class="ci">←</span>Landing page</a>
     </div>
-  </div>
-  <p class="sub">Local Twitch &amp; YouTube clipper — live streams and VODs. Clips are saved to the <b>clips/</b> folder.</p>
+  </aside>
+  <div class="main">
+    <div class="appbar">
+      <button class="abchip mobsbtoggle" id="navToggle" title="Menu">☰</button>
+      <span class="abtitle" id="viewTitle">Home</span>
+      <span class="abspace"></span>
+      <span class="abchip">⚡ Runs on your Mac</span>
+      <button class="abchip" id="themeBtn" title="Switch theme">🌙 Black</button>
+    </div>
+    <div class="mainpad">
+
+      <div id="homeExtra">
+        <div class="hero">
+          <div class="ghost">DAWASSI</div>
+          <div class="htitle">Turn any stream into viral shorts</div>
+          <div class="hsub">Paste a link or capture a live stream — auto-cut the best moments, then edit, caption &amp; publish.</div>
+          <div class="herobox">
+            <div class="herolink"><span class="lk">🔗</span><input id="heroUrl" placeholder="Drop a YouTube or Twitch link"></div>
+            <div class="heroactions">
+              <button class="ha" id="heroUpload">⬆ Upload a video</button>
+              <button class="ha" id="heroLiveBtn">🔴 Capture live</button>
+              <button class="ha" id="heroSection">✂ Clip exact section</button>
+            </div>
+            <button class="herogo" id="heroGo">✨ Get clips in 1 click</button>
+            <div class="herohint"><a id="heroLibraryLink">Or browse your clip library →</a></div>
+            <input type="file" id="heroFile" accept="video/*" hidden>
+          </div>
+        </div>
+        <div class="sectionhead"><h2>Tools</h2><span class="sh-sub">Everything you need to make a short — runs locally</span></div>
+        <div class="featgrid" id="featgrid"></div>
+      </div>
 
   <!-- LIVE -->
-  <div class="card">
+  <div class="card" data-view="create" id="secLive">
     <h2>Live streams <span id="streamCount" style="color:var(--muted);font-weight:600;text-transform:none;font-style:normal;letter-spacing:0"></span></h2>
     <div class="row">
       <input type="text" id="liveUrl" class="grow" placeholder="https://twitch.tv/kaicenat  or  YouTube live URL">
@@ -259,7 +362,7 @@
   </div>
 
   <!-- VOD -->
-  <div class="card">
+  <div class="card" data-view="create" id="secVod">
     <h2>VOD / video clip</h2>
     <div class="row timefields">
       <input type="text" id="vodUrl" class="grow" placeholder="YouTube video URL or Twitch VOD URL">
@@ -278,7 +381,7 @@
   </div>
 
   <!-- YOUTUBE -->
-  <div class="card" id="ytCard">
+  <div class="card" id="ytCard" data-view="publish">
     <h2>Publish to YouTube</h2>
 
     <!-- connected -->
@@ -330,7 +433,7 @@
   </div>
 
   <!-- LIBRARY -->
-  <div class="card">
+  <div class="card" data-view="library" id="secLibrary">
     <h2>Clip library</h2>
     <div class="grid" id="clips"></div>
     <div class="hint" id="noClips">No clips yet.</div>
@@ -375,7 +478,9 @@
     </div>
     <div class="fcopy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
   </footer>
-</div>
+    </div><!-- /mainpad -->
+  </div><!-- /main -->
+</div><!-- /app -->
 <!-- WEB EDITOR -->
 <div class="edwrap" id="edWrap">
   <div class="edtop">
@@ -496,12 +601,12 @@ const $ = (id) => document.getElementById(id);
 // ---- theme switcher (default orange ↔ black), remembered in the browser
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  $('themeBtn').textContent = dark ? '🟠 Orange' : '🌙 Black';
+  $('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
 }
-applyTheme(localStorage.getItem('theme') === 'dark');
+applyTheme(localStorage.getItem('theme') !== 'light'); // dark by default (OpusClip-style)
 $('themeBtn').onclick = () => {
   const dark = !document.body.classList.contains('dark');
-  localStorage.setItem('theme', dark ? 'dark' : 'orange');
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
   applyTheme(dark);
 };
 let toastT;
@@ -664,6 +769,9 @@ async function loadClips() {
           ${c.kind === 'video' ? `
             <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">✏️ Edit</button>
             <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">▶ Publish</button>
+            <button onclick="shortsClip('${encodeURIComponent(c.file)}')">✨ Auto shorts</button>
+            <button onclick="enhanceClip('${encodeURIComponent(c.file)}')">🎙 Enhance</button>
+            <button onclick="upscaleClipUI('${encodeURIComponent(c.file)}')">⬆ Upscale</button>
             ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ 9:16</button>`}
             <button onclick="gifClip('${c.file}')">GIF</button>
             <button onclick="thumbClip('${c.file}')">📷 Thumb</button>` : ''}
@@ -760,6 +868,95 @@ $('ytpGo').onclick = async () => {
   if (p.get('yt')) history.replaceState(null, '', location.pathname);
 })();
 ytRefresh();
+
+// ================= app shell: sidebar nav, hero, feature grid =================
+const VIEW_TITLES = { home: 'Home', create: 'Capture & import', library: 'Clip library', publish: 'Publish to YouTube' };
+let currentView = 'home';
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.sbnav[data-nav]').forEach(n => n.classList.toggle('on', n.dataset.nav === v));
+  $('viewTitle').textContent = VIEW_TITLES[v] || 'Home';
+  $('homeExtra').style.display = v === 'home' ? 'block' : 'none';
+  document.querySelectorAll('.mainpad [data-view]').forEach(el => { el.style.display = el.dataset.view === v ? '' : 'none'; });
+  $('app').classList.remove('navopen');
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('.sbnav[data-nav]').forEach(n => n.onclick = () => setView(n.dataset.nav));
+$('navToggle').onclick = () => $('app').classList.toggle('navopen');
+
+// feature grid — maps OpusClip-style tiles to real tools
+const FEATURES = [
+  { icon: '✨', label: 'Auto shorts', cls: 'grad-e', badge: 'New', act: () => heroFocus() },
+  { icon: '💬', label: 'AI Captions', cls: 'grad-b', act: () => editorLatest('subs') },
+  { icon: '🔤', label: 'Text layers', cls: 'grad-c', act: () => editorLatest('text') },
+  { icon: '✂️', label: 'Video editor', cls: 'grad-d', act: () => editorLatest('media') },
+  { icon: '🎙️', label: 'Enhance speech', cls: 'grad-b', badge: 'New', act: () => clipTool('enhance') },
+  { icon: '💎', label: 'Upscale HD', cls: 'grad-c', badge: 'New', act: () => clipTool('upscale') },
+  { icon: '🖼️', label: 'Reframe', cls: 'grad-d', act: () => editorLatest('video') },
+  { icon: '🎵', label: 'Add music', cls: 'grad-a', act: () => editorLatest('audio') },
+  { icon: '🔴', label: 'Capture live', cls: 'grad-a', act: () => setView('create') },
+  { icon: '▶️', label: 'Publish', cls: 'grad-a', act: () => setView('publish') },
+];
+$('featgrid').innerHTML = FEATURES.map((f, i) =>
+  `<button class="feattile ${f.cls}" data-i="${i}">${f.badge ? `<span class="fnew">${f.badge}</span>` : ''}<span class="fic">${f.icon}</span><span class="fl">${f.label}</span></button>`
+).join('');
+document.querySelectorAll('#featgrid .feattile').forEach(t => t.onclick = () => FEATURES[t.dataset.i].act());
+
+function heroFocus() { setView('home'); $('heroUrl').focus(); $('heroUrl').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+async function latestVideoClip() { try { const cl = await api('/api/clips'); return (cl.find(c => c.kind === 'video') || {}).file || null; } catch (_) { return null; } }
+async function editorLatest(tab) {
+  const f = await latestVideoClip();
+  if (!f) { toast('Make or import a clip first, then reopen this tool', true); setView('home'); return; }
+  openEditor(f); if (tab) setTimeout(() => switchTab(tab), 60);
+}
+async function clipTool(kind) {
+  const f = await latestVideoClip();
+  if (!f) { toast('Make or import a clip first', true); return; }
+  if (kind === 'enhance') enhanceClip(encodeURIComponent(f));
+  else if (kind === 'upscale') upscaleClipUI(encodeURIComponent(f));
+}
+
+// hero actions
+$('heroGo').onclick = async () => {
+  const url = $('heroUrl').value.trim();
+  if (!url) { toast('Paste a YouTube or Twitch link, or use Upload / Capture live', true); $('heroUrl').focus(); return; }
+  toast('⏳ Downloading the video… then auto-cutting the best moments');
+  try { await post('/api/shorts/url', { url, count: 3 }); setView('library'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+$('heroUpload').onclick = () => $('heroFile').click();
+$('heroFile').onchange = async (ev) => {
+  const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+  if (!f) return;
+  toast('⬆ Uploading video…');
+  try {
+    const r = await fetch('/api/clips/import?name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
+    const j = await r.json(); if (!r.ok || !j.ok) throw new Error(j.error || 'upload failed');
+    toast('✅ Imported — opening editor'); setView('library'); loadClips(); openEditor(j.file);
+  } catch (e) { toast(e.message, true); }
+};
+$('heroLiveBtn').onclick = () => { setView('create'); const u = $('heroUrl').value.trim(); if (u) $('liveUrl').value = u; $('liveUrl') && $('liveUrl').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+$('heroSection').onclick = () => { setView('create'); const u = $('heroUrl').value.trim(); if (u) $('vodUrl').value = u; $('secVod').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+$('heroLibraryLink').onclick = () => setView('library');
+
+// new clip tools
+window.shortsClip = async function (encFile) {
+  const file = decodeURIComponent(encFile);
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/shorts', { count: 3 }); toast('✨ Finding the best moments & cutting vertical shorts…'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+window.enhanceClip = async function (encFile) {
+  const file = decodeURIComponent(encFile);
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/enhance'); toast('🎙 Enhancing speech (denoise + loudness)…'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+window.upscaleClipUI = async function (encFile) {
+  const file = decodeURIComponent(encFile);
+  const target = confirm('Upscale to 4K? (Cancel = 1080p)') ? '2160' : '1080';
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/upscale', { target }); toast('⬆ Upscaling to ' + (target === '2160' ? '4K' : '1080p') + '…'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+setView('home');
 
 // ================= web editor (timeline) =================
 const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [], overlays: [], music: null, fadeIn: 0, fadeOut: 0 };

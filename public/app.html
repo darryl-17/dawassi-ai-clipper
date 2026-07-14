@@ -65,7 +65,7 @@
   .status { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-size: 14px; }
   .pill { padding: 4px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted); }
   .pill.rec { background: rgba(228,87,30,.1); border-color: var(--accent); color: var(--accent); font-weight: 800; animation: recglow 1.6s infinite; }
-  .pill.rec::before { content: '●'; margin-right: 6px; animation: blink 1.2s infinite; }
+  .pill.rec::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 6px; vertical-align: middle; animation: blink 1.2s infinite; }
   @keyframes blink { 50% { opacity: .25; } }
   @keyframes recglow { 0%,100% { box-shadow: 0 0 0 0 rgba(228,87,30,.35); } 50% { box-shadow: 0 0 0 6px rgba(228,87,30,0); } }
   .hint { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
@@ -228,6 +228,24 @@
   .ytmbox textarea { resize: vertical; min-height: 68px; }
   .ytmact { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
   .joblink { color: var(--accent); font-size: 12px; text-decoration: none; font-weight: 700; }
+  /* ==================== icons (inline SVG) ==================== */
+  .lic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.18em; flex-shrink: 0; }
+  [data-ic] { display: inline-flex; align-items: center; }
+  .micon { margin-right: 5px; } .micon .lic { width: 14px; height: 14px; }
+  button .lic, a .lic, .chip .lic { margin-right: 3px; }
+  .sbnav .ci { display: inline-flex; align-items: center; }
+  .sbnav .ci .lic { width: 19px; height: 19px; }
+  .sbnav .pill .lic, .abchip .lic { width: 15px; height: 15px; }
+  .feattile .fic .lic { width: 27px; height: 27px; }
+  .edtab .ic { display: flex; align-items: center; justify-content: center; }
+  .edtab .ic .lic { width: 21px; height: 21px; }
+  .subcard .ci .lic { width: 17px; height: 17px; }
+  .txnum.fname .lic, .txhead .lic { width: 15px; height: 15px; }
+  .herolink .lk .lic { width: 18px; height: 18px; }
+  .heroactions .ha .lic { width: 16px; height: 16px; }
+  .herogo .lic { width: 18px; height: 18px; vertical-align: -0.28em; }
+  .edplay .lic, .edtransport button .lic { width: 18px; height: 18px; }
+  .clip .actions .lic { width: 14px; height: 14px; }
   /* ==================== OpusClip-style app shell ==================== */
   .app { display: flex; min-height: 100vh; }
   .sidebar { width: 244px; flex-shrink: 0; position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--border); padding: 18px 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -301,25 +319,25 @@
 <div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="sblogo"><div class="mark">D</div><div class="wm">DAWASSI<small>AI Clipper</small></div></div>
-    <div class="sbplan"><span class="pn">🖥️ Local · Free</span><span class="credits">✨ no watermark</span></div>
+    <div class="sbplan"><span class="pn"><i class="micon" data-ic="monitor"></i>Local · Free</span><span class="credits"><i class="micon" data-ic="sparkles"></i>no watermark</span></div>
     <div class="sbgroup">Create</div>
-    <div class="sbnav on" data-nav="home"><span class="ci">🏠</span>Home</div>
-    <div class="sbnav" data-nav="create"><span class="ci">🎥</span>Capture &amp; import</div>
-    <div class="sbnav" data-nav="library"><span class="ci">🎬</span>Clip library</div>
+    <div class="sbnav on" data-nav="home"><span class="ci" data-ic="home"></span>Home</div>
+    <div class="sbnav" data-nav="create"><span class="ci" data-ic="video"></span>Capture &amp; import</div>
+    <div class="sbnav" data-nav="library"><span class="ci" data-ic="film"></span>Clip library</div>
     <div class="sbgroup">Post</div>
-    <div class="sbnav" data-nav="publish"><span class="ci">▶️</span>Publish<span class="pill">YT</span></div>
+    <div class="sbnav" data-nav="publish"><span class="ci" data-ic="youtube"></span>Publish<span class="pill">YT</span></div>
     <div class="sbspacer"></div>
     <div class="sbfoot">
-      <a class="sbnav" href="/"><span class="ci">←</span>Landing page</a>
+      <a class="sbnav" href="/"><span class="ci" data-ic="arrowleft"></span>Landing page</a>
     </div>
   </aside>
   <div class="main">
     <div class="appbar">
-      <button class="abchip mobsbtoggle" id="navToggle" title="Menu">☰</button>
+      <button class="abchip mobsbtoggle" id="navToggle" title="Menu" data-ic="menu"></button>
       <span class="abtitle" id="viewTitle">Home</span>
       <span class="abspace"></span>
-      <span class="abchip">⚡ Runs on your Mac</span>
-      <button class="abchip" id="themeBtn" title="Switch theme">🌙 Black</button>
+      <span class="abchip"><i data-ic="zap"></i>Runs on your Mac</span>
+      <button class="abchip" id="themeBtn" title="Switch theme">Theme</button>
     </div>
     <div class="mainpad">
 
@@ -329,14 +347,14 @@
           <div class="htitle">Turn any stream into viral shorts</div>
           <div class="hsub">Paste a link or capture a live stream — auto-cut the best moments, then edit, caption &amp; publish.</div>
           <div class="herobox">
-            <div class="herolink"><span class="lk">🔗</span><input id="heroUrl" placeholder="Drop a YouTube or Twitch link"></div>
+            <div class="herolink"><span class="lk" data-ic="link"></span><input id="heroUrl" placeholder="Drop a YouTube or Twitch link"></div>
             <div class="heroactions">
-              <button class="ha" id="heroUpload">⬆ Upload a video</button>
-              <button class="ha" id="heroLiveBtn">🔴 Capture live</button>
-              <button class="ha" id="heroSection">✂ Clip exact section</button>
+              <button class="ha" id="heroUpload"><i data-ic="upload"></i>Upload a video</button>
+              <button class="ha" id="heroLiveBtn"><i data-ic="radio"></i>Capture live</button>
+              <button class="ha" id="heroSection"><i data-ic="scissors"></i>Clip exact section</button>
             </div>
-            <button class="herogo" id="heroGo">✨ Get clips in 1 click</button>
-            <div class="herohint"><a id="heroLibraryLink">Or browse your clip library →</a></div>
+            <button class="herogo" id="heroGo"><i data-ic="sparkles"></i>Get clips in 1 click</button>
+            <div class="herohint"><a id="heroLibraryLink">Or browse your clip library <i data-ic="arrowright"></i></a></div>
             <input type="file" id="heroFile" accept="video/*" hidden>
           </div>
         </div>
@@ -355,9 +373,9 @@
         <option value="720">720p max</option>
         <option value="480" selected>480p max</option>
       </select>
-      <button id="btnStart" class="primary big">▶ Add &amp; buffer</button>
+      <button id="btnStart" class="primary big">Add &amp; buffer</button>
     </div>
-    <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 2-hour buffer. Use <b>⚑ Mark</b> when a moment begins → <b>✂ from mark</b> when it ends. 🔥 = an auto-detected hype spike.</div>
+    <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 2-hour buffer. Use <b><i data-ic="flag"></i> Mark</b> when a moment begins, then <b><i data-ic="scissors"></i> from mark</b> when it ends. <i data-ic="flame"></i> = an auto-detected hype spike.</div>
     <div id="streams"></div>
   </div>
 
@@ -369,7 +387,7 @@
       <input type="text" id="vodStart" placeholder="start 1:23:45">
       <input type="text" id="vodEnd" placeholder="end 1:25:00">
       <input type="text" id="vodName" placeholder="clip name (optional)" style="width:180px">
-      <button id="btnVod" class="primary big">✂ Create clip</button>
+      <button id="btnVod" class="primary big"><i data-ic="scissors"></i>Create clip</button>
     </div>
     <div class="hint">Downloads only the section you asked for (not the whole video). Times accept <b>1:23:45</b>, <b>12:34</b> or plain seconds.</div>
   </div>
@@ -390,7 +408,7 @@
         <img id="ytThumb" alt="" src="">
         <div style="flex:1;min-width:0">
           <div class="ytname" id="ytName">Your channel</div>
-          <div class="hint" style="margin-top:2px">Connected — hit <b>▶ Publish</b> on any clip below to upload it in one click.</div>
+          <div class="hint" style="margin-top:2px">Connected — hit <b>Publish</b> on any clip below to upload it in one click.</div>
         </div>
         <button class="ghostbtn" id="ytDisconnect">Disconnect</button>
       </div>
@@ -401,7 +419,7 @@
     <div id="ytConnect" style="display:none">
       <div class="hint" style="margin-bottom:12px">Your Google credentials are saved. Connect your channel to authorise uploads.</div>
       <div class="row">
-        <button class="primary big ytbtn" id="ytConnectBtn">▶ Connect YouTube channel</button>
+        <button class="primary big ytbtn" id="ytConnectBtn"><i data-ic="youtube"></i>Connect YouTube channel</button>
         <button class="ghostbtn" id="ytEditCfg">Edit credentials</button>
       </div>
     </div>
@@ -458,7 +476,7 @@
       <input type="text" id="ytpTags" placeholder="kaicenat, streamer university, clip">
       <div class="ytmact">
         <button class="ghostbtn" id="ytpCancel">Cancel</button>
-        <button class="primary ytbtn" id="ytpGo">▶ Publish</button>
+        <button class="primary ytbtn" id="ytpGo"><i data-ic="youtube"></i>Publish</button>
       </div>
     </div>
   </div>
@@ -492,12 +510,12 @@
   </div>
   <div class="edmain">
     <div class="edrail" id="edRail">
-      <div class="edtab on" data-tab="media"><span class="ic">🖼️</span>Media</div>
-      <div class="edtab" data-tab="subs"><span class="ic">💬</span>Subtitles</div>
-      <div class="edtab" data-tab="text"><span class="ic">🔤</span>Text</div>
-      <div class="edtab" data-tab="audio"><span class="ic">🎵</span>Audio</div>
-      <div class="edtab" data-tab="video"><span class="ic">🎬</span>Video</div>
-      <div class="edtab" data-tab="tools"><span class="ic">✨</span>Tools</div>
+      <div class="edtab on" data-tab="media"><span class="ic" data-ic="image"></span>Media</div>
+      <div class="edtab" data-tab="subs"><span class="ic" data-ic="captions"></span>Subtitles</div>
+      <div class="edtab" data-tab="text"><span class="ic" data-ic="type"></span>Text</div>
+      <div class="edtab" data-tab="audio"><span class="ic" data-ic="music"></span>Audio</div>
+      <div class="edtab" data-tab="video"><span class="ic" data-ic="film"></span>Video</div>
+      <div class="edtab" data-tab="tools"><span class="ic" data-ic="tool"></span>Tools</div>
     </div>
     <div class="edpanel">
       <div class="edpane on" data-pane="media">
@@ -506,25 +524,25 @@
         <div class="egroup">
           <label>Overlays &amp; stickers</label>
           <div id="edOverlayList"></div>
-          <button class="txadd" id="edAddOverlay">＋ Add image / video / sticker</button>
+          <button class="txadd" id="edAddOverlay"><i data-ic="plus"></i>Add image / video / sticker</button>
           <input type="file" id="edOverlayFile" accept="image/*,video/*" hidden>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px">Drag an overlay on the preview to place it. PNGs with transparency work as stickers or logos.</div>
         </div>
       </div>
       <div class="edpane" data-pane="subs">
         <h3>Select Subtitles</h3>
-        <div class="subcard" id="edAiSub"><div class="ci">✨</div><b>AI Subtitles</b><span>Auto-transcribe speech into timed captions — runs on your device</span></div>
+        <div class="subcard" id="edAiSub"><div class="ci" data-ic="sparkles"></div><b>AI Subtitles</b><span>Auto-transcribe speech into timed captions — runs on your device</span></div>
         <div id="edAiBox" style="display:none;margin:0 0 12px">
           <div class="txrow" style="margin-bottom:10px">
             <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Language</span>
             <div class="chips" id="edAiLang"><button class="chip on" data-l="en">English</button><button class="chip" data-l="multi">Other / mixed</button></div>
           </div>
-          <button class="txadd" id="edAiRun">✨ Transcribe this clip</button>
+          <button class="txadd" id="edAiRun"><i data-ic="sparkles"></i>Transcribe this clip</button>
           <div id="edAiStatus" style="display:none;font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px"></div>
           <div id="edAiBar" style="display:none;height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:8px"><div id="edAiBarFill" style="height:100%;width:0;background:var(--accent);transition:width .2s"></div></div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px">First run downloads a speech model (~145&nbsp;MB) to your browser, then it works offline. Captions appear in the <b>Text</b> tab where you can edit, restyle and re-time them.</div>
         </div>
-        <div class="subcard" id="edManualSub"><div class="ci">💬</div><b>Manual Subtitles</b><span>Add a caption with custom position</span></div>
+        <div class="subcard" id="edManualSub"><div class="ci" data-ic="captions"></div><b>Manual Subtitles</b><span>Add a caption with custom position</span></div>
         <div id="edSubEditor" style="display:none;margin-top:4px">
           <div class="egroup"><label>Caption text</label><input type="text" id="edCaption" placeholder="Type a caption…" maxlength="120"></div>
           <div class="egroup"><label>Position</label><div class="chips" id="edCapPos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Middle</button><button class="chip on" data-p="bottom">Bottom</button></div></div>
@@ -534,11 +552,11 @@
         <h3>Text</h3>
         <p class="txempty">Add one or more text layers over your video. Each has its own position, size, colour and on-screen timing. Move the playhead, then <b>Start</b>/<b>End</b> to time a layer.</p>
         <div id="edTextList"></div>
-        <button class="txadd" id="edAddText">＋ Add text</button>
+        <button class="txadd" id="edAddText"><i data-ic="plus"></i>Add text</button>
       </div>
       <div class="edpane" data-pane="audio">
         <h3>Audio</h3>
-        <div class="egroup"><label>Sound</label><div class="chips"><button class="chip" id="edMute">🔊 Sound on</button></div></div>
+        <div class="egroup"><label>Sound</label><div class="chips"><button class="chip" id="edMute"><i data-ic="volume"></i>Sound on</button></div></div>
         <div class="egroup"><label>Speed</label><div class="chips" id="edSpeed"><button class="chip" data-s="0.5">0.5×</button><button class="chip on" data-s="1">1×</button><button class="chip" data-s="1.5">1.5×</button><button class="chip" data-s="2">2×</button></div></div>
         <div class="egroup">
           <label>Background music</label>
@@ -557,7 +575,7 @@
       <div class="edpane" data-pane="tools">
         <h3>Tools</h3>
         <div class="egroup"><label>Trim</label>
-          <div class="chips"><button class="chip" id="edSetIn">⏮ Set start</button><button class="chip" id="edSetOut">Set end ⏭</button><button class="chip" id="edTrimReset">Reset</button></div>
+          <div class="chips"><button class="chip" id="edSetIn"><i data-ic="skipback"></i>Set start</button><button class="chip" id="edSetOut">Set end<i data-ic="skipforward"></i></button><button class="chip" id="edTrimReset">Reset</button></div>
           <div style="margin-top:10px;font-size:13px;color:var(--muted)" id="edTrimLbl">start 0:00 · end —</div>
         </div>
       </div>
@@ -575,9 +593,9 @@
   <div class="edtl">
     <div class="edtlbar">
       <div class="edtransport">
-        <button id="edPrev" title="Jump to start">⏮</button>
-        <button class="edplay" id="edPlay" title="Play / pause">▶</button>
-        <button id="edNext" title="Jump to end">⏭</button>
+        <button id="edPrev" title="Jump to start" data-ic="skipback"></button>
+        <button class="edplay" id="edPlay" title="Play / pause" data-ic="play"></button>
+        <button id="edNext" title="Jump to end" data-ic="skipforward"></button>
         <span class="edtime"><span id="edCur">0:00</span> / <span id="edTot">0:00</span></span>
       </div>
       <div class="edzoom"><button id="edZoomOut" title="Zoom out">−</button><span>zoom</span><button id="edZoomIn" title="Zoom in">+</button><button class="chip" id="edFit">Fit</button></div>
@@ -586,7 +604,7 @@
       <div class="edinner" id="edInner">
         <div class="edruler" id="edRuler"></div>
         <div class="edtrack cap" id="edTrackCap"><span class="lbl" id="edCapLbl">No caption</span></div>
-        <div class="edtrack vid" id="edTrackVid"><span class="lbl">🎬 clip</span><div class="edtrim" id="edTrim"><div class="edhandle l" id="edHL"></div><div class="edhandle r" id="edHR"></div></div></div>
+        <div class="edtrack vid" id="edTrackVid"><span class="lbl"><i data-ic="film"></i> clip</span><div class="edtrim" id="edTrim"><div class="edhandle l" id="edHL"></div><div class="edhandle r" id="edHR"></div></div></div>
         <div class="edph" id="edPlayhead"></div>
       </div>
     </div>
@@ -598,10 +616,71 @@
 <script>
 const $ = (id) => document.getElementById(id);
 
+// ===== Icon system: inline Feather/Lucide-style SVGs (no emojis, offline) =====
+const ICONS = {
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  video: '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  film: '<rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>',
+  radio: '<circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>',
+  youtube: '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  sparkles: '<path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/><path d="M5 3v4M3 5h4M19 16v3M17.5 17.5h3"/>',
+  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  edit: '<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
+  scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>',
+  captions: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="7" y1="9" x2="13" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/>',
+  type: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
+  music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  gem: '<path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+  mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  crop: '<path d="M6.13 1 6 16a2 2 0 0 0 2 2h15"/><path d="M1 6.13 16 6a2 2 0 0 1 2 2v15"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  sun: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+  menu: '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>',
+  camera: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+  skipback: '<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>',
+  skipforward: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  pause: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+  volume: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+  mute: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  loader: '<line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>',
+  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  smartphone: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  keyboard: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  arrowright: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+  arrowleft: '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  arrowupright: '<line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>',
+  movehoriz: '<polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/><line x1="2" y1="12" x2="22" y2="12"/>',
+  tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+};
+function icon(name, cls) {
+  const p = ICONS[name];
+  if (!p) return '';
+  return `<svg class="lic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+}
+function hydrateIcons(root) {
+  (root || document).querySelectorAll('[data-ic]:not([data-icd])').forEach((el) => {
+    el.innerHTML = icon(el.getAttribute('data-ic'));
+    el.setAttribute('data-icd', '1');
+  });
+}
+
 // ---- theme switcher (default orange ↔ black), remembered in the browser
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  $('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  $('themeBtn').innerHTML = icon(dark ? 'sun' : 'moon') + (dark ? ' Light' : ' Dark');
 }
 applyTheme(localStorage.getItem('theme') !== 'light'); // dark by default (OpusClip-style)
 $('themeBtn').onclick = () => {
@@ -644,16 +723,16 @@ $('btnStart').onclick = async () => {
     $('liveUrl').value = '';
   } catch (e) { toast(e.message, true); }
   $('btnStart').disabled = false;
-  $('btnStart').textContent = '▶ Add & buffer';
+  $('btnStart').textContent = 'Add & buffer';
   refresh();
 };
 window.liveStop = async (id) => { await post('/api/live/stop', { id }); toast('Stopped'); refresh(); };
 window.liveMark = async (id) => {
-  try { await post('/api/live/mark', { id }); toast('Mark set — hit “✂ from mark” when the moment ends'); refresh(); }
+  try { await post('/api/live/mark', { id }); toast('Mark set — hit “from mark” when the moment ends'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 window.liveClip = async (id, body) => {
-  try { const r = await post('/api/live/clip', { id, ...body }); toast('✂ Saved ' + r.file); refresh(); }
+  try { const r = await post('/api/live/clip', { id, ...body }); toast('Saved ' + r.file); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 window.liveCustom = (id) => {
@@ -670,8 +749,8 @@ function streamCardHTML(s) {
   if (rec) {
     head += `<span class="pill rec">REC</span>`;
     head += `<span class="pill">buffered ${fmtDur(s.bufferedSeconds)}${s.bufferBytes ? ' · ' + fmtSize(s.bufferBytes) : ''}</span>`;
-    if (s.markAt) head += `<span class="pill" style="color:var(--warn)">⚑ mark ${fmtDur((Date.now() - s.markAt) / 1000)} ago</span>`;
-    if (hype) head += `<span class="pill" style="color:var(--accent);font-weight:800">🔥 hype ${fmtDur(s.hypeSpikeAgo)} ago</span>`;
+    if (s.markAt) head += `<span class="pill" style="color:var(--warn)">${icon('flag')} mark ${fmtDur((Date.now() - s.markAt) / 1000)} ago</span>`;
+    if (hype) head += `<span class="pill" style="color:var(--accent);font-weight:800">${icon('flame')} hype ${fmtDur(s.hypeSpikeAgo)} ago</span>`;
   } else if (s.status === 'resolving') head += `<span class="pill">connecting…</span>`;
   else if (s.status === 'error') head += `<span class="pill" style="color:var(--danger)">error: ${(s.error || 'unknown').slice(0, 90)}</span>`;
   const title = (s.title || s.url || 'stream');
@@ -684,14 +763,14 @@ function streamCardHTML(s) {
       <button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:300})">5 min</button>
       <button onclick="liveCustom('${s.id}')">custom</button>
       <span style="width:8px"></span>
-      <button onclick="liveMark('${s.id}')">⚑ Mark</button>
-      <button ${s.markAt ? '' : 'disabled'} onclick="liveClip('${s.id}',{fromMark:true})">✂ from mark</button>
-      ${hype ? `<button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:${Math.min(600, s.hypeSpikeAgo + 25)}})">🔥 Clip hype</button>` : ''}
+      <button onclick="liveMark('${s.id}')">${icon('flag')}Mark</button>
+      <button ${s.markAt ? '' : 'disabled'} onclick="liveClip('${s.id}',{fromMark:true})">${icon('scissors')}from mark</button>
+      ${hype ? `<button class="clipbtn big" onclick="liveClip('${s.id}',{seconds:${Math.min(600, s.hypeSpikeAgo + 25)}})">${icon('flame')}Clip hype</button>` : ''}
     </div>` : '';
   return `<div class="streamcard">
     <div class="streamhead">
       <div class="sttitle" title="${t}">${t}</div>
-      <button class="danger" onclick="liveStop('${s.id}')">■ Stop</button>
+      <button class="danger" onclick="liveStop('${s.id}')">Stop</button>
     </div>
     <div class="status">${head}</div>
     ${buttons}
@@ -763,18 +842,18 @@ async function loadClips() {
         : `<video src="/clips/${encodeURIComponent(c.file)}" controls preload="metadata"></video>`}
       <div class="meta">
         <div class="name">${c.file}</div>
-        <div class="info">${c.duration ? '⏱ ' + fmtDur(c.duration) + ' · ' : ''}${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
+        <div class="info">${c.duration ? icon('clock') + ' ' + fmtDur(c.duration) + ' · ' : ''}${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
         <div class="actions">
-          <a href="/clips/${encodeURIComponent(c.file)}" download>⬇ Download</a>
+          <a href="/clips/${encodeURIComponent(c.file)}" download>${icon('download')}Download</a>
           ${c.kind === 'video' ? `
-            <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">✏️ Edit</button>
-            <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">▶ Publish</button>
-            <button onclick="shortsClip('${encodeURIComponent(c.file)}')">✨ Auto shorts</button>
-            <button onclick="enhanceClip('${encodeURIComponent(c.file)}')">🎙 Enhance</button>
-            <button onclick="upscaleClipUI('${encodeURIComponent(c.file)}')">⬆ Upscale</button>
-            ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ 9:16</button>`}
+            <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">${icon('edit')}Edit</button>
+            <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">${icon('youtube')}Publish</button>
+            <button onclick="shortsClip('${encodeURIComponent(c.file)}')">${icon('sparkles')}Auto shorts</button>
+            <button onclick="enhanceClip('${encodeURIComponent(c.file)}')">${icon('mic')}Enhance</button>
+            <button onclick="upscaleClipUI('${encodeURIComponent(c.file)}')">${icon('gem')}Upscale</button>
+            ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">${icon('smartphone')}9:16</button>`}
             <button onclick="gifClip('${c.file}')">GIF</button>
-            <button onclick="thumbClip('${c.file}')">📷 Thumb</button>` : ''}
+            <button onclick="thumbClip('${c.file}')">${icon('camera')}Thumb</button>` : ''}
           <button onclick="renameClip('${c.file}')">Rename</button>
           <button onclick="delClip('${c.file}')" style="color:var(--danger)">Delete</button>
         </div>
@@ -802,7 +881,7 @@ async function refresh() {
       <div class="job">
         <span class="st ${j.status}">${j.status === 'running' ? (j.progress != null ? j.progress.toFixed(0) + '%' : '…') : j.status}</span>
         <span>${j.label}</span>
-        ${link ? `<a class="joblink" href="${link}" target="_blank">${link} ↗</a>` : ''}
+        ${link ? `<a class="joblink" href="${link}" target="_blank">${link} ${icon('arrowupright')}</a>` : ''}
         ${j.status === 'error' ? `<span style="color:var(--danger);font-size:12px">${(j.detail || '').slice(0, 140)}</span>` : ''}
       </div>`; }).join('');
     if (jobs.some((j) => j.status === 'done' && Date.now() - j.startedAt < 15000)) loadClips();
@@ -844,7 +923,7 @@ $('ytCopyRedirect').onclick = () => { navigator.clipboard && navigator.clipboard
 let ytPubFile = null;
 window.publishClip = function (encFile) {
   const file = decodeURIComponent(encFile);
-  if (!ytStatus.connected) { toast('Connect your YouTube channel first ↓', true); $('ytCard').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (!ytStatus.connected) { toast('Connect your YouTube channel first', true); setView('publish'); $('ytCard').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
   ytPubFile = file;
   $('ytpTitle').value = file.replace(/\.mp4$/i, '').slice(0, 100);
   $('ytpDesc').value = ''; $('ytpTags').value = '';
@@ -856,14 +935,14 @@ $('ytPublishModal').addEventListener('click', (e) => { if (e.target.id === 'ytPu
 $('ytpGo').onclick = async () => {
   if (!ytPubFile) return;
   const body = { title: $('ytpTitle').value.trim(), description: $('ytpDesc').value.trim(), privacy: $('ytpPrivacy').value, tags: $('ytpTags').value.trim() };
-  try { await post('/api/clips/' + encodeURIComponent(ytPubFile) + '/publish', body); toast('▶ Uploading to YouTube… track it in Activity'); $('ytPublishModal').classList.remove('open'); refresh(); }
+  try { await post('/api/clips/' + encodeURIComponent(ytPubFile) + '/publish', body); toast('Uploading to YouTube… track it in Activity'); $('ytPublishModal').classList.remove('open'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 
 // handle the OAuth redirect back
 (function () {
   const p = new URLSearchParams(location.search);
-  if (p.get('yt') === 'connected') toast('✅ YouTube channel connected');
+  if (p.get('yt') === 'connected') toast('YouTube channel connected');
   else if (p.get('yt') === 'error') toast('YouTube connection failed: ' + (p.get('msg') || ''), true);
   if (p.get('yt')) history.replaceState(null, '', location.pathname);
 })();
@@ -886,19 +965,19 @@ $('navToggle').onclick = () => $('app').classList.toggle('navopen');
 
 // feature grid — maps OpusClip-style tiles to real tools
 const FEATURES = [
-  { icon: '✨', label: 'Auto shorts', cls: 'grad-e', badge: 'New', act: () => heroFocus() },
-  { icon: '💬', label: 'AI Captions', cls: 'grad-b', act: () => editorLatest('subs') },
-  { icon: '🔤', label: 'Text layers', cls: 'grad-c', act: () => editorLatest('text') },
-  { icon: '✂️', label: 'Video editor', cls: 'grad-d', act: () => editorLatest('media') },
-  { icon: '🎙️', label: 'Enhance speech', cls: 'grad-b', badge: 'New', act: () => clipTool('enhance') },
-  { icon: '💎', label: 'Upscale HD', cls: 'grad-c', badge: 'New', act: () => clipTool('upscale') },
-  { icon: '🖼️', label: 'Reframe', cls: 'grad-d', act: () => editorLatest('video') },
-  { icon: '🎵', label: 'Add music', cls: 'grad-a', act: () => editorLatest('audio') },
-  { icon: '🔴', label: 'Capture live', cls: 'grad-a', act: () => setView('create') },
-  { icon: '▶️', label: 'Publish', cls: 'grad-a', act: () => setView('publish') },
+  { ic: 'sparkles', label: 'Auto shorts', cls: 'grad-e', badge: 'New', act: () => heroFocus() },
+  { ic: 'captions', label: 'AI Captions', cls: 'grad-b', act: () => editorLatest('subs') },
+  { ic: 'type', label: 'Text layers', cls: 'grad-c', act: () => editorLatest('text') },
+  { ic: 'film', label: 'Video editor', cls: 'grad-d', act: () => editorLatest('media') },
+  { ic: 'mic', label: 'Enhance speech', cls: 'grad-b', badge: 'New', act: () => clipTool('enhance') },
+  { ic: 'gem', label: 'Upscale HD', cls: 'grad-c', badge: 'New', act: () => clipTool('upscale') },
+  { ic: 'crop', label: 'Reframe', cls: 'grad-d', act: () => editorLatest('video') },
+  { ic: 'music', label: 'Add music', cls: 'grad-a', act: () => editorLatest('audio') },
+  { ic: 'radio', label: 'Capture live', cls: 'grad-a', act: () => setView('create') },
+  { ic: 'youtube', label: 'Publish', cls: 'grad-a', act: () => setView('publish') },
 ];
 $('featgrid').innerHTML = FEATURES.map((f, i) =>
-  `<button class="feattile ${f.cls}" data-i="${i}">${f.badge ? `<span class="fnew">${f.badge}</span>` : ''}<span class="fic">${f.icon}</span><span class="fl">${f.label}</span></button>`
+  `<button class="feattile ${f.cls}" data-i="${i}">${f.badge ? `<span class="fnew">${f.badge}</span>` : ''}<span class="fic">${icon(f.ic)}</span><span class="fl">${f.label}</span></button>`
 ).join('');
 document.querySelectorAll('#featgrid .feattile').forEach(t => t.onclick = () => FEATURES[t.dataset.i].act());
 
@@ -920,7 +999,7 @@ async function clipTool(kind) {
 $('heroGo').onclick = async () => {
   const url = $('heroUrl').value.trim();
   if (!url) { toast('Paste a YouTube or Twitch link, or use Upload / Capture live', true); $('heroUrl').focus(); return; }
-  toast('⏳ Downloading the video… then auto-cutting the best moments');
+  toast('Downloading the video… then auto-cutting the best moments');
   try { await post('/api/shorts/url', { url, count: 3 }); setView('library'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
@@ -928,11 +1007,11 @@ $('heroUpload').onclick = () => $('heroFile').click();
 $('heroFile').onchange = async (ev) => {
   const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
   if (!f) return;
-  toast('⬆ Uploading video…');
+  toast('Uploading video…');
   try {
     const r = await fetch('/api/clips/import?name=' + encodeURIComponent(f.name), { method: 'POST', body: f });
     const j = await r.json(); if (!r.ok || !j.ok) throw new Error(j.error || 'upload failed');
-    toast('✅ Imported — opening editor'); setView('library'); loadClips(); openEditor(j.file);
+    toast('Imported — opening editor'); setView('library'); loadClips(); openEditor(j.file);
   } catch (e) { toast(e.message, true); }
 };
 $('heroLiveBtn').onclick = () => { setView('create'); const u = $('heroUrl').value.trim(); if (u) $('liveUrl').value = u; $('liveUrl') && $('liveUrl').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
@@ -942,18 +1021,18 @@ $('heroLibraryLink').onclick = () => setView('library');
 // new clip tools
 window.shortsClip = async function (encFile) {
   const file = decodeURIComponent(encFile);
-  try { await post('/api/clips/' + encodeURIComponent(file) + '/shorts', { count: 3 }); toast('✨ Finding the best moments & cutting vertical shorts…'); refresh(); }
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/shorts', { count: 3 }); toast('Finding the best moments & cutting vertical shorts…'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 window.enhanceClip = async function (encFile) {
   const file = decodeURIComponent(encFile);
-  try { await post('/api/clips/' + encodeURIComponent(file) + '/enhance'); toast('🎙 Enhancing speech (denoise + loudness)…'); refresh(); }
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/enhance'); toast('Enhancing speech (denoise + loudness)…'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 window.upscaleClipUI = async function (encFile) {
   const file = decodeURIComponent(encFile);
   const target = confirm('Upscale to 4K? (Cancel = 1080p)') ? '2160' : '1080';
-  try { await post('/api/clips/' + encodeURIComponent(file) + '/upscale', { target }); toast('⬆ Upscaling to ' + (target === '2160' ? '4K' : '1080p') + '…'); refresh(); }
+  try { await post('/api/clips/' + encodeURIComponent(file) + '/upscale', { target }); toast('Upscaling to ' + (target === '2160' ? '4K' : '1080p') + '…'); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 setView('home');
@@ -974,7 +1053,7 @@ window.openEditor = function(file){
   E('edAiBox').style.display = 'none'; E('edAiStatus').style.display = 'none'; E('edAiStatus').textContent = '';
   setChips('edAspect','a','original'); setChips('edCapPos','p','bottom'); setChips('edSpeed','s','1');
   setChips('edFadeIn','f','0'); setChips('edFadeOut','f','0');
-  E('edMute').classList.remove('on'); E('edMute').textContent = '🔊 Sound on'; E('edCapLbl').textContent = 'No caption';
+  E('edMute').classList.remove('on'); E('edMute').innerHTML = icon('volume') + 'Sound on'; E('edCapLbl').textContent = 'No caption';
   renderTextList(); updateTextPreview(); renderOverlayList(); updateOverlayPreview(); renderMusicRow();
   switchTab('media'); edw.classList.add('open');
   edVideo.onloadedmetadata = () => { ed.dur = edVideo.duration || 0; ed.outPt = ed.dur; E('edTot').textContent = fmtT(ed.dur); fitZoom(); renderTL(); updateTextPreview(); updateOverlayPreview(); };
@@ -1010,7 +1089,7 @@ async function decodeClipAudio(url){
 E('edAiRun').onclick = async () => {
   const btn = E('edAiRun'); if (btn.disabled) return;
   const model = edAiLang === 'en' ? 'Xenova/whisper-base.en' : 'Xenova/whisper-base';
-  btn.disabled = true; btn.textContent = '⏳ Working…';
+  btn.disabled = true; btn.innerHTML = icon('loader') + 'Working…';
   try {
     aiStatus('Loading speech model…'); aiProgress(0);
     const TF = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
@@ -1048,17 +1127,17 @@ E('edAiRun').onclick = async () => {
     renderTextList(); updateTextPreview();
     aiProgress(null); aiStatus('');
     E('edAiBox').style.display = 'none';
-    if (added) { switchTab('text'); toast('✨ Added ' + added + ' caption' + (added > 1 ? 's' : '') + ' — edit them in the Text tab'); }
+    if (added) { switchTab('text'); toast('Added ' + added + ' caption' + (added > 1 ? 's' : '') + ' — edit them in the Text tab'); }
     else toast('No speech detected in this clip.', true);
   } catch (err) {
     aiProgress(null);
     aiStatus('Could not run AI captions (needs internet on first use to fetch the model). You can use Manual Subtitles or the Text tab instead.');
     toast('AI captions failed: ' + (err.message || err), true);
-  } finally { btn.disabled = false; btn.textContent = '✨ Transcribe this clip'; }
+  } finally { btn.disabled = false; btn.innerHTML = icon('sparkles') + 'Transcribe this clip'; }
 };
 E('edCaption').addEventListener('input', updCap);
 document.querySelectorAll('#edCapPos .chip').forEach(c => c.onclick = () => { ed.capPos = c.dataset.p; setChips('edCapPos','p',ed.capPos); updCap(); });
-function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textContent = t ? ('💬 ' + t) : 'No caption';
+function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textContent = t ? t : 'No caption';
   if (!t) { edCapPrev.style.display = 'none'; return; }
   edCapPrev.textContent = t; edCapPrev.style.display = 'block';
   if (ed.capPos === 'top') { edCapPrev.style.top = '6%'; edCapPrev.style.bottom = 'auto'; }
@@ -1078,11 +1157,11 @@ function renderTextList(){
   ed.texts.forEach((l, i) => {
     const row = document.createElement('div'); row.className = 'txlayer'; row.dataset.i = i;
     row.innerHTML =
-      '<div class="txhead"><span class="txnum">Text ' + (i + 1) + '</span><button class="txdel" title="Delete layer">🗑</button></div>'
+      '<div class="txhead"><span class="txnum">Text ' + (i + 1) + '</span><button class="txdel" title="Delete layer">' + icon('trash') + '</button></div>'
       + '<input type="text" class="txinput" maxlength="120" placeholder="Type text…">'
       + '<div class="txrow"><div class="chips txpos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Mid</button><button class="chip" data-p="bottom">Bottom</button></div></div>'
       + '<div class="txrow"><div class="chips txsize"><button class="chip" data-s="small">S</button><button class="chip" data-s="medium">M</button><button class="chip" data-s="large">L</button></div><div class="txcolors"></div></div>'
-      + '<div class="txrow txtime"><button class="chip txsetstart">⏮ Start</button><button class="chip txsetend">End ⏭</button><button class="chip txfull">Full</button><span class="txtimelbl"></span></div>';
+      + '<div class="txrow txtime"><button class="chip txsetstart">' + icon('skipback') + 'Start</button><button class="chip txsetend">End' + icon('skipforward') + '</button><button class="chip txfull">Full</button><span class="txtimelbl"></span></div>';
     box.appendChild(row);
     const inp = row.querySelector('.txinput'); inp.value = l.text || '';
     inp.addEventListener('input', () => { l.text = inp.value; updateTextPreview(); });
@@ -1160,9 +1239,9 @@ function renderOverlayList(){
   ed.overlays.forEach((ov, i) => {
     const row = document.createElement('div'); row.className = 'txlayer'; row.dataset.i = i;
     row.innerHTML =
-      '<div class="txhead"><span class="txnum fname">' + (ov.type === 'video' ? '🎬 ' : '🖼️ ') + '</span><button class="txdel" title="Remove overlay">🗑</button></div>'
+      '<div class="txhead"><span class="txnum fname">' + icon(ov.type === 'video' ? 'film' : 'image') + ' </span><button class="txdel" title="Remove overlay">' + icon('trash') + '</button></div>'
       + '<div class="txrange"><input type="range" class="ovscale" min="5" max="100" step="1"><span class="val"></span></div>'
-      + '<div class="txrow txtime"><button class="chip ovsetstart">⏮ Start</button><button class="chip ovsetend">End ⏭</button><button class="chip ovfull">Full</button><span class="txtimelbl"></span></div>';
+      + '<div class="txrow txtime"><button class="chip ovsetstart">' + icon('skipback') + 'Start</button><button class="chip ovsetend">End' + icon('skipforward') + '</button><button class="chip ovfull">Full</button><span class="txtimelbl"></span></div>';
     box.appendChild(row);
     row.querySelector('.fname').append(document.createTextNode(ov.name || 'overlay'));
     const rng = row.querySelector('.ovscale'), val = row.querySelector('.val');
@@ -1228,11 +1307,11 @@ E('edMusicFile').onchange = async (ev) => {
 function renderMusicRow(){
   const box = E('edMusicRow'); if (!box) return; box.innerHTML = '';
   if (!ed.music) {
-    const b = document.createElement('button'); b.className = 'txadd'; b.id = 'edAddMusic'; b.textContent = '🎵 Add music track';
+    const b = document.createElement('button'); b.className = 'txadd'; b.id = 'edAddMusic'; b.innerHTML = icon('music') + 'Add music track';
     b.onclick = () => E('edMusicFile').click(); box.appendChild(b); return;
   }
   const row = document.createElement('div'); row.className = 'musicrow';
-  row.innerHTML = '<span class="mn">🎵 </span><button class="txdel" title="Remove music">🗑</button>';
+  row.innerHTML = '<span class="mn">' + icon('music') + ' </span><button class="txdel" title="Remove music">' + icon('trash') + '</button>';
   row.querySelector('.mn').append(document.createTextNode(ed.music.name || 'music'));
   row.querySelector('.txdel').onclick = () => { ed.music = null; renderMusicRow(); };
   box.appendChild(row);
@@ -1249,7 +1328,7 @@ document.querySelectorAll('#edFadeIn .chip').forEach(c => c.onclick = () => { ed
 document.querySelectorAll('#edFadeOut .chip').forEach(c => c.onclick = () => { ed.fadeOut = Number(c.dataset.f); setChips('edFadeOut','f',c.dataset.f); });
 
 // audio
-E('edMute').onclick = () => { ed.mute = !ed.mute; E('edMute').classList.toggle('on', ed.mute); E('edMute').textContent = ed.mute ? '🔇 Muted' : '🔊 Sound on'; };
+E('edMute').onclick = () => { ed.mute = !ed.mute; E('edMute').classList.toggle('on', ed.mute); E('edMute').innerHTML = (ed.mute ? icon('mute') + 'Muted' : icon('volume') + 'Sound on'); };
 document.querySelectorAll('#edSpeed .chip').forEach(c => c.onclick = () => { ed.speed = Number(c.dataset.s); setChips('edSpeed','s',c.dataset.s); });
 
 // video / crop box
@@ -1287,7 +1366,7 @@ function handleDrag(handle, isLeft){ let d = false; const pt = e => e.touches ? 
   handle.addEventListener('touchstart', st, { passive: false }); window.addEventListener('touchmove', mv, { passive: false }); window.addEventListener('touchend', en); }
 handleDrag(E('edHL'), true); handleDrag(E('edHR'), false);
 E('edPlay').onclick = () => { if (edVideo.paused) edVideo.play(); else edVideo.pause(); };
-edVideo.addEventListener('play', () => E('edPlay').textContent = '⏸'); edVideo.addEventListener('pause', () => E('edPlay').textContent = '▶');
+edVideo.addEventListener('play', () => E('edPlay').innerHTML = icon('pause')); edVideo.addEventListener('pause', () => E('edPlay').innerHTML = icon('play'));
 E('edPrev').onclick = () => { edVideo.currentTime = ed.inPt || 0; };
 E('edNext').onclick = () => { edVideo.currentTime = (ed.outPt != null ? ed.outPt : ed.dur); };
 E('edSetIn').onclick = () => { ed.inPt = edVideo.currentTime; if (ed.outPt != null && ed.inPt >= ed.outPt) ed.outPt = ed.dur; updTrim(); };
@@ -1305,18 +1384,13 @@ E('edExport').onclick = async () => {
   const overlays = ed.overlays.map(o => ({ file: o.file, scale: o.scale, x: o.x, y: o.y, start: o.start, end: o.end }));
   const music = ed.music ? { file: ed.music.file, volume: ed.music.volume } : null;
   const body = { start: ed.inPt, end: ed.outPt, aspect: ed.aspect, cropX: ed.crop.x, cropY: ed.crop.y, caption: E('edCaption').value.trim(), captionPos: ed.capPos, texts, overlays, music, fadeIn: ed.fadeIn, fadeOut: ed.fadeOut, speed: ed.speed, mute: ed.mute };
-  try { await post('/api/clips/' + encodeURIComponent(ed.file) + '/edit', body); toast('✨ Rendering edited clip…'); closeEditor(); refresh(); }
+  try { await post('/api/clips/' + encodeURIComponent(ed.file) + '/edit', body); toast('Rendering edited clip…'); closeEditor(); refresh(); }
   catch (e) { toast(e.message, true); }
 };
 </script>
 <script>
-(function(){
-  const M = { '🖼':'framed_picture','💬':'speech_balloon','🔤':'input_latin_letters','🎵':'musical_note','🎬':'clapper_board','✨':'sparkles','⚡':'high_voltage','🔴':'red_circle','🔥':'fire','📱':'mobile_phone','⚑':'triangular_flag','🚩':'triangular_flag','✂':'scissors','🎞':'film_frames','⌨':'keyboard','🔒':'locked','📷':'camera','▶':'play_button','⏮':'prev','⏭':'next' };
-  document.querySelectorAll('.ic, .ico').forEach(el => {
-    const k = el.textContent.trim().replace(/️/g, ''); const f = M[k];
-    if (f) el.innerHTML = '<img class="i3d" src="/icons/' + f + '.png" alt="' + k + '" onerror="this.replaceWith(document.createTextNode(this.alt))">';
-  });
-})();
+// Fill every static [data-ic] placeholder with its inline SVG icon.
+hydrateIcons(document);
 </script>
 </body>
 </html>

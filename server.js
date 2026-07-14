@@ -350,9 +350,10 @@ setInterval(() => {
     for (const s of listSegments(st)) if (s.mtime < cutoff) { try { fs.unlinkSync(s.file); } catch (_) {} }
 }, 60 * 1000);
 
-// Clean abandoned buffer dirs from previous runs on boot (keep uploaded assets).
+// Clean abandoned buffer dirs from previous runs on boot (keep uploaded assets
+// and the persisted YouTube connection).
 for (const d of fs.readdirSync(BUFFER_DIR)) {
-  if (d === 'assets') continue;
+  if (d === 'assets' || d === 'youtube.json') continue;
   const full = path.join(BUFFER_DIR, d);
   try { fs.rmSync(full, { recursive: true, force: true }); } catch (_) {}
 }
@@ -705,6 +706,89 @@ function trimClip(file, start, end) {
   return job;
 }
 
+// ---------------------------------------------------------------- YouTube
+// One-click publishing of finished clips to the user's own channel via the
+// YouTube Data API v3. The user supplies their own Google OAuth client
+// (created in Google Cloud Console) — credentials + tokens live in
+// buffer/youtube.json (gitignored, preserved across the boot cleanup).
+const YT_FILE = path.join(BUFFER_DIR, 'youtube.json');
+const YT_REDIRECT = `http://localhost:${PORT}/api/youtube/callback`;
+const YT_SCOPES = 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly';
+
+function loadYT() { try { return JSON.parse(fs.readFileSync(YT_FILE, 'utf8')); } catch (_) { return {}; } }
+function saveYT(obj) { fs.writeFileSync(YT_FILE, JSON.stringify(obj, null, 2)); }
+
+async function ytTokenRequest(params) {
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(params),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error_description || j.error || 'token request failed');
+  return j;
+}
+
+async function ytExchangeCode(code) {
+  const cfg = loadYT();
+  const j = await ytTokenRequest({ code, client_id: cfg.clientId, client_secret: cfg.clientSecret, redirect_uri: YT_REDIRECT, grant_type: 'authorization_code' });
+  cfg.tokens = { access_token: j.access_token, refresh_token: j.refresh_token, expiry: Date.now() + ((j.expires_in || 3600) - 60) * 1000 };
+  saveYT(cfg);
+  return cfg;
+}
+
+async function ytAccessToken() {
+  const cfg = loadYT();
+  if (!cfg.tokens || !cfg.tokens.refresh_token) throw new Error('YouTube not connected');
+  if (cfg.tokens.access_token && Date.now() < (cfg.tokens.expiry || 0)) return cfg.tokens.access_token;
+  const j = await ytTokenRequest({ client_id: cfg.clientId, client_secret: cfg.clientSecret, refresh_token: cfg.tokens.refresh_token, grant_type: 'refresh_token' });
+  cfg.tokens.access_token = j.access_token;
+  cfg.tokens.expiry = Date.now() + ((j.expires_in || 3600) - 60) * 1000;
+  saveYT(cfg);
+  return cfg.tokens.access_token;
+}
+
+async function ytFetchChannel() {
+  const token = await ytAccessToken();
+  const r = await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', { headers: { Authorization: 'Bearer ' + token } });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((j.error && j.error.message) || 'could not read channel');
+  const c = (j.items || [])[0];
+  return c ? { id: c.id, title: c.snippet.title, thumb: c.snippet.thumbnails && c.snippet.thumbnails.default && c.snippet.thumbnails.default.url } : null;
+}
+
+function publishToYouTube(file, meta) {
+  const src = path.join(CLIPS_DIR, file);
+  if (!fs.existsSync(src)) throw new Error('clip not found');
+  if (!/\.mp4$/i.test(file)) throw new Error('only video clips can be published');
+  const job = newJob('youtube', `YouTube ▶ ${file}`);
+  (async () => {
+    const token = await ytAccessToken();
+    const snippet = { title: (String(meta.title || file).replace(/\.mp4$/i, '')).slice(0, 100) || 'Clip', description: String(meta.description || '').slice(0, 4900), categoryId: '20' };
+    if (meta.tags) snippet.tags = String(meta.tags).split(',').map((t) => t.trim()).filter(Boolean).slice(0, 40);
+    const privacyStatus = ['public', 'unlisted', 'private'].includes(meta.privacy) ? meta.privacy : 'private';
+    const bytes = fs.readFileSync(src);
+    // 1) initiate a resumable upload session
+    const init = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': 'video/mp4', 'X-Upload-Content-Length': String(bytes.length) },
+      body: JSON.stringify({ snippet, status: { privacyStatus, selfDeclaredMadeForKids: false } }),
+    });
+    if (!init.ok) throw new Error('upload init failed: ' + (await init.text()).slice(0, 300));
+    const uploadUrl = init.headers.get('location');
+    if (!uploadUrl) throw new Error('YouTube did not return an upload URL');
+    job.progress = 15;
+    // 2) send the bytes
+    const up = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': 'video/mp4', 'Content-Length': String(bytes.length) }, body: bytes });
+    const j = await up.json().catch(() => ({}));
+    if (!up.ok) throw new Error((j.error && j.error.message) || 'upload failed');
+    job.videoId = j.id;
+    job.detail = 'https://youtu.be/' + j.id;
+  })()
+    .then(() => { job.status = 'done'; job.progress = 100; })
+    .catch((err) => { job.status = 'error'; job.detail = (err.message || String(err)).slice(0, 300); });
+  return job;
+}
+
 // ---------------------------------------------------------------- API
 
 app.get('/api/status', (req, res) => {
@@ -837,6 +921,55 @@ app.post('/api/clips/:file/trim', (req, res) => {
 
 app.post('/api/clips/:file/edit', (req, res) => {
   try { res.json({ ok: true, jobId: editClip(path.basename(req.params.file), req.body || {}).id }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// --- YouTube publishing ---
+app.get('/api/youtube/status', (req, res) => {
+  const cfg = loadYT();
+  res.json({
+    configured: !!(cfg.clientId && cfg.clientSecret),
+    connected: !!(cfg.tokens && cfg.tokens.refresh_token),
+    channel: cfg.channel || null,
+    redirectUri: YT_REDIRECT,
+  });
+});
+
+app.post('/api/youtube/config', (req, res) => {
+  const clientId = String(req.body.clientId || '').trim();
+  const clientSecret = String(req.body.clientSecret || '').trim();
+  if (!clientId || !clientSecret) return res.status(400).json({ error: 'Client ID and Client Secret are both required' });
+  const cfg = loadYT(); cfg.clientId = clientId; cfg.clientSecret = clientSecret; saveYT(cfg);
+  res.json({ ok: true });
+});
+
+app.get('/api/youtube/auth', (req, res) => {
+  const cfg = loadYT();
+  if (!cfg.clientId) return res.status(400).send('Add your Google Client ID and Secret first.');
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: cfg.clientId, redirect_uri: YT_REDIRECT, response_type: 'code',
+    scope: YT_SCOPES, access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true',
+  });
+  res.redirect(url);
+});
+
+app.get('/api/youtube/callback', async (req, res) => {
+  try {
+    if (req.query.error) throw new Error(String(req.query.error));
+    if (!req.query.code) throw new Error('no authorization code');
+    await ytExchangeCode(String(req.query.code));
+    const ch = await ytFetchChannel();
+    const cfg = loadYT(); cfg.channel = ch; saveYT(cfg);
+    res.redirect('/app.html?yt=connected');
+  } catch (e) { res.redirect('/app.html?yt=error&msg=' + encodeURIComponent(e.message || 'connection failed')); }
+});
+
+app.post('/api/youtube/disconnect', (req, res) => {
+  const cfg = loadYT(); delete cfg.tokens; delete cfg.channel; saveYT(cfg); res.json({ ok: true });
+});
+
+app.post('/api/clips/:file/publish', (req, res) => {
+  try { res.json({ ok: true, jobId: publishToYouTube(path.basename(req.params.file), req.body || {}).id }); }
   catch (e) { res.status(400).json({ error: e.message }); }
 });
 

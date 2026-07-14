@@ -201,6 +201,33 @@
   body.dark .homebtn, body.dark #themeBtn { background: rgba(255,255,255,.08); }
   .primary, .clipbtn, .edexport { position: relative; overflow: hidden; }
   .primary::after, .clipbtn::after, .edexport::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0) 55%); pointer-events: none; }
+  /* ---------- YouTube publishing ---------- */
+  .ytbtn { background: #ff0033; color: #fff; border: none; font-weight: 800; }
+  .ytbtn:hover { filter: brightness(1.08); color: #fff; }
+  .ytchan { display: flex; align-items: center; gap: 14px; }
+  .ytchan img { width: 52px; height: 52px; border-radius: 50%; background: var(--panel2); object-fit: cover; }
+  .ytname { font-weight: 800; font-size: 17px; }
+  .ghostbtn { background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 16px; font-weight: 700; cursor: pointer; }
+  .ghostbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .ytsetup label { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 14px 0 6px; }
+  .ytsetup input[type=text] { width: 100%; background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .ytcode { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; display: inline-flex; align-items: center; gap: 8px; user-select: all; }
+  .ytcode button { border: none; background: var(--accent); color: #fff; border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .ytsteps { margin: 12px 0 0; padding: 0; }
+  .ytsteps summary { cursor: pointer; font-weight: 700; color: var(--accent); font-size: 14px; }
+  .ytsteps ol { margin: 12px 0 0; padding-left: 20px; line-height: 1.7; font-size: 13.5px; color: var(--muted); }
+  .ytsteps a { color: var(--accent); }
+  .ytnote { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--panel2); border-radius: 0 8px 8px 0; }
+  .ytmodal { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .ytmodal.open { display: flex; }
+  .ytmbox { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+  .ytmbox h3 { margin: 0 0 4px; font-size: 20px; font-weight: 800; }
+  .ytmbox .csub { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .ytmbox label { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 14px 0 6px; }
+  .ytmbox input, .ytmbox textarea, .ytmbox select { width: 100%; background: var(--panel2); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; }
+  .ytmbox textarea { resize: vertical; min-height: 68px; }
+  .ytmact { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .joblink { color: var(--accent); font-size: 12px; text-decoration: none; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -250,11 +277,87 @@
     <div class="jobs" id="jobs"></div>
   </div>
 
+  <!-- YOUTUBE -->
+  <div class="card" id="ytCard">
+    <h2>Publish to YouTube</h2>
+
+    <!-- connected -->
+    <div id="ytConnected" style="display:none">
+      <div class="ytchan">
+        <img id="ytThumb" alt="" src="">
+        <div style="flex:1;min-width:0">
+          <div class="ytname" id="ytName">Your channel</div>
+          <div class="hint" style="margin-top:2px">Connected — hit <b>▶ Publish</b> on any clip below to upload it in one click.</div>
+        </div>
+        <button class="ghostbtn" id="ytDisconnect">Disconnect</button>
+      </div>
+      <div class="ytnote">Uploads use the YouTube Data API (~1,600 quota units each; ~6 uploads/day on the default quota). If your Google project hasn’t been verified by YouTube yet, uploads may be forced to <b>Private</b> until you request an API audit.</div>
+    </div>
+
+    <!-- configured, not connected -->
+    <div id="ytConnect" style="display:none">
+      <div class="hint" style="margin-bottom:12px">Your Google credentials are saved. Connect your channel to authorise uploads.</div>
+      <div class="row">
+        <button class="primary big ytbtn" id="ytConnectBtn">▶ Connect YouTube channel</button>
+        <button class="ghostbtn" id="ytEditCfg">Edit credentials</button>
+      </div>
+    </div>
+
+    <!-- setup -->
+    <div id="ytSetup" class="ytsetup" style="display:none">
+      <div class="hint">To publish to your own channel, YouTube requires a free Google OAuth app (a one-time, ~10-minute setup). Paste the Client ID &amp; Secret you create below.</div>
+      <label>Client ID</label>
+      <input type="text" id="ytClientId" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+      <label>Client Secret</label>
+      <input type="text" id="ytClientSecret" placeholder="GOCSPX-…" autocomplete="off">
+      <label>Authorised redirect URI (add this in Google Cloud)</label>
+      <div class="ytcode"><span id="ytRedirect">http://localhost:3547/api/youtube/callback</span><button id="ytCopyRedirect" type="button">Copy</button></div>
+      <details class="ytsteps">
+        <summary>Step-by-step: create your Google credentials</summary>
+        <ol>
+          <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> and create a new project.</li>
+          <li>In <b>APIs &amp; Services → Library</b>, enable the <b>YouTube Data API v3</b>.</li>
+          <li>In <b>OAuth consent screen</b>, choose <b>External</b>, fill the basics, and add your own Google account under <b>Test users</b>.</li>
+          <li>In <b>Credentials → Create credentials → OAuth client ID</b>, pick <b>Web application</b>.</li>
+          <li>Under <b>Authorised redirect URIs</b>, add the URI shown above, then create.</li>
+          <li>Copy the <b>Client ID</b> and <b>Client Secret</b> into the fields here and hit Save.</li>
+        </ol>
+      </details>
+      <div class="row" style="margin-top:16px">
+        <button class="primary big" id="ytSaveCfg">Save credentials</button>
+      </div>
+    </div>
+  </div>
+
   <!-- LIBRARY -->
   <div class="card">
     <h2>Clip library</h2>
     <div class="grid" id="clips"></div>
     <div class="hint" id="noClips">No clips yet.</div>
+  </div>
+
+  <!-- YOUTUBE PUBLISH MODAL -->
+  <div class="ytmodal" id="ytPublishModal">
+    <div class="ytmbox">
+      <h3>Publish to YouTube</h3>
+      <div class="csub" id="ytpChannel"></div>
+      <label>Title</label>
+      <input type="text" id="ytpTitle" maxlength="100" placeholder="Clip title">
+      <label>Description</label>
+      <textarea id="ytpDesc" placeholder="Optional description…"></textarea>
+      <label>Privacy</label>
+      <select id="ytpPrivacy">
+        <option value="public">Public</option>
+        <option value="unlisted">Unlisted</option>
+        <option value="private" selected>Private</option>
+      </select>
+      <label>Tags (comma-separated)</label>
+      <input type="text" id="ytpTags" placeholder="kaicenat, streamer university, clip">
+      <div class="ytmact">
+        <button class="ghostbtn" id="ytpCancel">Cancel</button>
+        <button class="primary ytbtn" id="ytpGo">▶ Publish</button>
+      </div>
+    </div>
   </div>
 
   <footer id="footer">
@@ -314,7 +417,7 @@
           <button class="txadd" id="edAiRun">✨ Transcribe this clip</button>
           <div id="edAiStatus" style="display:none;font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px"></div>
           <div id="edAiBar" style="display:none;height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:8px"><div id="edAiBarFill" style="height:100%;width:0;background:var(--accent);transition:width .2s"></div></div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px">First run downloads a small speech model (~40&nbsp;MB) to your browser, then it works offline and instantly. Captions appear in the <b>Text</b> tab where you can edit, restyle and re-time them.</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px">First run downloads a speech model (~145&nbsp;MB) to your browser, then it works offline. Captions appear in the <b>Text</b> tab where you can edit, restyle and re-time them.</div>
         </div>
         <div class="subcard" id="edManualSub"><div class="ci">💬</div><b>Manual Subtitles</b><span>Add a caption with custom position</span></div>
         <div id="edSubEditor" style="display:none;margin-top:4px">
@@ -560,6 +663,7 @@ async function loadClips() {
           <a href="/clips/${encodeURIComponent(c.file)}" download>⬇ Download</a>
           ${c.kind === 'video' ? `
             <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">✏️ Edit</button>
+            <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">▶ Publish</button>
             ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">▯ 9:16</button>`}
             <button onclick="gifClip('${c.file}')">GIF</button>
             <button onclick="thumbClip('${c.file}')">📷 Thumb</button>` : ''}
@@ -584,18 +688,78 @@ async function refresh() {
 
     const jobs = st.jobs || [];
     $('jobsCard').style.display = jobs.length ? '' : 'none';
-    $('jobs').innerHTML = jobs.map((j) => `
+    $('jobs').innerHTML = jobs.map((j) => {
+      const link = j.status === 'done' && /^https?:\/\//.test(j.detail || '') ? j.detail : '';
+      return `
       <div class="job">
         <span class="st ${j.status}">${j.status === 'running' ? (j.progress != null ? j.progress.toFixed(0) + '%' : '…') : j.status}</span>
         <span>${j.label}</span>
+        ${link ? `<a class="joblink" href="${link}" target="_blank">${link} ↗</a>` : ''}
         ${j.status === 'error' ? `<span style="color:var(--danger);font-size:12px">${(j.detail || '').slice(0, 140)}</span>` : ''}
-      </div>`).join('');
+      </div>`; }).join('');
     if (jobs.some((j) => j.status === 'done' && Date.now() - j.startedAt < 15000)) loadClips();
   } catch (_) {}
   loadClips().catch(() => {});
 }
 refresh();
 setInterval(refresh, 2500);
+
+// ================= YouTube publishing =================
+let ytStatus = { configured: false, connected: false, channel: null };
+async function ytRefresh() {
+  try { ytStatus = await api('/api/youtube/status'); }
+  catch (_) { ytStatus = { configured: false, connected: false, channel: null }; }
+  if (ytStatus.redirectUri) { const r = $('ytRedirect'); if (r) r.textContent = ytStatus.redirectUri; }
+  $('ytConnected').style.display = ytStatus.connected ? 'block' : 'none';
+  $('ytConnect').style.display = (ytStatus.configured && !ytStatus.connected) ? 'block' : 'none';
+  $('ytSetup').style.display = ytStatus.configured ? 'none' : 'block';
+  if (ytStatus.connected && ytStatus.channel) {
+    $('ytName').textContent = ytStatus.channel.title || 'Your channel';
+    if (ytStatus.channel.thumb) $('ytThumb').src = ytStatus.channel.thumb;
+  }
+}
+$('ytSaveCfg').onclick = async () => {
+  const clientId = $('ytClientId').value.trim(), clientSecret = $('ytClientSecret').value.trim();
+  if (!clientId || !clientSecret) return toast('Enter both Client ID and Secret', true);
+  try { await post('/api/youtube/config', { clientId, clientSecret }); toast('Saved — now connect your channel'); await ytRefresh(); }
+  catch (e) { toast(e.message, true); }
+};
+$('ytConnectBtn').onclick = () => { window.location.href = '/api/youtube/auth'; };
+$('ytEditCfg').onclick = () => { $('ytSetup').style.display = 'block'; $('ytConnect').style.display = 'none'; };
+$('ytDisconnect').onclick = async () => {
+  if (!confirm('Disconnect this YouTube channel?')) return;
+  try { await post('/api/youtube/disconnect'); toast('Disconnected'); await ytRefresh(); } catch (e) { toast(e.message, true); }
+};
+$('ytCopyRedirect').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('ytRedirect').textContent).then(() => toast('Copied'), () => {}); };
+
+// publish modal
+let ytPubFile = null;
+window.publishClip = function (encFile) {
+  const file = decodeURIComponent(encFile);
+  if (!ytStatus.connected) { toast('Connect your YouTube channel first ↓', true); $('ytCard').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  ytPubFile = file;
+  $('ytpTitle').value = file.replace(/\.mp4$/i, '').slice(0, 100);
+  $('ytpDesc').value = ''; $('ytpTags').value = '';
+  $('ytpChannel').textContent = ytStatus.channel ? ('Uploading to ' + ytStatus.channel.title) : '';
+  $('ytPublishModal').classList.add('open');
+};
+$('ytpCancel').onclick = () => $('ytPublishModal').classList.remove('open');
+$('ytPublishModal').addEventListener('click', (e) => { if (e.target.id === 'ytPublishModal') $('ytPublishModal').classList.remove('open'); });
+$('ytpGo').onclick = async () => {
+  if (!ytPubFile) return;
+  const body = { title: $('ytpTitle').value.trim(), description: $('ytpDesc').value.trim(), privacy: $('ytpPrivacy').value, tags: $('ytpTags').value.trim() };
+  try { await post('/api/clips/' + encodeURIComponent(ytPubFile) + '/publish', body); toast('▶ Uploading to YouTube… track it in Activity'); $('ytPublishModal').classList.remove('open'); refresh(); }
+  catch (e) { toast(e.message, true); }
+};
+
+// handle the OAuth redirect back
+(function () {
+  const p = new URLSearchParams(location.search);
+  if (p.get('yt') === 'connected') toast('✅ YouTube channel connected');
+  else if (p.get('yt') === 'error') toast('YouTube connection failed: ' + (p.get('msg') || ''), true);
+  if (p.get('yt')) history.replaceState(null, '', location.pathname);
+})();
+ytRefresh();
 
 // ================= web editor (timeline) =================
 const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [], overlays: [], music: null, fadeIn: 0, fadeOut: 0 };
@@ -648,7 +812,7 @@ async function decodeClipAudio(url){
 }
 E('edAiRun').onclick = async () => {
   const btn = E('edAiRun'); if (btn.disabled) return;
-  const model = edAiLang === 'en' ? 'Xenova/whisper-tiny.en' : 'Xenova/whisper-tiny';
+  const model = edAiLang === 'en' ? 'Xenova/whisper-base.en' : 'Xenova/whisper-base';
   btn.disabled = true; btn.textContent = '⏳ Working…';
   try {
     aiStatus('Loading speech model…'); aiProgress(0);

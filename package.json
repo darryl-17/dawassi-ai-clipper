@@ -1,7 +1,7 @@
 {
   "name": "clip-studio",
-  "version": "1.0.0",
-  "description": "Local Twitch & YouTube stream/VOD clipping app",
+  "version": "2.0.0",
+  "description": "DAWASSI AI Clipper — local Twitch & YouTube stream/VOD clipping app with AI captions, auto-shorts and a full caption editor",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

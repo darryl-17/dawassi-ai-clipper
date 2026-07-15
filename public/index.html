@@ -7,9 +7,17 @@
 <script src="/i18n.js"></script>
 <title>DAWASSI AI CLIPPER — The #1 Local Stream Clipping Tool</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
+  /* Departure Mono by Helena Zhang, SIL OFL 1.1 — see fonts/DepartureMono-LICENSE.txt.
+     Self-hosted: the page makes no font request off this machine. Ships Regular
+     only, so bold is synthesised by the browser (see the .b/strong rules below). */
+  @font-face {
+    font-family: 'Departure Mono';
+    src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
   :root {
     --bg: #ffffff; --text: #1a130f; --muted: #6f635b; --accent: #e4571e;
     --accent-dark: #c44712; --hi: #e4571e; --border: #f0e6df; --panel: #fbf7f4;
@@ -19,7 +27,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body { background: var(--bg); color: var(--text); font-family: 'Departure Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
 
   /* ---------- ambient background ---------- */
@@ -43,9 +51,9 @@
   .navdiscord svg { width: 20px; height: 20px; display: block; }
   .navdiscord:hover { background: var(--accent); color: #fff !important; transform: translateY(-1px); }
   .navdiscord:hover svg { fill: #fff; }
-  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); transition: transform .35s var(--spring); }
+  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 19px; letter-spacing: 0; color: var(--text); transition: transform .35s var(--spring); }
   .logo:hover { transform: scale(1.04); }
-  .logo .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
+  .logo .script { font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
   .navlinks { display: flex; gap: 30px; align-items: center; }
   .navlinks a { font-weight: 600; font-size: 15px; color: #3a322d; transition: color .15s; position: relative; }
   .navlinks a:not(.cta)::after { content: ''; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0; background: var(--accent); border-radius: 2px; transition: width .3s var(--ease); }
@@ -59,7 +67,12 @@
   .hero { max-width: 1000px; margin: 0 auto; text-align: center; padding: 78px 26px 40px; }
   .proof { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; letter-spacing: .5px; color: #4a4038; margin-bottom: 26px; }
   .stars { color: #ffb020; letter-spacing: 2px; font-size: 16px; }
-  h1.head { font-size: clamp(42px, 8vw, 88px); line-height: .98; font-weight: 900; letter-spacing: -2px; }
+  /* Departure Mono is monospace: every glyph is .6364em wide, so the same words
+     run ~2x wider than the old proportional face. Sizes below are set from that
+     ratio against the 948px hero box, using the longest translation (es, 35 chars)
+     so the two-line headline survives in all five languages. Negative tracking is
+     gone — it collided the glyphs of a pixel font. */
+  h1.head { font-size: clamp(22px, 4.4vw, 42px); line-height: 1.12; font-weight: 900; letter-spacing: 0; }
   h1.head .mark { display: inline-block; position: relative; overflow: hidden; background: var(--accent); color: #fff; padding: 0 .18em; border-radius: 14px; }
   h1.head .mark::after { content: ''; position: absolute; top: 0; left: -75%; width: 48%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-18deg); animation: shine 4.4s ease-in-out 1.3s infinite; }
   @keyframes shine { 0% { left: -75%; } 24%, 100% { left: 140%; } }
@@ -78,7 +91,7 @@
   /* ---------- features ---------- */
   .section { max-width: 1120px; margin: 0 auto; padding: 44px 26px 20px; }
   .eyebrow { text-align: center; color: var(--accent); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; font-size: 13px; }
-  .h2 { text-align: center; font-size: clamp(28px, 4vw, 40px); font-weight: 900; letter-spacing: -1px; margin-top: 8px; }
+  .h2 { text-align: center; font-size: clamp(19px, 2.6vw, 30px); font-weight: 900; letter-spacing: 0; margin-top: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 38px; }
   .feat { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 24px; transition: transform .5s var(--spring), box-shadow .3s ease, border-color .3s ease; }
   .feat:hover { transform: translateY(-6px); box-shadow: 0 18px 38px var(--shadow); border-color: #f4d8c8; }
@@ -100,7 +113,7 @@
   .final { max-width: 1120px; margin: 50px auto 0; padding: 0 26px; }
   .finalcard { position: relative; background: linear-gradient(150deg, #ef6a2c, #e4571e 45%, #b93d0d); border-radius: 26px; padding: 58px 30px; text-align: center; color: #fff; box-shadow: 0 24px 60px var(--shadow); overflow: hidden; }
   .finalcard::before { content: ''; position: absolute; width: 380px; height: 380px; border-radius: 50%; background: rgba(255,255,255,.12); top: -160px; right: -100px; animation: drift 22s ease-in-out infinite; }
-  .finalcard h2 { font-size: clamp(28px, 5vw, 46px); font-weight: 900; letter-spacing: -1px; position: relative; }
+  .finalcard h2 { font-size: clamp(19px, 3vw, 30px); font-weight: 900; letter-spacing: 0; position: relative; }
   .finalcard p { margin: 14px auto 0; max-width: 520px; opacity: .95; font-size: 17px; position: relative; }
   .finalcard .cta { background: #fff; color: var(--accent-dark); margin-top: 28px; font-size: 18px; padding: 16px 36px; position: relative; }
   .finalcard .cta:hover { background: #fff; transform: translateY(-3px) scale(1.03); }
@@ -108,7 +121,7 @@
   /* ---------- footer ---------- */
   footer { max-width: 1120px; margin: 58px auto 0; padding: 32px 26px 48px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
   .fbrand { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 20px; color: var(--text); }
-  .fbrand .script { font-family: 'Caveat', cursive; font-style: normal; text-transform: none; color: var(--accent); }
+  .fbrand .script { font-style: normal; text-transform: none; color: var(--accent); }
   .flinks { margin: 18px 0 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .flinks a { display: inline-flex; align-items: center; gap: 7px; background: var(--panel); border: 1px solid var(--border); padding: 8px 15px; border-radius: 999px; font-weight: 700; font-size: 13.5px; color: var(--text); transition: transform .35s var(--spring), background .2s ease, color .2s ease; }
   .flinks a:hover { background: var(--accent); color: #fff; transform: translateY(-3px); }
@@ -143,7 +156,7 @@
   /* ---------- editor showcase ---------- */
   .showcase { max-width: 1120px; margin: 66px auto 0; padding: 0 26px; }
   .showhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
-  .showhead h2 { font-size: clamp(26px, 4.4vw, 40px); font-weight: 900; letter-spacing: -1.2px; line-height: 1.04; }
+  .showhead h2 { font-size: clamp(18px, 2.6vw, 29px); font-weight: 900; letter-spacing: 0; line-height: 1.04; }
   .mockup { background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 24px 60px var(--shadow); overflow: hidden; }
   .mocktop { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); }
   .mockexport { background: var(--accent); color: #fff; border-radius: 999px; padding: 7px 16px; font-weight: 800; font-size: 12.5px; }

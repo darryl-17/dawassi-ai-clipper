@@ -97,6 +97,8 @@ Clipping for commentary and reaction content is common practice, but the content
 
 [MIT](LICENSE) — fork it, tweak it, make it yours.
 
+The landing page is set in [Departure Mono](https://departuremono.com/) by Helena Zhang, used under the SIL Open Font License 1.1. The font is self-hosted in `public/fonts/`, with its licence alongside it — the page loads no fonts off your machine.
+
 ---
 
 ## Français
@@ -185,3 +187,5 @@ Clipper pour du commentaire ou de la réaction est une pratique courante, mais l
 ### Licence
 
 [MIT](LICENSE) — forkez-le, modifiez-le, faites-en le vôtre.
+
+La landing page est composée en [Departure Mono](https://departuremono.com/) de Helena Zhang, utilisée sous licence SIL Open Font License 1.1. La police est hébergée en local dans `public/fonts/`, avec sa licence à côté — la page ne charge aucune police depuis l'extérieur de votre machine.

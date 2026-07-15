@@ -98,7 +98,7 @@ const BUFFER_DIR = path.join(ROOT, 'buffer');
 const CLIPS_DIR = path.join(ROOT, 'clips');
 const ASSETS_DIR = path.join(BUFFER_DIR, 'assets'); // uploaded overlays / music (gitignored)
 const SEG_SECONDS = 4;            // segment length of the live buffer
-const BUFFER_MINUTES = 120;       // how much live history to keep on disk
+const BUFFER_MINUTES = Number(process.env.CLIP_BUFFER_MINUTES) || 600; // live history kept on disk
 const PORT = Number(process.env.PORT) || 3547;
 
 for (const d of [BUFFER_DIR, CLIPS_DIR, ASSETS_DIR]) fs.mkdirSync(d, { recursive: true });

@@ -195,7 +195,7 @@ function newStream(url, quality) {
     error: null, proc: null, segDir: path.join(BUFFER_DIR, `live_${id}_${Date.now()}`),
     startedAt: null, markAt: null, restarts: 0, stopRequested: false, nextSegStart: 0,
     hypeSpikeAt: null, hypeBaseline: null, volHistory: [], analyzedUpTo: -1, analyzing: false,
-    lastSegCount: 0, lastSegAt: null,
+    lastSegSeen: -1, lastSegAt: null,
   };
   fs.mkdirSync(st.segDir, { recursive: true });
   streams.set(id, st);
@@ -357,12 +357,19 @@ function stopLive(id) {
 
 // A recorder blocked on a stalled read keeps its process alive and its status
 // 'recording' while writing nothing, so segment growth — not liveness — is what
-// tells us the capture is healthy.
+// tells us the capture is healthy. Track the newest segment's index rather than
+// how many exist: once retention trimming keeps pace with new writes the count
+// plateaus, which would look identical to a stall. Indices only move forward,
+// and survive a recorder restart via nextSegStart.
 setInterval(() => {
   for (const st of streams.values()) {
     if (st.status !== 'recording' || st.stopRequested) continue;
-    const n = listSegments(st).length;
-    if (n > st.lastSegCount) { st.lastSegCount = n; st.lastSegAt = Date.now(); }
+    const segs = listSegments(st);
+    if (!segs.length) continue;
+    const m = path.basename(segs[segs.length - 1].file).match(/(\d+)/);
+    if (!m) continue;
+    const newest = Number(m[1]);
+    if (newest > st.lastSegSeen) { st.lastSegSeen = newest; st.lastSegAt = Date.now(); }
   }
 }, 5000);
 

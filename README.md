@@ -21,7 +21,7 @@ The app runs in your browser at `http://localhost:3547`, but every byte stays on
 ### Features
 
 **Capture**
-- Rolling **2-hour live buffer** for Twitch & YouTube — clip the last 30s / 1 / 2 / 5 min instantly
+- Rolling **10-hour live buffer** for Twitch & YouTube — clip the last 30s / 1 / 2 / 5 min instantly
 - Buffer **up to 5 streams at once**, each with its own controls
 - **Mark → clip from mark** for exact-length clips
 - **Hype detection** — flags loudness spikes automatically so you can grab the whole reaction
@@ -109,7 +109,7 @@ L'application s'ouvre dans votre navigateur sur `http://localhost:3547`, mais **
 ### Fonctionnalités
 
 **Capture**
-- **Buffer live glissant de 2 heures** pour Twitch & YouTube — clippez les 30 dernières s / 1 / 2 / 5 min instantanément
+- **Buffer live glissant de 10 heures** pour Twitch & YouTube — clippez les 30 dernières s / 1 / 2 / 5 min instantanément
 - Bufferisez **jusqu'à 5 lives en même temps**, chacun avec ses propres commandes
 - **Marquer → clipper depuis la marque** pour des clips de durée exacte
 - **Détection des moments forts** — repère automatiquement les pics de volume pour capturer toute la réaction
@@ -159,7 +159,7 @@ node server.js
 ### Le workflow principal
 
 1. Collez l'URL d'un live (ex. `https://twitch.tv/quelquun`) et appuyez sur **Ajouter & bufferiser** — faites-le *avant* que les moments arrivent.
-2. L'application enregistre un buffer glissant sur le disque (jusqu'à 2 heures).
+2. L'application enregistre un buffer glissant sur le disque (jusqu'à 10 heures).
 3. Quand ça part en vrille, appuyez sur **Clipper les 30 dernières s / 1 / 2 / 5 min** — le clip est découpé instantanément et enregistré dans `clips/`.
 4. Ou appuyez sur **Marquer** au début du moment et **depuis la marque** à la fin.
 5. Cliquez sur **Éditer** sur n'importe quel clip pour les sous-titres, les shorts, les incrustations et l'export.

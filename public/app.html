@@ -387,7 +387,7 @@
       </select>
       <button id="btnStart" class="primary big" data-i18n="a.live.start">Add &amp; buffer</button>
     </div>
-    <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 2-hour buffer. Use <b><i data-ic="flag"></i> Mark</b> when a moment begins, then <b><i data-ic="scissors"></i> from mark</b> when it ends. <i data-ic="flame"></i> = an auto-detected hype spike.</div>
+    <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 10-hour buffer. Use <b><i data-ic="flag"></i> Mark</b> when a moment begins, then <b><i data-ic="scissors"></i> from mark</b> when it ends. <i data-ic="flame"></i> = an auto-detected hype spike.</div>
     <div id="streams"></div>
   </div>
 
@@ -764,7 +764,9 @@ function streamCardHTML(s) {
   const hype = s.hypeSpikeAgo != null && s.hypeSpikeAgo < 150;
   let head = '';
   if (rec) {
-    head += `<span class="pill rec">REC</span>`;
+    head += s.stalled
+      ? `<span class="pill" style="color:var(--danger);font-weight:800">${icon('radio')} ${window.t('a.stalled')} ${fmtDur(s.lastSegmentAgo)}</span>`
+      : `<span class="pill rec">REC</span>`;
     head += `<span class="pill">buffered ${fmtDur(s.bufferedSeconds)}${s.bufferBytes ? ' · ' + fmtSize(s.bufferBytes) : ''}</span>`;
     if (s.markAt) head += `<span class="pill" style="color:var(--warn)">${icon('flag')} mark ${fmtDur((Date.now() - s.markAt) / 1000)} ago</span>`;
     if (hype) head += `<span class="pill" style="color:var(--accent);font-weight:800">${icon('flame')} hype ${fmtDur(s.hypeSpikeAgo)} ago</span>`;

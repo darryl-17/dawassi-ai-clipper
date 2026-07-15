@@ -98,6 +98,8 @@ const BUFFER_DIR = path.join(ROOT, 'buffer');
 const CLIPS_DIR = path.join(ROOT, 'clips');
 const ASSETS_DIR = path.join(BUFFER_DIR, 'assets'); // uploaded overlays / music (gitignored)
 const SEG_SECONDS = 4;            // segment length of the live buffer
+const KILL_GRACE_MS = 4000;       // SIGINT → SIGKILL escalation for a wedged recorder
+const STALL_SECONDS = 30;         // no new segment for this long = capture is stalled
 const BUFFER_MINUTES = Number(process.env.CLIP_BUFFER_MINUTES) || 600; // live history kept on disk
 const PORT = Number(process.env.PORT) || 3547;
 
@@ -193,6 +195,7 @@ function newStream(url, quality) {
     error: null, proc: null, segDir: path.join(BUFFER_DIR, `live_${id}_${Date.now()}`),
     startedAt: null, markAt: null, restarts: 0, stopRequested: false, nextSegStart: 0,
     hypeSpikeAt: null, hypeBaseline: null, volHistory: [], analyzedUpTo: -1, analyzing: false,
+    lastSegCount: 0, lastSegAt: null,
   };
   fs.mkdirSync(st.segDir, { recursive: true });
   streams.set(id, st);
@@ -338,10 +341,30 @@ function stopLive(id) {
   const st = streams.get(id);
   if (!st) return;
   st.stopRequested = true;
-  if (st.proc) st.proc.kill('SIGINT');
-  setTimeout(() => { try { fs.rmSync(st.segDir, { recursive: true, force: true }); } catch (_) {} }, 1500);
+  const proc = st.proc;
+  if (proc) {
+    proc.kill('SIGINT');
+    // ffmpeg blocked on a stalled network read never acts on SIGINT. Once the
+    // stream leaves the map nothing tracks the process, so it would linger and
+    // keep competing for bandwidth — escalate to make the stop unconditional.
+    setTimeout(() => {
+      if (proc.exitCode === null && proc.signalCode === null) { try { proc.kill('SIGKILL'); } catch (_) {} }
+    }, KILL_GRACE_MS);
+  }
+  setTimeout(() => { try { fs.rmSync(st.segDir, { recursive: true, force: true }); } catch (_) {} }, KILL_GRACE_MS + 1500);
   streams.delete(id);
 }
+
+// A recorder blocked on a stalled read keeps its process alive and its status
+// 'recording' while writing nothing, so segment growth — not liveness — is what
+// tells us the capture is healthy.
+setInterval(() => {
+  for (const st of streams.values()) {
+    if (st.status !== 'recording' || st.stopRequested) continue;
+    const n = listSegments(st).length;
+    if (n > st.lastSegCount) { st.lastSegCount = n; st.lastSegAt = Date.now(); }
+  }
+}, 5000);
 
 // Trim old segments (all streams) so the buffer doesn't eat the disk.
 setInterval(() => {
@@ -971,6 +994,8 @@ app.get('/api/status', (req, res) => {
       bufferedSeconds: segs.length ? Math.max(0, (segs.length - 1) * SEG_SECONDS) : 0,
       bufferBytes: segs.reduce((a, s) => a + s.size, 0),
       hypeSpikeAgo: st.hypeSpikeAt ? Math.round((Date.now() - st.hypeSpikeAt) / 1000) : null,
+      lastSegmentAgo: st.lastSegAt ? Math.round((Date.now() - st.lastSegAt) / 1000) : null,
+      stalled: st.status === 'recording' && !!st.lastSegAt && Date.now() - st.lastSegAt > STALL_SECONDS * 1000,
     });
   }
   res.json({

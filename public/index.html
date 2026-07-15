@@ -128,7 +128,8 @@
   }
 
   /* news ticker */
-  .tickerwrap { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); padding: 13px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+  /* sits directly under the sticky header pill, which has no bottom padding */
+  .tickerwrap { margin-top: 14px; overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); padding: 13px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
   .tickertrack { display: flex; align-items: center; gap: 34px; width: max-content; animation: tickerscroll var(--tdur, 60s) linear infinite; }
   .tickerwrap:hover .tickertrack, .tickerwrap:focus-within .tickertrack { animation-play-state: paused; }
   .tickeritem { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; font-size: 14px; color: var(--muted); }
@@ -339,6 +340,11 @@
   </div>
 </header>
 
+<!-- NEWS TICKER -->
+<div class="tickerwrap" id="ticker" aria-label="Latest news and tips">
+  <div class="tickertrack" id="tickerTrack"></div>
+</div>
+
 <!-- HERO -->
 <section class="hero" data-stagger>
   <div class="proof" data-animate>
@@ -353,11 +359,6 @@
   <div class="micro" data-animate data-i18n="hero.micro">Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
   <div class="scrollcue" data-animate></div>
 </section>
-
-<!-- NEWS TICKER -->
-<div class="tickerwrap" id="ticker" aria-label="Latest news and tips">
-  <div class="tickertrack" id="tickerTrack"></div>
-</div>
 
 <!-- FEATURES -->
 <section class="section" id="features">

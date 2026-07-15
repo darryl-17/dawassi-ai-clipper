@@ -25,6 +25,7 @@ The app runs in your browser at `http://localhost:3547`, but every byte stays on
 - Buffer **up to 5 streams at once**, each with its own controls
 - **Mark → clip from mark** for exact-length clips
 - **Hype detection** — flags loudness spikes automatically so you can grab the whole reaction
+- **Past broadcasts** — list any Twitch channel's recent ended streams (thumbnail, length, views), then clip a section or download the whole broadcast
 - **VOD section download** — grab just the part you need, by timestamp
 - Import your own video files
 
@@ -113,6 +114,7 @@ L'application s'ouvre dans votre navigateur sur `http://localhost:3547`, mais **
 - Bufferisez **jusqu'à 5 lives en même temps**, chacun avec ses propres commandes
 - **Marquer → clipper depuis la marque** pour des clips de durée exacte
 - **Détection des moments forts** — repère automatiquement les pics de volume pour capturer toute la réaction
+- **Rediffusions** — listez les derniers streams terminés de n'importe quelle chaîne Twitch (miniature, durée, vues), puis clippez une section ou téléchargez toute la rediffusion
 - **Téléchargement d'une section de VOD** — seulement la partie voulue, par timestamp
 - Importez vos propres fichiers vidéo
 

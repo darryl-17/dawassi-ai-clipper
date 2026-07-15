@@ -122,7 +122,22 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .blob, .head .mark::after, .herocta .cta:first-child, .scrollcue::before, .finalcard::before { animation: none !important; }
+    /* Stop the scroll but keep the news readable — it wraps instead of running off. */
+    .tickertrack { animation: none !important; flex-wrap: wrap; justify-content: center; padding: 0 20px; }
+    .tickertrack .tickeritem[data-clone="1"] { display: none; }
   }
+
+  /* news ticker */
+  .tickerwrap { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); padding: 13px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+  .tickertrack { display: flex; align-items: center; gap: 34px; width: max-content; animation: tickerscroll var(--tdur, 60s) linear infinite; }
+  .tickerwrap:hover .tickertrack, .tickerwrap:focus-within .tickertrack { animation-play-state: paused; }
+  .tickeritem { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; font-size: 14px; color: var(--muted); }
+  .tickeritem .tk { flex: none; font-size: 10px; font-weight: 800; letter-spacing: .5px; background: var(--accent); color: #fff; border-radius: 6px; padding: 3px 8px; text-transform: uppercase; }
+  .tickeritem .tk.tip { background: var(--text); }
+  .tickeritem b { color: var(--text); font-weight: 700; }
+  .tickeritem::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .38; margin-left: 34px; }
+  /* Track holds the item list twice, so -50% lands exactly on the copy. */
+  @keyframes tickerscroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ---------- editor showcase ---------- */
   .showcase { max-width: 1120px; margin: 66px auto 0; padding: 0 26px; }
@@ -338,6 +353,11 @@
   <div class="micro" data-animate data-i18n="hero.micro">Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
   <div class="scrollcue" data-animate></div>
 </section>
+
+<!-- NEWS TICKER -->
+<div class="tickerwrap" id="ticker" aria-label="Latest news and tips">
+  <div class="tickertrack" id="tickerTrack"></div>
+</div>
 
 <!-- FEATURES -->
 <section class="section" id="features">
@@ -668,12 +688,37 @@ langBtn.addEventListener('click', (e) => { e.stopPropagation(); langWrap.classLi
 langMenu.addEventListener('click', (e) => e.stopPropagation());
 document.addEventListener('click', closeLang);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLang(); });
-// keep the pill label + tick in sync whenever the language changes
-window.onLangChange = buildLangMenu;
+// ---- news ticker
+const TICKS = [
+  { tag: 'new', key: 'tick.1' }, { tag: 'new', key: 'tick.2' }, { tag: 'new', key: 'tick.3' },
+  { tag: 'tip', key: 'tick.4' }, { tag: 'tip', key: 'tick.5' }, { tag: 'tip', key: 'tick.6' },
+  { tag: 'tip', key: 'tick.7' }, { tag: 'tip', key: 'tick.8' }, { tag: 'tip', key: 'tick.9' },
+  { tag: 'new', key: 'tick.10' },
+];
+const tickerTrack = document.getElementById('tickerTrack');
+
+function buildTicker() {
+  // Shuffle so the band doesn't open on the same line every visit.
+  const items = TICKS.slice().sort(() => Math.random() - 0.5);
+  const html = (clone) => items.map(it =>
+    '<span class="tickeritem"' + (clone ? ' data-clone="1" aria-hidden="true"' : '') + '>'
+    + '<span class="tk ' + it.tag + '">' + t('tick.tag' + it.tag) + '</span>'
+    + '<span>' + t(it.key) + '</span></span>').join('');
+  // The list is rendered twice: the -50% keyframe lands exactly on the copy, so
+  // the loop has no visible seam.
+  tickerTrack.innerHTML = html(false) + html(true);
+  // Pace by width, not a fixed duration — otherwise longer translations scroll faster.
+  const half = tickerTrack.scrollWidth / 2;
+  if (half) tickerTrack.style.setProperty('--tdur', Math.round(half / 55) + 's');
+}
+
+// keep the pill label, tick and ticker in sync whenever the language changes
+window.onLangChange = () => { buildLangMenu(); buildTicker(); };
 
 // language: applies the saved/detected language to every [data-i18n]
 initI18n();
 buildLangMenu();
+buildTicker();
 </script>
 </body>
 </html>

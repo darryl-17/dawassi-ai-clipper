@@ -272,6 +272,8 @@
   .sbnav .ci { width: 20px; text-align: center; font-size: 16px; flex-shrink: 0; }
   .sbnav .pill { margin-left: auto; font-size: 10px; font-weight: 800; background: var(--accent); color: #fff; border-radius: 6px; padding: 1px 6px; }
   .sbspacer { flex: 1; }
+  .langsel { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 6px; }
+  .langsel:hover { border-color: var(--accent); color: var(--accent); }
   .sbfoot { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; }
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .appbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: 14px 26px; background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
@@ -328,16 +330,17 @@
 <div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="sblogo"><div class="mark">D</div><div class="wm">DAWASSI<small>AI Clipper</small></div></div>
-    <div class="sbplan"><span class="pn"><i class="micon" data-ic="monitor"></i>Local · Free</span><span class="credits"><i class="micon" data-ic="sparkles"></i>no watermark</span></div>
-    <div class="sbgroup">Create</div>
-    <div class="sbnav on" data-nav="home"><span class="ci" data-ic="home"></span>Home</div>
-    <div class="sbnav" data-nav="create"><span class="ci" data-ic="video"></span>Capture &amp; import</div>
-    <div class="sbnav" data-nav="library"><span class="ci" data-ic="film"></span>Clip library</div>
-    <div class="sbgroup">Post</div>
-    <div class="sbnav" data-nav="publish"><span class="ci" data-ic="youtube"></span>Publish<span class="pill">YT</span></div>
+    <div class="sbplan"><span class="pn"><i class="micon" data-ic="monitor"></i><span data-i18n="a.plan">Local · Free</span></span><span class="credits"><i class="micon" data-ic="sparkles"></i><span data-i18n="a.nowm">no watermark</span></span></div>
+    <div class="sbgroup" data-i18n="a.nav.create">Create</div>
+    <div class="sbnav on" data-nav="home"><span class="ci" data-ic="home"></span><span data-i18n="a.nav.home">Home</span></div>
+    <div class="sbnav" data-nav="create"><span class="ci" data-ic="video"></span><span data-i18n="a.nav.capture">Capture &amp; import</span></div>
+    <div class="sbnav" data-nav="library"><span class="ci" data-ic="film"></span><span data-i18n="a.nav.library">Clip library</span></div>
+    <div class="sbgroup" data-i18n="a.nav.post">Post</div>
+    <div class="sbnav" data-nav="publish"><span class="ci" data-ic="youtube"></span><span data-i18n="a.nav.publish">Publish</span><span class="pill">YT</span></div>
     <div class="sbspacer"></div>
     <div class="sbfoot">
-      <a class="sbnav" href="/"><span class="ci" data-ic="arrowleft"></span>Landing page</a>
+      <select class="langsel" id="langSelApp" aria-label="Language"></select>
+      <a class="sbnav" href="/"><span class="ci" data-ic="arrowleft"></span><span data-i18n="a.nav.landing">Landing page</span></a>
     </div>
   </aside>
   <div class="main">
@@ -345,7 +348,7 @@
       <button class="abchip mobsbtoggle" id="navToggle" title="Menu" data-ic="menu"></button>
       <span class="abtitle" id="viewTitle">Home</span>
       <span class="abspace"></span>
-      <span class="abchip"><i data-ic="zap"></i>Runs on your Mac</span>
+      <span class="abchip"><i data-ic="zap"></i><span data-i18n="a.runs">Runs on your Mac</span></span>
       <button class="abchip" id="themeBtn" title="Switch theme">Theme</button>
     </div>
     <div class="mainpad">
@@ -353,36 +356,36 @@
       <div id="homeExtra">
         <div class="hero">
           <div class="ghost">DAWASSI</div>
-          <div class="htitle">Turn any stream into viral shorts</div>
-          <div class="hsub">Paste a link or capture a live stream — auto-cut the best moments, then edit, caption &amp; publish.</div>
+          <div class="htitle" data-i18n="a.hero.title">Turn any stream into viral shorts</div>
+          <div class="hsub" data-i18n="a.hero.sub">Paste a link or capture a live stream.</div>
           <div class="herobox">
-            <div class="herolink"><span class="lk" data-ic="link"></span><input id="heroUrl" placeholder="Drop a YouTube or Twitch link"></div>
+            <div class="herolink"><span class="lk" data-ic="link"></span><input id="heroUrl" placeholder="Drop a YouTube or Twitch link" data-i18n-ph="a.hero.ph"></div>
             <div class="heroactions">
-              <button class="ha" id="heroUpload"><i data-ic="upload"></i>Upload a video</button>
-              <button class="ha" id="heroLiveBtn"><i data-ic="radio"></i>Capture live</button>
-              <button class="ha" id="heroSection"><i data-ic="scissors"></i>Clip exact section</button>
+              <button class="ha" id="heroUpload"><i data-ic="upload"></i><span data-i18n="a.hero.upload">Upload a video</span></button>
+              <button class="ha" id="heroLiveBtn"><i data-ic="radio"></i><span data-i18n="a.hero.live">Capture live</span></button>
+              <button class="ha" id="heroSection"><i data-ic="scissors"></i><span data-i18n="a.hero.section">Clip exact section</span></button>
             </div>
-            <button class="herogo" id="heroGo"><i data-ic="sparkles"></i>Get clips in 1 click</button>
-            <div class="herohint"><a id="heroLibraryLink">Or browse your clip library <i data-ic="arrowright"></i></a></div>
+            <button class="herogo" id="heroGo"><i data-ic="sparkles"></i><span data-i18n="a.hero.go">Get clips in 1 click</span></button>
+            <div class="herohint"><a id="heroLibraryLink"><span data-i18n="a.hero.browse">Or browse your clip library</span> <i data-ic="arrowright"></i></a></div>
             <input type="file" id="heroFile" accept="video/*" hidden>
           </div>
         </div>
-        <div class="sectionhead"><h2>Tools</h2><span class="sh-sub">Everything you need to make a short — runs locally</span></div>
+        <div class="sectionhead"><h2 data-i18n="a.tools">Tools</h2><span class="sh-sub" data-i18n="a.tools.sub">Everything you need to make a short — runs locally</span></div>
         <div class="featgrid" id="featgrid"></div>
       </div>
 
   <!-- LIVE -->
   <div class="card" data-view="create" id="secLive">
-    <h2>Live streams <span id="streamCount" style="color:var(--muted);font-weight:600;text-transform:none;font-style:normal;letter-spacing:0"></span></h2>
+    <h2><span data-i18n="a.live.title">Live streams</span> <span id="streamCount" style="color:var(--muted);font-weight:600;text-transform:none;font-style:normal;letter-spacing:0"></span></h2>
     <div class="row">
-      <input type="text" id="liveUrl" class="grow" placeholder="https://twitch.tv/kaicenat  or  YouTube live URL">
+      <input type="text" id="liveUrl" class="grow" placeholder="https://twitch.tv/kaicenat  or  YouTube live URL" data-i18n-ph="a.live.ph">
       <select id="liveQuality">
-        <option value="best">Best quality</option>
+        <option value="best" data-i18n="a.live.best">Best quality</option>
         <option value="1080">1080p max</option>
         <option value="720">720p max</option>
         <option value="480" selected>480p max</option>
       </select>
-      <button id="btnStart" class="primary big">Add &amp; buffer</button>
+      <button id="btnStart" class="primary big" data-i18n="a.live.start">Add &amp; buffer</button>
     </div>
     <div class="hint">Buffer up to <b>5 streams at once</b> — built for Streamer University. Add each stream <b>before</b> the action; every “Clip last …” button cuts instantly from that stream’s rolling 2-hour buffer. Use <b><i data-ic="flag"></i> Mark</b> when a moment begins, then <b><i data-ic="scissors"></i> from mark</b> when it ends. <i data-ic="flame"></i> = an auto-detected hype spike.</div>
     <div id="streams"></div>
@@ -390,26 +393,26 @@
 
   <!-- VOD -->
   <div class="card" data-view="create" id="secVod">
-    <h2>VOD / video clip</h2>
+    <h2 data-i18n="a.vod.title">VOD / video clip</h2>
     <div class="row timefields">
-      <input type="text" id="vodUrl" class="grow" placeholder="YouTube video URL or Twitch VOD URL">
-      <input type="text" id="vodStart" placeholder="start 1:23:45">
-      <input type="text" id="vodEnd" placeholder="end 1:25:00">
-      <input type="text" id="vodName" placeholder="clip name (optional)" style="width:180px">
-      <button id="btnVod" class="primary big"><i data-ic="scissors"></i>Create clip</button>
+      <input type="text" id="vodUrl" class="grow" placeholder="YouTube video URL or Twitch VOD URL" data-i18n-ph="a.vod.ph">
+      <input type="text" id="vodStart" placeholder="start 1:23:45" data-i18n-ph="a.vod.start">
+      <input type="text" id="vodEnd" placeholder="end 1:25:00" data-i18n-ph="a.vod.end">
+      <input type="text" id="vodName" placeholder="clip name (optional)" style="width:180px" data-i18n-ph="a.vod.name">
+      <button id="btnVod" class="primary big"><i data-ic="scissors"></i><span data-i18n="a.vod.btn">Create clip</span></button>
     </div>
     <div class="hint">Downloads only the section you asked for (not the whole video). Times accept <b>1:23:45</b>, <b>12:34</b> or plain seconds.</div>
   </div>
 
   <!-- JOBS -->
   <div class="card" id="jobsCard" style="display:none">
-    <h2>Activity</h2>
+    <h2 data-i18n="a.jobs">Activity</h2>
     <div class="jobs" id="jobs"></div>
   </div>
 
   <!-- YOUTUBE -->
   <div class="card" id="ytCard" data-view="publish">
-    <h2>Publish to YouTube</h2>
+    <h2 data-i18n="a.yt.title">Publish to YouTube</h2>
 
     <!-- connected -->
     <div id="ytConnected" style="display:none">
@@ -419,7 +422,7 @@
           <div class="ytname" id="ytName">Your channel</div>
           <div class="hint" style="margin-top:2px">Connected — hit <b>Publish</b> on any clip below to upload it in one click.</div>
         </div>
-        <button class="ghostbtn" id="ytDisconnect">Disconnect</button>
+        <button class="ghostbtn" id="ytDisconnect" data-i18n="a.yt.disconnect">Disconnect</button>
       </div>
       <div class="ytnote">Uploads use the YouTube Data API (~1,600 quota units each; ~6 uploads/day on the default quota). If your Google project hasn’t been verified by YouTube yet, uploads may be forced to <b>Private</b> until you request an API audit.</div>
     </div>
@@ -428,8 +431,8 @@
     <div id="ytConnect" style="display:none">
       <div class="hint" style="margin-bottom:12px">Your Google credentials are saved. Connect your channel to authorise uploads.</div>
       <div class="row">
-        <button class="primary big ytbtn" id="ytConnectBtn"><i data-ic="youtube"></i>Connect YouTube channel</button>
-        <button class="ghostbtn" id="ytEditCfg">Edit credentials</button>
+        <button class="primary big ytbtn" id="ytConnectBtn"><i data-ic="youtube"></i><span data-i18n="a.yt.connect">Connect YouTube channel</span></button>
+        <button class="ghostbtn" id="ytEditCfg" data-i18n="a.yt.editcfg">Edit credentials</button>
       </div>
     </div>
 
@@ -454,38 +457,38 @@
         </ol>
       </details>
       <div class="row" style="margin-top:16px">
-        <button class="primary big" id="ytSaveCfg">Save credentials</button>
+        <button class="primary big" id="ytSaveCfg" data-i18n="a.yt.save">Save credentials</button>
       </div>
     </div>
   </div>
 
   <!-- LIBRARY -->
   <div class="card" data-view="library" id="secLibrary">
-    <h2>Clip library</h2>
+    <h2 data-i18n="a.lib.title">Clip library</h2>
     <div class="grid" id="clips"></div>
-    <div class="hint" id="noClips">No clips yet.</div>
+    <div class="hint" id="noClips" data-i18n="a.lib.none">No clips yet.</div>
   </div>
 
   <!-- YOUTUBE PUBLISH MODAL -->
   <div class="ytmodal" id="ytPublishModal">
     <div class="ytmbox">
-      <h3>Publish to YouTube</h3>
+      <h3 data-i18n="a.pub.title">Publish to YouTube</h3>
       <div class="csub" id="ytpChannel"></div>
-      <label>Title</label>
+      <label data-i18n="a.pub.ttl">Title</label>
       <input type="text" id="ytpTitle" maxlength="100" placeholder="Clip title">
-      <label>Description</label>
+      <label data-i18n="a.pub.desc">Description</label>
       <textarea id="ytpDesc" placeholder="Optional description…"></textarea>
-      <label>Privacy</label>
+      <label data-i18n="a.pub.priv">Privacy</label>
       <select id="ytpPrivacy">
-        <option value="public">Public</option>
-        <option value="unlisted">Unlisted</option>
-        <option value="private" selected>Private</option>
+        <option value="public" data-i18n="a.pub.public">Public</option>
+        <option value="unlisted" data-i18n="a.pub.unlisted">Unlisted</option>
+        <option value="private" selected data-i18n="a.pub.private">Private</option>
       </select>
-      <label>Tags (comma-separated)</label>
+      <label data-i18n="a.pub.tags">Tags (comma-separated)</label>
       <input type="text" id="ytpTags" placeholder="kaicenat, streamer university, clip">
       <div class="ytmact">
-        <button class="ghostbtn" id="ytpCancel">Cancel</button>
-        <button class="primary ytbtn" id="ytpGo"><i data-ic="youtube"></i>Publish</button>
+        <button class="ghostbtn" id="ytpCancel" data-i18n="a.pub.cancel">Cancel</button>
+        <button class="primary ytbtn" id="ytpGo"><i data-ic="youtube"></i><span data-i18n="a.pub.go">Publish</span></button>
       </div>
     </div>
   </div>
@@ -515,76 +518,76 @@
       <button class="edback" id="edBack" title="Back to library">‹</button>
       <span class="nm" id="edName">clip</span>
     </div>
-    <button class="edexport" id="edExport">Export Video</button>
+    <button class="edexport" id="edExport" data-i18n="e.export">Export Video</button>
   </div>
   <div class="edmain">
     <div class="edrail" id="edRail">
-      <div class="edtab on" data-tab="media"><span class="ic" data-ic="image"></span>Media</div>
-      <div class="edtab" data-tab="subs"><span class="ic" data-ic="captions"></span>Subtitles</div>
-      <div class="edtab" data-tab="text"><span class="ic" data-ic="type"></span>Text</div>
-      <div class="edtab" data-tab="audio"><span class="ic" data-ic="music"></span>Audio</div>
-      <div class="edtab" data-tab="video"><span class="ic" data-ic="film"></span>Video</div>
-      <div class="edtab" data-tab="tools"><span class="ic" data-ic="tool"></span>Tools</div>
+      <div class="edtab on" data-tab="media"><span class="ic" data-ic="image"></span><span data-i18n="e.media">Media</span></div>
+      <div class="edtab" data-tab="subs"><span class="ic" data-ic="captions"></span><span data-i18n="e.subs">Subtitles</span></div>
+      <div class="edtab" data-tab="text"><span class="ic" data-ic="type"></span><span data-i18n="e.text">Text</span></div>
+      <div class="edtab" data-tab="audio"><span class="ic" data-ic="music"></span><span data-i18n="e.audio">Audio</span></div>
+      <div class="edtab" data-tab="video"><span class="ic" data-ic="film"></span><span data-i18n="e.video">Video</span></div>
+      <div class="edtab" data-tab="tools"><span class="ic" data-ic="tool"></span><span data-i18n="e.tools">Tools</span></div>
     </div>
     <div class="edpanel">
       <div class="edpane on" data-pane="media">
-        <h3>Media</h3>
-        <div class="egroup"><label>Source clip</label><div id="edMediaInfo" style="font-size:14px;color:var(--muted);word-break:break-all">—</div></div>
+        <h3 data-i18n="e.media">Media</h3>
+        <div class="egroup"><label data-i18n="e.src">Source clip</label><div id="edMediaInfo" style="font-size:14px;color:var(--muted);word-break:break-all">—</div></div>
         <div class="egroup">
-          <label>Overlays &amp; stickers</label>
+          <label data-i18n="e.overlays">Overlays &amp; stickers</label>
           <div id="edOverlayList"></div>
-          <button class="txadd" id="edAddOverlay"><i data-ic="plus"></i>Add image / video / sticker</button>
+          <button class="txadd" id="edAddOverlay"><i data-ic="plus"></i><span data-i18n="e.addov">Add image / video / sticker</span></button>
           <input type="file" id="edOverlayFile" accept="image/*,video/*" hidden>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px">Drag an overlay on the preview to place it. PNGs with transparency work as stickers or logos.</div>
         </div>
       </div>
       <div class="edpane" data-pane="subs">
-        <h3>Select Subtitles</h3>
-        <div class="subcard" id="edAiSub"><div class="ci" data-ic="sparkles"></div><b>AI Subtitles</b><span>Auto-transcribe speech into timed captions — runs on your device</span></div>
+        <h3 data-i18n="e.selsubs">Select Subtitles</h3>
+        <div class="subcard" id="edAiSub"><div class="ci" data-ic="sparkles"></div><b data-i18n="e.aisubs">AI Subtitles</b><span data-i18n="e.aisubs.d">Auto-transcribe speech into timed captions</span></div>
         <div id="edAiBox" style="display:none;margin:0 0 12px">
           <div class="txrow" style="margin-bottom:10px">
             <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Language</span>
             <div class="chips" id="edAiLang"><button class="chip on" data-l="en">English</button><button class="chip" data-l="multi">Other / mixed</button></div>
           </div>
-          <button class="txadd" id="edAiRun"><i data-ic="sparkles"></i>Transcribe this clip</button>
+          <button class="txadd" id="edAiRun"><i data-ic="sparkles"></i><span data-i18n="e.transcribe">Transcribe this clip</span></button>
           <div id="edAiStatus" style="display:none;font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px"></div>
           <div id="edAiBar" style="display:none;height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:8px"><div id="edAiBarFill" style="height:100%;width:0;background:var(--accent);transition:width .2s"></div></div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px">First run downloads a speech model (~145&nbsp;MB) to your browser, then it works offline. Captions appear in the <b>Text</b> tab where you can edit, restyle and re-time them.</div>
         </div>
-        <div class="subcard" id="edManualSub"><div class="ci" data-ic="captions"></div><b>Manual Subtitles</b><span>Add a caption with custom position</span></div>
+        <div class="subcard" id="edManualSub"><div class="ci" data-ic="captions"></div><b data-i18n="e.mansubs">Manual Subtitles</b><span data-i18n="e.mansubs.d">Add a caption with custom position</span></div>
         <div id="edSubEditor" style="display:none;margin-top:4px">
-          <div class="egroup"><label>Caption text</label><input type="text" id="edCaption" placeholder="Type a caption…" maxlength="120"></div>
+          <div class="egroup"><label data-i18n="e.cap">Caption text</label><input type="text" id="edCaption" placeholder="Type a caption…" maxlength="120" data-i18n-ph="e.cap.ph"></div>
           <div class="egroup"><label>Position</label><div class="chips" id="edCapPos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Middle</button><button class="chip on" data-p="bottom">Bottom</button></div></div>
         </div>
       </div>
       <div class="edpane" data-pane="text">
-        <h3>Text</h3>
+        <h3 data-i18n="e.text">Text</h3>
         <p class="txempty">Add text layers with their own <b>font, colour, size, alignment</b> and <b>effect</b> (outline / shadow / box). <b>Drag</b> any text on the preview to move it, or drag its corner handle to resize — or use the panel. Set <b>Start</b>/<b>End</b> from the playhead to time a layer.</p>
         <div id="edTextList"></div>
-        <button class="txadd" id="edAddText"><i data-ic="plus"></i>Add text</button>
+        <button class="txadd" id="edAddText"><i data-ic="plus"></i><span data-i18n="e.addtext">Add text</span></button>
       </div>
       <div class="edpane" data-pane="audio">
-        <h3>Audio</h3>
-        <div class="egroup"><label>Sound</label><div class="chips"><button class="chip" id="edMute"><i data-ic="volume"></i>Sound on</button></div></div>
-        <div class="egroup"><label>Speed</label><div class="chips" id="edSpeed"><button class="chip" data-s="0.5">0.5×</button><button class="chip on" data-s="1">1×</button><button class="chip" data-s="1.5">1.5×</button><button class="chip" data-s="2">2×</button></div></div>
+        <h3 data-i18n="e.audio">Audio</h3>
+        <div class="egroup"><label data-i18n="e.sound">Sound</label><div class="chips"><button class="chip" id="edMute"><i data-ic="volume"></i>Sound on</button></div></div>
+        <div class="egroup"><label data-i18n="e.speed">Speed</label><div class="chips" id="edSpeed"><button class="chip" data-s="0.5">0.5×</button><button class="chip on" data-s="1">1×</button><button class="chip" data-s="1.5">1.5×</button><button class="chip" data-s="2">2×</button></div></div>
         <div class="egroup">
-          <label>Background music</label>
+          <label data-i18n="e.music">Background music</label>
           <div id="edMusicRow"></div>
           <input type="file" id="edMusicFile" accept="audio/*" hidden>
           <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px">Music loops to cover the clip. Turn <b>Sound</b> off above to keep music only.</div>
         </div>
       </div>
       <div class="edpane" data-pane="video">
-        <h3>Video</h3>
-        <div class="egroup"><label>Format / reframe</label><div class="chips" id="edAspect"><button class="chip on" data-a="original">Original</button><button class="chip" data-a="9:16">9:16</button><button class="chip" data-a="1:1">1:1</button><button class="chip" data-a="16:9">16:9</button></div></div>
+        <h3 data-i18n="e.video">Video</h3>
+        <div class="egroup"><label data-i18n="e.format">Format / reframe</label><div class="chips" id="edAspect"><button class="chip on" data-a="original" data-i18n="e.original">Original</button><button class="chip" data-a="9:16">9:16</button><button class="chip" data-a="1:1">1:1</button><button class="chip" data-a="16:9">16:9</button></div></div>
         <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:18px">Pick a format, then drag the white box on the preview to choose exactly what stays in frame.</div>
-        <div class="egroup"><label>Fade in</label><div class="chips" id="edFadeIn"><button class="chip on" data-f="0">Off</button><button class="chip" data-f="0.5">0.5s</button><button class="chip" data-f="1">1s</button><button class="chip" data-f="2">2s</button></div></div>
-        <div class="egroup"><label>Fade out</label><div class="chips" id="edFadeOut"><button class="chip on" data-f="0">Off</button><button class="chip" data-f="0.5">0.5s</button><button class="chip" data-f="1">1s</button><button class="chip" data-f="2">2s</button></div></div>
+        <div class="egroup"><label data-i18n="e.fadein">Fade in</label><div class="chips" id="edFadeIn"><button class="chip on" data-f="0">Off</button><button class="chip" data-f="0.5">0.5s</button><button class="chip" data-f="1">1s</button><button class="chip" data-f="2">2s</button></div></div>
+        <div class="egroup"><label data-i18n="e.fadeout">Fade out</label><div class="chips" id="edFadeOut"><button class="chip on" data-f="0">Off</button><button class="chip" data-f="0.5">0.5s</button><button class="chip" data-f="1">1s</button><button class="chip" data-f="2">2s</button></div></div>
       </div>
       <div class="edpane" data-pane="tools">
-        <h3>Tools</h3>
-        <div class="egroup"><label>Trim</label>
-          <div class="chips"><button class="chip" id="edSetIn"><i data-ic="skipback"></i>Set start</button><button class="chip" id="edSetOut">Set end<i data-ic="skipforward"></i></button><button class="chip" id="edTrimReset">Reset</button></div>
+        <h3 data-i18n="e.tools">Tools</h3>
+        <div class="egroup"><label data-i18n="e.trim">Trim</label>
+          <div class="chips"><button class="chip" id="edSetIn"><i data-ic="skipback"></i><span data-i18n="e.setstart">Set start</span></button><button class="chip" id="edSetOut"><span data-i18n="e.setend">Set end</span><i data-ic="skipforward"></i></button><button class="chip" id="edTrimReset" data-i18n="e.reset">Reset</button></div>
           <div style="margin-top:10px;font-size:13px;color:var(--muted)" id="edTrimLbl">start 0:00 · end —</div>
         </div>
       </div>
@@ -622,6 +625,7 @@
 
 <div id="toast"></div>
 
+<script src="/i18n.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 
@@ -857,18 +861,18 @@ async function loadClips() {
         <div class="name">${c.file}</div>
         <div class="info">${c.duration ? icon('clock') + ' ' + fmtDur(c.duration) + ' · ' : ''}${fmtSize(c.size)} · ${new Date(c.mtime).toLocaleString()}</div>
         <div class="actions">
-          <a href="/clips/${encodeURIComponent(c.file)}" download>${icon('download')}Download</a>
+          <a href="/clips/${encodeURIComponent(c.file)}" download>${icon('download')}${t('a.c.download')}</a>
           ${c.kind === 'video' ? `
-            <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">${icon('edit')}Edit</button>
-            <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">${icon('youtube')}Publish</button>
-            <button onclick="shortsClip('${encodeURIComponent(c.file)}')">${icon('sparkles')}Auto shorts</button>
-            <button onclick="enhanceClip('${encodeURIComponent(c.file)}')">${icon('mic')}Enhance</button>
-            <button onclick="upscaleClipUI('${encodeURIComponent(c.file)}')">${icon('gem')}Upscale</button>
+            <button onclick="openEditor('${c.file}')" style="border-color:var(--accent);color:var(--accent);font-weight:800">${icon('edit')}${t('a.c.edit')}</button>
+            <button class="ytbtn" onclick="publishClip('${encodeURIComponent(c.file)}')">${icon('youtube')}${t('a.c.publish')}</button>
+            <button onclick="shortsClip('${encodeURIComponent(c.file)}')">${icon('sparkles')}${t('a.c.shorts')}</button>
+            <button onclick="enhanceClip('${encodeURIComponent(c.file)}')">${icon('mic')}${t('a.c.enhance')}</button>
+            <button onclick="upscaleClipUI('${encodeURIComponent(c.file)}')">${icon('gem')}${t('a.c.upscale')}</button>
             ${c.file.includes('_vertical') ? '' : `<button onclick="vertClip('${c.file}')">${icon('smartphone')}9:16</button>`}
             <button onclick="gifClip('${c.file}')">GIF</button>
-            <button onclick="thumbClip('${c.file}')">${icon('camera')}Thumb</button>` : ''}
-          <button onclick="renameClip('${c.file}')">Rename</button>
-          <button onclick="delClip('${c.file}')" style="color:var(--danger)">Delete</button>
+            <button onclick="thumbClip('${c.file}')">${icon('camera')}${t('a.c.thumb')}</button>` : ''}
+          <button onclick="renameClip('${c.file}')">${t('a.c.rename')}</button>
+          <button onclick="delClip('${c.file}')" style="color:var(--danger)">${t('a.c.delete')}</button>
         </div>
       </div>
     </div>`).join('');
@@ -962,12 +966,12 @@ $('ytpGo').onclick = async () => {
 ytRefresh();
 
 // ================= app shell: sidebar nav, hero, feature grid =================
-const VIEW_TITLES = { home: 'Home', create: 'Capture & import', library: 'Clip library', publish: 'Publish to YouTube' };
+const VIEW_TITLE_KEYS = { home: 'a.nav.home', create: 'a.nav.capture', library: 'a.nav.library', publish: 'a.yt.title' };
 let currentView = 'home';
 function setView(v) {
   currentView = v;
   document.querySelectorAll('.sbnav[data-nav]').forEach(n => n.classList.toggle('on', n.dataset.nav === v));
-  $('viewTitle').textContent = VIEW_TITLES[v] || 'Home';
+  $('viewTitle').innerHTML = t(VIEW_TITLE_KEYS[v] || 'a.nav.home');
   $('homeExtra').style.display = v === 'home' ? 'block' : 'none';
   document.querySelectorAll('.mainpad [data-view]').forEach(el => { el.style.display = el.dataset.view === v ? '' : 'none'; });
   $('app').classList.remove('navopen');
@@ -978,21 +982,24 @@ $('navToggle').onclick = () => $('app').classList.toggle('navopen');
 
 // feature grid — maps OpusClip-style tiles to real tools
 const FEATURES = [
-  { ic: 'sparkles', label: 'Auto shorts', cls: 'grad-e', badge: 'New', act: () => heroFocus() },
-  { ic: 'captions', label: 'AI Captions', cls: 'grad-b', act: () => editorLatest('subs') },
-  { ic: 'type', label: 'Text layers', cls: 'grad-c', act: () => editorLatest('text') },
-  { ic: 'film', label: 'Video editor', cls: 'grad-d', act: () => editorLatest('media') },
-  { ic: 'mic', label: 'Enhance speech', cls: 'grad-b', badge: 'New', act: () => clipTool('enhance') },
-  { ic: 'gem', label: 'Upscale HD', cls: 'grad-c', badge: 'New', act: () => clipTool('upscale') },
-  { ic: 'crop', label: 'Reframe', cls: 'grad-d', act: () => editorLatest('video') },
-  { ic: 'music', label: 'Add music', cls: 'grad-a', act: () => editorLatest('audio') },
-  { ic: 'radio', label: 'Capture live', cls: 'grad-a', act: () => setView('create') },
-  { ic: 'youtube', label: 'Publish', cls: 'grad-a', act: () => setView('publish') },
+  { ic: 'sparkles', k: 'a.t.shorts', cls: 'grad-e', badge: 'New', act: () => heroFocus() },
+  { ic: 'captions', k: 'a.t.captions', cls: 'grad-b', act: () => editorLatest('subs') },
+  { ic: 'type', k: 'a.t.text', cls: 'grad-c', act: () => editorLatest('text') },
+  { ic: 'film', k: 'a.t.editor', cls: 'grad-d', act: () => editorLatest('media') },
+  { ic: 'mic', k: 'a.t.enhance', cls: 'grad-b', badge: 'New', act: () => clipTool('enhance') },
+  { ic: 'gem', k: 'a.t.upscale', cls: 'grad-c', badge: 'New', act: () => clipTool('upscale') },
+  { ic: 'crop', k: 'a.t.reframe', cls: 'grad-d', act: () => editorLatest('video') },
+  { ic: 'music', k: 'a.t.music', cls: 'grad-a', act: () => editorLatest('audio') },
+  { ic: 'radio', k: 'a.t.live', cls: 'grad-a', act: () => setView('create') },
+  { ic: 'youtube', k: 'a.t.publish', cls: 'grad-a', act: () => setView('publish') },
 ];
-$('featgrid').innerHTML = FEATURES.map((f, i) =>
-  `<button class="feattile ${f.cls}" data-i="${i}">${f.badge ? `<span class="fnew">${f.badge}</span>` : ''}<span class="fic">${icon(f.ic)}</span><span class="fl">${f.label}</span></button>`
-).join('');
-document.querySelectorAll('#featgrid .feattile').forEach(t => t.onclick = () => FEATURES[t.dataset.i].act());
+function renderFeatGrid(){
+  $('featgrid').innerHTML = FEATURES.map((f, i) =>
+    `<button class="feattile ${f.cls}" data-i="${i}">${f.badge ? `<span class="fnew">${f.badge}</span>` : ''}<span class="fic">${icon(f.ic)}</span><span class="fl">${t(f.k)}</span></button>`
+  ).join('');
+  document.querySelectorAll('#featgrid .feattile').forEach(el => el.onclick = () => FEATURES[el.dataset.i].act());
+}
+renderFeatGrid();
 
 function heroFocus() { setView('home'); $('heroUrl').focus(); $('heroUrl').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 async function latestVideoClip() { try { const cl = await api('/api/clips'); return (cl.find(c => c.kind === 'video') || {}).file || null; } catch (_) { return null; } }
@@ -1050,6 +1057,15 @@ window.upscaleClipUI = async function (encFile) {
 };
 setView('home');
 
+// Re-render everything the JS builds when the language changes.
+window.onLangChange = () => {
+  renderFeatGrid();
+  setView(currentView);
+  lastClipsJson = '';            // bust the cache so clip buttons re-label
+  loadClips().catch(() => {});
+  if (edw && edw.classList.contains('open')) { renderTextList(); renderOverlayList(); renderMusicRow(); }
+};
+
 // ================= web editor (timeline) =================
 const ed = { file: null, dur: 0, inPt: 0, outPt: null, aspect: 'original', capPos: 'bottom', speed: 1, mute: false, crop: { x: .5, y: .5 }, pps: 34, texts: [], selText: null, overlays: [], music: null, fadeIn: 0, fadeOut: 0 };
 const E = id => document.getElementById(id);
@@ -1066,7 +1082,7 @@ window.openEditor = function(file){
   E('edAiBox').style.display = 'none'; E('edAiStatus').style.display = 'none'; E('edAiStatus').textContent = '';
   setChips('edAspect','a','original'); setChips('edCapPos','p','bottom'); setChips('edSpeed','s','1');
   setChips('edFadeIn','f','0'); setChips('edFadeOut','f','0');
-  E('edMute').classList.remove('on'); E('edMute').innerHTML = icon('volume') + 'Sound on'; E('edCapLbl').textContent = 'No caption';
+  E('edMute').classList.remove('on'); E('edMute').innerHTML = icon('volume') + t('e.soundon'); E('edCapLbl').textContent = t('e.nocap');
   renderTextList(); updateTextPreview(); renderOverlayList(); updateOverlayPreview(); renderMusicRow();
   switchTab('media'); edw.classList.add('open');
   edVideo.onloadedmetadata = () => { ed.dur = edVideo.duration || 0; ed.outPt = ed.dur; E('edTot').textContent = fmtT(ed.dur); fitZoom(); renderTL(); updateTextPreview(); updateOverlayPreview(); };
@@ -1146,11 +1162,11 @@ E('edAiRun').onclick = async () => {
     aiProgress(null);
     aiStatus('Could not run AI captions (needs internet on first use to fetch the model). You can use Manual Subtitles or the Text tab instead.');
     toast('AI captions failed: ' + (err.message || err), true);
-  } finally { btn.disabled = false; btn.innerHTML = icon('sparkles') + 'Transcribe this clip'; }
+  } finally { btn.disabled = false; btn.innerHTML = icon('sparkles') + t('e.transcribe'); }
 };
 E('edCaption').addEventListener('input', updCap);
 document.querySelectorAll('#edCapPos .chip').forEach(c => c.onclick = () => { ed.capPos = c.dataset.p; setChips('edCapPos','p',ed.capPos); updCap(); });
-function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textContent = t ? t : 'No caption';
+function updCap(){ const t = E('edCaption').value.trim(); E('edCapLbl').textContent = t ? t : window.t('e.nocap');
   if (!t) { edCapPrev.style.display = 'none'; return; }
   edCapPrev.textContent = t; edCapPrev.style.display = 'block';
   if (ed.capPos === 'top') { edCapPrev.style.top = '6%'; edCapPrev.style.bottom = 'auto'; }
@@ -1172,12 +1188,12 @@ const CAP_FONTS = [
   { id: 'sf', name: 'SF Pro', css: '-apple-system,"SF Pro Display","Helvetica Neue",sans-serif' },
 ];
 const CAP_FONT_CSS = {}; CAP_FONTS.forEach(f => CAP_FONT_CSS[f.id] = f.css);
-const TX_EFFECTS = [{ id: 'outline', name: 'Outline' }, { id: 'shadow', name: 'Shadow' }, { id: 'box', name: 'Box' }, { id: 'plain', name: 'None' }];
+const TX_EFFECTS = [{ id: 'outline', k: 'e.fx.outline' }, { id: 'shadow', k: 'e.fx.shadow' }, { id: 'box', k: 'e.fx.box' }, { id: 'plain', k: 'e.fx.plain' }];
 function txTimeLabel(l){
-  if (l.start == null && l.end == null) return 'Whole clip';
+  if (l.start == null && l.end == null) return t('e.wholeclip');
   if (l.start != null && l.end != null) return fmtT(l.start) + ' → ' + fmtT(l.end);
-  if (l.start != null) return 'from ' + fmtT(l.start);
-  return 'until ' + fmtT(l.end);
+  if (l.start != null) return t('e.from') + ' ' + fmtT(l.start);
+  return t('e.until') + ' ' + fmtT(l.end);
 }
 function newTextLayer(over){
   return Object.assign({ text: '', font: 'arialblack', color: 'white', align: 'center', sizePct: 0.07, x: 0.5, y: 0.88, effect: 'outline', start: null, end: null }, over || {});
@@ -1218,12 +1234,12 @@ function renderTextList(){
       + '<input type="text" class="txinput" maxlength="120" placeholder="Type text…">'
       + '<div class="txrow"><select class="txfont">' + fontOpts + '</select></div>'
       + '<div class="txrow"><div class="chips txalign">'
-        + '<button class="chip" data-a="left" title="Left">' + icon('alignleft') + '</button><button class="chip" data-a="center" title="Center">' + icon('aligncenter') + '</button><button class="chip" data-a="right" title="Right">' + icon('alignright') + '</button>'
-      + '</div><div class="chips txpos"><button class="chip" data-p="top">Top</button><button class="chip" data-p="middle">Mid</button><button class="chip" data-p="bottom">Bottom</button></div></div>'
-      + '<div class="txrow txsizerow"><span class="tzlbl">Size</span><input type="range" class="txsize" min="2" max="30" step="1"><span class="val"></span></div>'
-      + '<div class="txrow"><div class="chips txeffect">' + TX_EFFECTS.map(e => '<button class="chip" data-e="' + e.id + '">' + e.name + '</button>').join('') + '</div></div>'
+        + '<button class="chip" data-a="left">' + icon('alignleft') + '</button><button class="chip" data-a="center">' + icon('aligncenter') + '</button><button class="chip" data-a="right">' + icon('alignright') + '</button>'
+      + '</div><div class="chips txpos"><button class="chip" data-p="top">' + t('e.top') + '</button><button class="chip" data-p="middle">' + t('e.mid') + '</button><button class="chip" data-p="bottom">' + t('e.bottom') + '</button></div></div>'
+      + '<div class="txrow txsizerow"><span class="tzlbl">' + t('e.size') + '</span><input type="range" class="txsize" min="2" max="30" step="1"><span class="val"></span></div>'
+      + '<div class="txrow"><div class="chips txeffect">' + TX_EFFECTS.map(e => '<button class="chip" data-e="' + e.id + '">' + t(e.k) + '</button>').join('') + '</div></div>'
       + '<div class="txrow"><div class="txcolors"></div></div>'
-      + '<div class="txrow txtime"><button class="chip txsetstart">' + icon('skipback') + 'Start</button><button class="chip txsetend">End' + icon('skipforward') + '</button><button class="chip txfull">Full</button><span class="txtimelbl"></span></div>';
+      + '<div class="txrow txtime"><button class="chip txsetstart">' + icon('skipback') + t('e.start') + '</button><button class="chip txsetend">' + t('e.end') + icon('skipforward') + '</button><button class="chip txfull">' + t('e.full') + '</button><span class="txtimelbl"></span></div>';
     box.appendChild(row);
     const inp = row.querySelector('.txinput'); inp.value = l.text || '';
     inp.addEventListener('input', () => { l.text = inp.value; updateTextPreview(); });
@@ -1342,7 +1358,7 @@ function renderOverlayList(){
     row.innerHTML =
       '<div class="txhead"><span class="txnum fname">' + icon(ov.type === 'video' ? 'film' : 'image') + ' </span><button class="txdel" title="Remove overlay">' + icon('trash') + '</button></div>'
       + '<div class="txrange"><input type="range" class="ovscale" min="5" max="100" step="1"><span class="val"></span></div>'
-      + '<div class="txrow txtime"><button class="chip ovsetstart">' + icon('skipback') + 'Start</button><button class="chip ovsetend">End' + icon('skipforward') + '</button><button class="chip ovfull">Full</button><span class="txtimelbl"></span></div>';
+      + '<div class="txrow txtime"><button class="chip ovsetstart">' + icon('skipback') + t('e.start') + '</button><button class="chip ovsetend">' + t('e.end') + icon('skipforward') + '</button><button class="chip ovfull">' + t('e.full') + '</button><span class="txtimelbl"></span></div>';
     box.appendChild(row);
     row.querySelector('.fname').append(document.createTextNode(ov.name || 'overlay'));
     const rng = row.querySelector('.ovscale'), val = row.querySelector('.val');
@@ -1408,7 +1424,7 @@ E('edMusicFile').onchange = async (ev) => {
 function renderMusicRow(){
   const box = E('edMusicRow'); if (!box) return; box.innerHTML = '';
   if (!ed.music) {
-    const b = document.createElement('button'); b.className = 'txadd'; b.id = 'edAddMusic'; b.innerHTML = icon('music') + 'Add music track';
+    const b = document.createElement('button'); b.className = 'txadd'; b.id = 'edAddMusic'; b.innerHTML = icon('music') + t('e.addmusic');
     b.onclick = () => E('edMusicFile').click(); box.appendChild(b); return;
   }
   const row = document.createElement('div'); row.className = 'musicrow';
@@ -1429,7 +1445,7 @@ document.querySelectorAll('#edFadeIn .chip').forEach(c => c.onclick = () => { ed
 document.querySelectorAll('#edFadeOut .chip').forEach(c => c.onclick = () => { ed.fadeOut = Number(c.dataset.f); setChips('edFadeOut','f',c.dataset.f); });
 
 // audio
-E('edMute').onclick = () => { ed.mute = !ed.mute; E('edMute').classList.toggle('on', ed.mute); E('edMute').innerHTML = (ed.mute ? icon('mute') + 'Muted' : icon('volume') + 'Sound on'); };
+E('edMute').onclick = () => { ed.mute = !ed.mute; E('edMute').classList.toggle('on', ed.mute); E('edMute').innerHTML = (ed.mute ? icon('mute') + t('e.muted') : icon('volume') + t('e.soundon')); };
 document.querySelectorAll('#edSpeed .chip').forEach(c => c.onclick = () => { ed.speed = Number(c.dataset.s); setChips('edSpeed','s',c.dataset.s); });
 
 // video / crop box
@@ -1492,6 +1508,8 @@ E('edExport').onclick = async () => {
 <script>
 // Fill every static [data-ic] placeholder with its inline SVG icon.
 hydrateIcons(document);
+// Language: fill the picker and apply the saved/detected language to every [data-i18n].
+initI18n();
 </script>
 </body>
 </html>

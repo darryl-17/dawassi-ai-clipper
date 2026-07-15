@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>document.documentElement.classList.add('js')</script>
+<script src="/i18n.js"></script>
 <title>DAWASSI AI CLIPPER — The #1 Local Stream Clipping Tool</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,6 +194,9 @@
   .cta, .mockexport, .finalcard .cta { position: relative; overflow: hidden; }
   .cta::after, .finalcard .cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 55%); pointer-events: none; }
 
+  /* ---------- language selector ---------- */
+  .langsel { background: rgba(255,255,255,.6); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: 7px 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .langsel:hover { border-color: var(--accent); color: var(--accent); }
   /* ---------- inline SVG icons ---------- */
   .lic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.18em; }
   .feat .ico .lic { width: 30px; height: 30px; }
@@ -265,10 +269,11 @@
   <nav>
     <a href="/" class="logo">DAWASSI <span class="script">AI Clipper</span></a>
     <div class="navlinks" id="navlinks">
-      <a href="#whatsnew">What's new</a>
-      <a href="#features">Features</a>
-      <a href="#how">How it works</a>
-      <a href="#pricing">Pricing</a>
+      <a href="#whatsnew" data-i18n="nav.new">What's new</a>
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#how" data-i18n="nav.how">How it works</a>
+      <a href="#pricing" data-i18n="nav.pricing">Pricing</a>
+      <select class="langsel" id="langSel" aria-label="Language"></select>
       <a href="https://discord.gg/nFPU9Gteu" target="_blank" class="navdiscord" title="Join our Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369a19.8 19.8 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.3 18.3 0 0 0-5.487 0 12.6 12.6 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.7 19.7 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.891.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.8 19.8 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg></a>
     </div>
     <button class="menuBtn" id="menuBtn" aria-label="Menu" data-ic="menu"></button>
@@ -278,39 +283,39 @@
 <!-- HERO -->
 <section class="hero" data-stagger>
   <div class="proof" data-animate>
-    <span class="stars">★★★★★</span> FREE &amp; 100% LOCAL · OPEN SOURCE
+    <span class="stars">★★★★★</span> <span data-i18n="hero.proof">FREE &amp; 100% LOCAL · OPEN SOURCE</span>
   </div>
-  <h1 class="head" data-animate>The <span class="mark">#1 Local</span><br>Clipping Tool For Streamers</h1>
-  <p class="subhead" data-animate>Buffer any Twitch or YouTube live stream on your own PC and turn its best moments into clips, GIFs and vertical Shorts — with AI hype detection. No subscriptions, no watermarks, nothing uploaded.</p>
+  <h1 class="head" data-animate data-i18n="hero.h1">The <span class="mark">#1 Local</span><br>Clipping Tool For Streamers</h1>
+  <p class="subhead" data-animate data-i18n="hero.sub">Buffer any Twitch or YouTube live stream on your own PC and turn its best moments into clips, GIFs and vertical Shorts — with AI hype detection. No subscriptions, no watermarks, nothing uploaded.</p>
   <div class="herocta" data-animate>
-    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i>Launch DAWASSI Clipper</a>
-    <a href="#how" class="cta big ghost magnetic">See how it works</a>
+    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i><span data-i18n="hero.cta1">Launch DAWASSI Clipper</span></a>
+    <a href="#how" class="cta big ghost magnetic" data-i18n="hero.cta2">See how it works</a>
   </div>
-  <div class="micro" data-animate>Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
+  <div class="micro" data-animate data-i18n="hero.micro">Runs on your machine · Works on Windows, macOS &amp; Linux · No account needed</div>
   <div class="scrollcue" data-animate></div>
 </section>
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="eyebrow" data-animate>Everything a clipper needs</div>
-  <div class="h2" data-animate>Built to catch the moment — instantly</div>
+  <div class="eyebrow" data-animate data-i18n="feat.eyebrow">Everything a clipper needs</div>
+  <div class="h2" data-animate data-i18n="feat.h2">Built to catch the moment — instantly</div>
   <div class="grid" data-stagger>
-    <div class="feat" data-animate><div class="ico" data-ic="radio"></div><h3>Rolling 2-hour buffer</h3><p>Records the live stream in the background. Every “Clip last 30s / 1 / 2 / 5 min” button cuts instantly — no re-encoding, no waiting for the VOD.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="sparkles"></div><h3>AI captions &amp; auto-shorts</h3><p>Transcribe speech on-device into timed captions, and auto-cut a long video into the liveliest vertical shorts — in one click.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="type"></div><h3>Caption designer</h3><p>10 fonts, custom colours, size, alignment and effects (outline / shadow / box). Drag captions on screen or resize by the corner handle.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="flame"></div><h3>AI hype detection</h3><p>Listens for crowd pops and loudness spikes and flags hype moments automatically. One click grabs the whole reaction.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="smartphone"></div><h3>Vertical 9:16 export</h3><p>Turn any clip into a 1080×1920 short for TikTok, Reels and YouTube Shorts with auto centered cropping.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="mic"></div><h3>Enhance &amp; upscale</h3><p>Denoise and loudness-normalise speech, and upscale clips to crisp 1080p or 4K — all locally with ffmpeg.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="youtube"></div><h3>One-click YouTube publish</h3><p>Connect your channel once, then upload finished clips straight from your library — title, description and privacy included.</p></div>
-    <div class="feat" data-animate><div class="ico" data-ic="lock"></div><h3>100% local &amp; private</h3><p>Everything runs on your computer. No cloud, no watermark, no account — your clips never leave your machine.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="radio"></div><h3 data-i18n="feat.1.t">Rolling 2-hour buffer</h3><p data-i18n="feat.1.d">Records the live stream in the background.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="sparkles"></div><h3 data-i18n="feat.2.t">AI captions &amp; auto-shorts</h3><p data-i18n="feat.2.d">Transcribe speech on-device into timed captions.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="type"></div><h3 data-i18n="feat.3.t">Caption designer</h3><p data-i18n="feat.3.d">10 fonts, custom colours, size, alignment and effects.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="flame"></div><h3 data-i18n="feat.4.t">AI hype detection</h3><p data-i18n="feat.4.d">Listens for crowd pops and loudness spikes.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="smartphone"></div><h3 data-i18n="feat.5.t">Vertical 9:16 export</h3><p data-i18n="feat.5.d">Turn any clip into a 1080×1920 short.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="mic"></div><h3 data-i18n="feat.6.t">Enhance &amp; upscale</h3><p data-i18n="feat.6.d">Denoise and loudness-normalise speech.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="youtube"></div><h3 data-i18n="feat.7.t">One-click YouTube publish</h3><p data-i18n="feat.7.d">Connect your channel once, then upload finished clips.</p></div>
+    <div class="feat" data-animate><div class="ico" data-ic="lock"></div><h3 data-i18n="feat.8.t">100% local &amp; private</h3><p data-i18n="feat.8.d">Everything runs on your computer.</p></div>
   </div>
 </section>
 
 <!-- WHAT'S NEW -->
 <section class="section" id="whatsnew">
-  <div class="eyebrow" data-animate>What's new</div>
-  <div class="h2" data-animate>A brand-new studio, packed with AI tools</div>
-  <p class="subhead" data-animate style="text-align:center;max-width:660px;margin:14px auto 0;color:var(--muted);font-size:16px;line-height:1.6">We rebuilt DAWASSI from the ground up — a sleek dark workspace, one-click auto-shorts, on-device AI captions, a full caption designer and direct YouTube publishing. Still 100% local, free and watermark-free.</p>
+  <div class="eyebrow" data-animate data-i18n="new.eyebrow">What's new</div>
+  <div class="h2" data-animate data-i18n="new.h2">A brand-new studio, packed with AI tools</div>
+  <p class="subhead" data-animate data-i18n="new.sub" style="text-align:center;max-width:660px;margin:14px auto 0;color:var(--muted);font-size:16px;line-height:1.6">We rebuilt DAWASSI from the ground up.</p>
 
   <div class="shots" data-stagger>
     <figure class="shot" data-animate>
@@ -338,7 +343,7 @@
           </div>
         </div>
       </div>
-      <figcaption>The new dashboard — sidebar, one-click auto-shorts and a full local tool grid.</figcaption>
+      <figcaption data-i18n="new.cap1">The new dashboard — sidebar, one-click auto-shorts and a full local tool grid.</figcaption>
     </figure>
 
     <figure class="shot" data-animate>
@@ -355,56 +360,56 @@
           <div class="nu-phone"><img src="/kai-preview.jpg" alt="caption preview"><div class="nu-cap">STREAMER U</div></div>
         </div>
       </div>
-      <figcaption>The caption designer — 10 fonts, colours, effects &amp; drag-to-resize on screen.</figcaption>
+      <figcaption data-i18n="new.cap2">The caption designer — 10 fonts, colours, effects &amp; drag-to-resize on screen.</figcaption>
     </figure>
   </div>
 
   <div class="news" data-stagger>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Auto long→shorts.</b> Paste a link (or pick a clip) and DAWASSI finds the liveliest moments by loudness and cuts vertical 9:16 shorts in one click.</div></div>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>On-device AI captions.</b> Transcribe any clip with Whisper — right in your browser, offline after the first run — into timed, fully-editable caption layers.</div></div>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Caption designer.</b> 10 fonts, custom colours, size, alignment and effects (outline / shadow / box) — drag captions on the preview or resize them by their corner handle.</div></div>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Overlays, music &amp; transitions.</b> Drop image/video overlays and stickers, add a background music track, and fade clips in and out.</div></div>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>Enhance speech &amp; Upscale.</b> Clean up audio (denoise + broadcast loudness) and upscale clips to 1080p or 4K.</div></div>
-    <div class="newsitem" data-animate><span class="newstag">NEW</span><div><b>One-click YouTube publishing.</b> Connect your channel and upload finished clips straight from the library.</div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n1"><b>Auto long→shorts.</b></div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n2"><b>On-device AI captions.</b></div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n3"><b>Caption designer.</b></div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n4"><b>Overlays, music &amp; transitions.</b></div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n5"><b>Enhance speech &amp; Upscale.</b></div></div>
+    <div class="newsitem" data-animate><span class="newstag">NEW</span><div data-i18n="new.n6"><b>One-click YouTube publishing.</b></div></div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
 <section class="section" id="how">
-  <div class="eyebrow" data-animate>How it works</div>
-  <div class="h2" data-animate>From live stream to posted clip in seconds</div>
+  <div class="eyebrow" data-animate data-i18n="how.eyebrow">How it works</div>
+  <div class="h2" data-animate data-i18n="how.h2">From live stream to posted clip in seconds</div>
   <div class="steps" data-stagger>
-    <div class="step" data-animate><div class="n">1</div><h4>Paste the stream</h4><p>Drop any Twitch or YouTube live URL and hit Start buffering before the action begins.</p></div>
-    <div class="step" data-animate><div class="n">2</div><h4>Catch the moment</h4><p>When something pops, press one clip button — or let hype detection flag it for you.</p></div>
-    <div class="step" data-animate><div class="n">3</div><h4>Make it vertical</h4><p>One click exports a 9:16 short, a GIF, or a thumbnail — ready for any platform.</p></div>
-    <div class="step" data-animate><div class="n">4</div><h4>Post &amp; grow</h4><p>Your clip is a plain MP4 in your clips folder. Drag it into CapCut or upload it directly.</p></div>
+    <div class="step" data-animate><div class="n">1</div><h4 data-i18n="how.1.t">Paste the stream</h4><p data-i18n="how.1.d">Drop any Twitch or YouTube live URL.</p></div>
+    <div class="step" data-animate><div class="n">2</div><h4 data-i18n="how.2.t">Catch the moment</h4><p data-i18n="how.2.d">When something pops, press one clip button.</p></div>
+    <div class="step" data-animate><div class="n">3</div><h4 data-i18n="how.3.t">Make it vertical</h4><p data-i18n="how.3.d">One click exports a 9:16 short, a GIF, or a thumbnail.</p></div>
+    <div class="step" data-animate><div class="n">4</div><h4 data-i18n="how.4.t">Post &amp; grow</h4><p data-i18n="how.4.d">Your clip is a plain MP4 in your clips folder.</p></div>
   </div>
   <div class="demo" data-animate>
     <a class="demovideo" href="https://x.com/darryl_wassi" target="_blank" id="demoLink" title="Watch the demo on X">
       <div class="thumb"><img src="/kai-preview.jpg" alt="DAWASSI AI Clipper demo"><span class="playbtn" data-ic="play"></span></div>
-      <div class="demotxt"><b>Watch the 60-second demo</b><span>See DAWASSI AI Clipper in action on X →</span></div>
+      <div class="demotxt"><b data-i18n="how.demo1">Watch the 60-second demo</b><span data-i18n="how.demo2">See DAWASSI AI Clipper in action on X →</span></div>
     </a>
   </div>
 </section>
 
 <!-- PRICING -->
 <section class="section" id="pricing">
-  <div class="eyebrow" data-animate>Pricing</div>
-  <div class="h2" data-animate>Free. Forever. Open source.</div>
-  <p class="subhead" style="margin-top:16px" data-animate>Other clipping tools charge $20–30/month and stamp their logo on your content. DAWASSI AI Clipper is completely free, runs on your own machine, and the full code is on GitHub — fork it, tweak it, make it yours.</p>
+  <div class="eyebrow" data-animate data-i18n="price.eyebrow">Pricing</div>
+  <div class="h2" data-animate data-i18n="price.h2">Free. Forever. Open source.</div>
+  <p class="subhead" style="margin-top:16px" data-animate data-i18n="price.sub">Other clipping tools charge $20–30/month.</p>
   <div style="text-align:center;margin-top:26px" data-animate>
-    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i>Launch it now</a>
+    <a href="/app.html" class="cta big magnetic"><i data-ic="zap"></i><span data-i18n="price.cta">Launch it now</span></a>
   </div>
 </section>
 
 <!-- EDITOR SHOWCASE -->
 <section class="showcase" id="editor">
   <div class="showhead" data-animate>
-    <h2>Full control with our<br>web editor. Feels like magic.</h2>
-    <a href="/app.html" class="cta"><i data-ic="zap"></i>Open the editor</a>
+    <h2 data-i18n="show.h2">Full control with our<br>web editor. Feels like magic.</h2>
+    <a href="/app.html" class="cta"><i data-ic="zap"></i><span data-i18n="show.cta">Open the editor</span></a>
   </div>
   <div class="mockup" data-animate>
-    <div class="mocktop"><span>streamer clip · editing</span><span class="mockexport">Export Video</span></div>
+    <div class="mocktop"><span data-i18n="show.top">streamer clip · editing</span><span class="mockexport" data-i18n="show.export">Export Video</span></div>
     <div class="mockbody">
       <div class="mockrail">
         <div><span class="ic" data-ic="video"></span>Media</div>
@@ -427,13 +432,13 @@
 
 <!-- MAKER -->
 <section class="maker">
-  <div class="eyebrow" data-animate>Meet the maker</div>
+  <div class="eyebrow" data-animate data-i18n="maker.eyebrow">Meet the maker</div>
   <div class="makercard" data-animate>
     <div class="makeravatar">DW<img src="/founder.jpg" alt="Darryl Wassi" onerror="this.remove()"></div>
     <div class="makertxt">
-      <div class="q">"I got tired of paying for clipping tools that watermark my content and upload my clips to their servers. So I built DAWASSI AI Clipper — fast, free, private, and made to catch the moment while the stream is still live."</div>
+      <div class="q" data-i18n="maker.q">"I got tired of paying for clipping tools that watermark my content."</div>
       <div class="nm">Darryl Wassi</div>
-      <div class="role">Creator of DAWASSI AI Clipper</div>
+      <div class="role" data-i18n="maker.role">Creator of DAWASSI AI Clipper</div>
       <div class="msoc">
         <a href="https://linkedin.com/in/darryl-wassi" target="_blank" title="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
         <a href="https://instagram.com/k_rryl" target="_blank" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor" stroke="none"/></svg></a>
@@ -447,24 +452,24 @@
 
 <!-- FAQ -->
 <section class="faq" id="faq">
-  <div class="eyebrow" data-animate>FAQs</div>
-  <div class="h2" data-animate>Frequently asked questions</div>
+  <div class="eyebrow" data-animate data-i18n="faq.eyebrow">FAQs</div>
+  <div class="h2" data-animate data-i18n="faq.h2">Frequently asked questions</div>
   <div class="faqlist" data-animate>
-    <div class="faqitem"><div class="faqq">Is DAWASSI AI Clipper really free?<span class="pm">+</span></div><div class="faqa"><div>Yes — it's 100% free and open source under the MIT license. No subscription, no trial limits, no watermark. The full code is on GitHub for anyone to use or fork.</div></div></div>
-    <div class="faqitem"><div class="faqq">Do my clips get uploaded anywhere?<span class="pm">+</span></div><div class="faqa"><div>Never. Everything runs locally on your own computer — the buffer, the clipping, and the editor. Your clips stay on your machine and are never sent to any server.</div></div></div>
-    <div class="faqitem"><div class="faqq">Which platforms can I clip?<span class="pm">+</span></div><div class="faqa"><div>Twitch and YouTube — both live streams and VODs. Paste a live URL to buffer and clip in real time, or a VOD URL with timestamps to grab just a section.</div></div></div>
-    <div class="faqitem"><div class="faqq">What is AI hype detection?<span class="pm">+</span></div><div class="faqa"><div>While buffering a live stream, DAWASSI listens for loudness spikes — crowd pops, screaming, chaos — and automatically flags those hype moments so you can clip the whole reaction with one click.</div></div></div>
-    <div class="faqitem"><div class="faqq">Does it work on Windows?<span class="pm">+</span></div><div class="faqa"><div>Yes. DAWASSI AI Clipper runs on Windows, macOS and Linux. There's a one-click setup script for each, and it installs everything it needs automatically.</div></div></div>
-    <div class="faqitem"><div class="faqq">Can I edit clips into vertical Shorts?<span class="pm">+</span></div><div class="faqa"><div>Absolutely. The built-in web editor lets you trim, reframe to 9:16 / 1:1 / 16:9 with a draggable crop box, burn in captions, change speed, and export — all in the browser.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q1">Is DAWASSI AI Clipper really free?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a1">Yes — it's 100% free and open source.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q2">Do my clips get uploaded anywhere?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a2">Never. Everything runs locally.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q3">Which platforms can I clip?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a3">Twitch and YouTube — both live streams and VODs.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q4">What is AI hype detection?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a4">DAWASSI listens for loudness spikes.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q5">Does it work on Windows?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a5">Yes. Windows, macOS and Linux.</div></div></div>
+    <div class="faqitem"><div class="faqq"><span data-i18n="faq.q6">Can I edit clips into vertical Shorts?</span><span class="pm">+</span></div><div class="faqa"><div data-i18n="faq.a6">Absolutely. The built-in web editor.</div></div></div>
   </div>
 </section>
 
 <!-- FINAL CTA -->
 <section class="final">
   <div class="finalcard" data-animate>
-    <h2>Ready to catch the next big moment?</h2>
-    <p>Start buffering your favorite stream and never miss a clip again.</p>
-    <a href="/app.html" class="cta magnetic"><i data-ic="zap"></i>Launch DAWASSI Clipper</a>
+    <h2 data-i18n="final.h2">Ready to catch the next big moment?</h2>
+    <p data-i18n="final.p">Start buffering your favorite stream and never miss a clip again.</p>
+    <a href="/app.html" class="cta magnetic"><i data-ic="zap"></i><span data-i18n="hero.cta1">Launch DAWASSI Clipper</span></a>
   </div>
 </section>
 
@@ -472,7 +477,7 @@
 <footer>
   <div class="fbrand" data-animate>DAWASSI <span class="script">AI Clipper</span></div>
   <div class="flinks" data-animate>
-    <a href="https://darrylwassi.com" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Website</a>
+    <a href="https://darrylwassi.com" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span data-i18n="foot.website">Website</span></a>
     <a href="https://x.com/darryl_wassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>@darryl_wassi</a>
     <a href="https://youtube.com/@d_wassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube</a>
     <a href="https://twitch.tv/darrylwassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>Twitch</a>
@@ -480,9 +485,9 @@
     <a href="https://linkedin.com/in/darryl-wassi" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
     <a href="https://github.com/darryl-17/dawassi-ai-clipper" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>GitHub</a>
     <a href="https://discord.gg/nFPU9Gteu" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369a19.8 19.8 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.3 18.3 0 0 0-5.487 0 12.6 12.6 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.7 19.7 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.891.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.8 19.8 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg>Discord</a>
-    <a href="mailto:darrylwassi@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Contact</a>
+    <a href="mailto:darrylwassi@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span data-i18n="foot.contact">Contact</span></a>
   </div>
-  <div class="fcopy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
+  <div class="fcopy" data-i18n="foot.copy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
 </footer>
 
 <script>
@@ -585,6 +590,8 @@ const ICONS = {
 };
 function icon(n) { const p = ICONS[n]; return p ? '<svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>' : ''; }
 document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = icon(el.getAttribute('data-ic')); });
+// language: fills the picker, applies the saved/detected language to every [data-i18n]
+initI18n();
 </script>
 </body>
 </html>

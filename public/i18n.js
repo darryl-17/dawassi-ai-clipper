@@ -84,7 +84,7 @@ const DICT = {
     // ================= app =================
     'a.nav.create': 'Create', 'a.nav.post': 'Post', 'a.nav.home': 'Home', 'a.nav.capture': 'Capture &amp; import',
     'a.nav.library': 'Clip library', 'a.nav.publish': 'Publish', 'a.nav.landing': 'Landing page',
-    'a.plan': 'Local · Free', 'a.stalled': 'stalled · no data for', 'a.nowm': 'no watermark', 'a.runs': 'Runs on your Mac',
+    'a.plan': 'Local · Free', "a.arch.title": "Past broadcasts", "a.arch.ph": "Twitch channel — name or URL", "a.arch.btn": "List broadcasts", "a.arch.hint": "A channel’s recent ended streams, newest first — the top entry may still be in progress. Clip a section, or download the whole broadcast.", "a.arch.views": "views", "a.arch.clip": "Clip a section", "a.arch.full": "Download full", "a.arch.loading": "Loading broadcasts…", "a.arch.needchan": "Enter a Twitch channel name", 'a.stalled': 'stalled · no data for', 'a.nowm': 'no watermark', 'a.runs': 'Runs on your Mac',
     'a.hero.title': 'Turn any stream into viral shorts',
     'a.hero.sub': 'Paste a link or capture a live stream — auto-cut the best moments, then edit, caption &amp; publish.',
     'a.hero.ph': 'Drop a YouTube or Twitch link', 'a.hero.upload': 'Upload a video', 'a.hero.live': 'Capture live',
@@ -188,7 +188,7 @@ const DICT = {
     // ================= app =================
     'a.nav.create': 'Créer', 'a.nav.post': 'Publier', 'a.nav.home': 'Accueil', 'a.nav.capture': 'Capture &amp; import',
     'a.nav.library': 'Bibliothèque', 'a.nav.publish': 'Publier', 'a.nav.landing': "Page d'accueil",
-    'a.plan': 'Local · Gratuit', 'a.stalled': 'bloqué · aucune donnée depuis', 'a.nowm': 'sans filigrane', 'a.runs': 'Tourne sur votre Mac',
+    'a.plan': 'Local · Gratuit', "a.arch.title": "Rediffusions", "a.arch.ph": "Chaîne Twitch — nom ou URL", "a.arch.btn": "Lister les rediffs", "a.arch.hint": "Les derniers streams terminés d’une chaîne, du plus récent au plus ancien — le premier peut être encore en cours. Clippez une section, ou téléchargez toute la rediffusion.", "a.arch.views": "vues", "a.arch.clip": "Clipper une section", "a.arch.full": "Tout télécharger", "a.arch.loading": "Chargement des rediffusions…", "a.arch.needchan": "Entrez un nom de chaîne Twitch", 'a.stalled': 'bloqué · aucune donnée depuis', 'a.nowm': 'sans filigrane', 'a.runs': 'Tourne sur votre Mac',
     'a.hero.title': 'Transformez vos lives en shorts viraux',
     'a.hero.sub': "Collez un lien ou capturez un live — découpez automatiquement les meilleurs moments, puis éditez, sous-titrez &amp; publiez.",
     'a.hero.ph': 'Collez un lien YouTube ou Twitch', 'a.hero.upload': 'Importer une vidéo', 'a.hero.live': 'Capturer un live',
@@ -291,7 +291,7 @@ const DICT = {
     // ================= app =================
     'a.nav.create': 'Crear', 'a.nav.post': 'Publicar', 'a.nav.home': 'Inicio', 'a.nav.capture': 'Capturar e importar',
     'a.nav.library': 'Biblioteca', 'a.nav.publish': 'Publicar', 'a.nav.landing': 'Página de inicio',
-    'a.plan': 'Local · Gratis', 'a.stalled': 'bloqueado · sin datos desde hace', 'a.nowm': 'sin marca de agua', 'a.runs': 'Funciona en tu Mac',
+    'a.plan': 'Local · Gratis', "a.arch.title": "Retransmisiones anteriores", "a.arch.ph": "Canal de Twitch — nombre o URL", "a.arch.btn": "Listar retransmisiones", "a.arch.hint": "Los últimos directos finalizados de un canal, del más reciente al más antiguo — el primero puede seguir en curso. Recorta una sección o descarga la retransmisión completa.", "a.arch.views": "visualizaciones", "a.arch.clip": "Recortar una sección", "a.arch.full": "Descargar completa", "a.arch.loading": "Cargando retransmisiones…", "a.arch.needchan": "Introduce un nombre de canal de Twitch", 'a.stalled': 'bloqueado · sin datos desde hace', 'a.nowm': 'sin marca de agua', 'a.runs': 'Funciona en tu Mac',
     'a.hero.title': 'Convierte cualquier directo en shorts virales',
     'a.hero.sub': 'Pega un enlace o captura un directo — corta los mejores momentos automáticamente, luego edita, subtitula &amp; publica.',
     'a.hero.ph': 'Pega un enlace de YouTube o Twitch', 'a.hero.upload': 'Subir un vídeo', 'a.hero.live': 'Capturar directo',
@@ -394,7 +394,7 @@ const DICT = {
     // ================= app =================
     'a.nav.create': 'Criar', 'a.nav.post': 'Publicar', 'a.nav.home': 'Início', 'a.nav.capture': 'Capturar e importar',
     'a.nav.library': 'Biblioteca', 'a.nav.publish': 'Publicar', 'a.nav.landing': 'Página inicial',
-    'a.plan': 'Local · Grátis', 'a.stalled': 'travado · sem dados há', 'a.nowm': 'sem marca d\'água', 'a.runs': 'Roda no seu Mac',
+    'a.plan': 'Local · Grátis', "a.arch.title": "Transmissões anteriores", "a.arch.ph": "Canal da Twitch — nome ou URL", "a.arch.btn": "Listar transmissões", "a.arch.hint": "As últimas lives encerradas de um canal, da mais recente para a mais antiga — a primeira pode ainda estar em andamento. Corte um trecho ou baixe a transmissão inteira.", "a.arch.views": "visualizações", "a.arch.clip": "Cortar um trecho", "a.arch.full": "Baixar completa", "a.arch.loading": "Carregando transmissões…", "a.arch.needchan": "Digite um nome de canal da Twitch", 'a.stalled': 'travado · sem dados há', 'a.nowm': 'sem marca d\'água', 'a.runs': 'Roda no seu Mac',
     'a.hero.title': 'Transforme qualquer live em shorts virais',
     'a.hero.sub': 'Cole um link ou capture uma live — corte os melhores momentos automaticamente, depois edite, legende &amp; publique.',
     'a.hero.ph': 'Cole um link do YouTube ou da Twitch', 'a.hero.upload': 'Enviar um vídeo', 'a.hero.live': 'Capturar live',
@@ -497,7 +497,7 @@ const DICT = {
     // ================= app =================
     'a.nav.create': 'Erstellen', 'a.nav.post': 'Posten', 'a.nav.home': 'Start', 'a.nav.capture': 'Aufnehmen &amp; Import',
     'a.nav.library': 'Clip-Bibliothek', 'a.nav.publish': 'Veröffentlichen', 'a.nav.landing': 'Startseite',
-    'a.plan': 'Lokal · Kostenlos', 'a.stalled': 'blockiert · keine Daten seit', 'a.nowm': 'kein Wasserzeichen', 'a.runs': 'Läuft auf deinem Mac',
+    'a.plan': 'Lokal · Kostenlos', "a.arch.title": "Vergangene Streams", "a.arch.ph": "Twitch-Kanal — Name oder URL", "a.arch.btn": "Streams auflisten", "a.arch.hint": "Die letzten beendeten Streams eines Kanals, neueste zuerst — der oberste läuft möglicherweise noch. Schneide einen Abschnitt oder lade den ganzen Stream herunter.", "a.arch.views": "Aufrufe", "a.arch.clip": "Abschnitt clippen", "a.arch.full": "Komplett laden", "a.arch.loading": "Streams werden geladen…", "a.arch.needchan": "Gib einen Twitch-Kanalnamen ein", 'a.stalled': 'blockiert · keine Daten seit', 'a.nowm': 'kein Wasserzeichen', 'a.runs': 'Läuft auf deinem Mac',
     'a.hero.title': 'Mach aus jedem Stream virale Shorts',
     'a.hero.sub': 'Füge einen Link ein oder nimm einen Livestream auf — die besten Momente werden automatisch geschnitten, dann bearbeiten, untertiteln &amp; veröffentlichen.',
     'a.hero.ph': 'YouTube- oder Twitch-Link einfügen', 'a.hero.upload': 'Video hochladen', 'a.hero.live': 'Live aufnehmen',

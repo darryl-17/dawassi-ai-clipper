@@ -104,6 +104,20 @@
   .streamhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .sttitle { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .streamcard .status { margin-top: 8px; }
+  .archlist:not(:empty) { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .archrow { display: flex; align-items: center; gap: 14px; background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
+  .archthumb { width: 104px; height: 58px; border-radius: 8px; object-fit: cover; flex: none; background: var(--chip); }
+  .archthumb-none { display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  .archthumb-none .lic { width: 22px; }
+  .archmeta { flex: 1; min-width: 0; }
+  .archtitle { font-weight: 700; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .archpills { display: flex; gap: 8px; margin-top: 6px; font-size: 12px; }
+  .archacts { display: flex; gap: 8px; flex: none; }
+  @media (max-width: 720px) {
+    .archrow { flex-wrap: wrap; }
+    .archthumb { width: 72px; height: 40px; }
+    .archacts { width: 100%; }
+  }
   /* ---------- web editor (timeline) ---------- */
   .edwrap { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; }
   .edwrap.open { display: flex; }
@@ -392,6 +406,27 @@
   </div>
 
   <!-- VOD -->
+  <!-- PAST BROADCASTS -->
+  <div class="card" data-view="create" id="secArch">
+    <h2 data-i18n="a.arch.title">Past broadcasts</h2>
+    <div class="row">
+      <input type="text" id="archChan" class="grow" placeholder="Twitch channel — name or URL" data-i18n-ph="a.arch.ph">
+      <select id="archLimit" title="how many to list">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+      </select>
+      <select id="archQual" title="quality for a full download">
+        <option value="480">480p</option>
+        <option value="720" selected>720p</option>
+        <option value="1080">1080p</option>
+      </select>
+      <button id="btnArch" class="primary big"><i data-ic="radio"></i><span data-i18n="a.arch.btn">List broadcasts</span></button>
+    </div>
+    <div class="hint" data-i18n="a.arch.hint">A channel’s recent ended streams, newest first — the top entry may still be in progress. Clip a section, or download the whole broadcast.</div>
+    <div id="archList" class="archlist"></div>
+  </div>
+
   <div class="card" data-view="create" id="secVod">
     <h2 data-i18n="a.vod.title">VOD / video clip</h2>
     <div class="row timefields">
@@ -720,6 +755,7 @@ async function api(path, opts) {
   return j;
 }
 const post = (path, body) => api(path, { method: 'POST', body: JSON.stringify(body || {}) });
+const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
 function fmtDur(s) {
   s = Math.round(s);
@@ -809,6 +845,65 @@ $('btnVod').onclick = async () => {
     refresh();
   } catch (e) { toast(e.message, true); }
 };
+
+// ---- past broadcasts
+function fmtViews(n) {
+  if (n == null) return '';
+  if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1e3) return Math.round(n / 1e3) + 'k';
+  return String(n);
+}
+
+function archRowHTML(v) {
+  const views = v.viewCount != null ? `<span class="pill">${fmtViews(v.viewCount)} ${window.t('a.arch.views')}</span>` : '';
+  const dur = v.durationString ? `<span class="pill">${v.durationString}</span>` : '';
+  const thumb = v.thumbnail
+    ? `<img class="archthumb" src="${v.thumbnail}" alt="" loading="lazy">`
+    : `<div class="archthumb archthumb-none">${icon('video')}</div>`;
+  return `<div class="archrow">
+    ${thumb}
+    <div class="archmeta">
+      <div class="archtitle" title="${esc(v.title)}">${esc(v.title)}</div>
+      <div class="archpills">${dur}${views}</div>
+    </div>
+    <div class="archacts">
+      <button class="clipbtn" onclick="archClip('${v.url}')">${icon('scissors')}${window.t('a.arch.clip')}</button>
+      <button class="ghost" onclick="archFull('${v.url}', this)">${icon('download')}${window.t('a.arch.full')}</button>
+    </div>
+  </div>`;
+}
+
+window.archClip = (url) => {
+  $('vodUrl').value = url;
+  $('secVod').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('vodStart').focus();
+};
+
+window.archFull = async (url, btn) => {
+  const q = $('archQual') ? $('archQual').value : '720';
+  btn.disabled = true;
+  try {
+    await post('/api/vod/download', { url, quality: q });
+    toast('Downloading full broadcast… watch the Activity panel');
+    refresh();
+  } catch (e) { toast(e.message, true); }
+  btn.disabled = false;
+};
+
+$('btnArch').onclick = async () => {
+  const chan = $('archChan').value.trim();
+  const list = $('archList');
+  if (!chan) return toast(window.t('a.arch.needchan'), true);
+  list.innerHTML = `<div class="hint">${window.t('a.arch.loading')}</div>`;
+  try {
+    const d = await api(`/api/twitch/vods?channel=${encodeURIComponent(chan)}&limit=${$('archLimit').value}`);
+    list.innerHTML = d.vods.map(archRowHTML).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="hint" style="color:var(--danger)">${esc(e.message)}</div>`;
+  }
+};
+
+$('archChan').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnArch').click(); });
 
 // ---- clip actions
 async function delClip(f) {

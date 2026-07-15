@@ -447,7 +447,12 @@ function vodClip({ url, start, end, name, precise }) {
     url,
   ];
   if (precise !== false) args.splice(4, 0, '--force-keyframes-at-cuts');
+  return runYtdlpJob(job, args, base);
+}
 
+// Drives a yt-dlp download as a job: parses its progress, then decides the job
+// outcome from the file actually on disk rather than the exit code alone.
+function runYtdlpJob(job, args, base) {
   const p = ytdlpSpawn(args);
   const onData = (d) => {
     for (const line of d.toString().split('\n')) {
@@ -469,6 +474,80 @@ function vodClip({ url, start, end, name, precise }) {
     }
   });
   return job;
+}
+
+// ---------------------------------------------------------------- twitch channel archives
+
+const TWITCH_CHANNEL_RE = /^[A-Za-z0-9_]{2,30}$/;
+
+// Accepts a bare channel name or any twitch.tv/<channel>/... URL.
+function parseChannel(input) {
+  const raw = String(input || '').trim();
+  const m = raw.match(/twitch\.tv\/([^/?#]+)/i);
+  const name = (m ? m[1] : raw).replace(/^@/, '');
+  if (!TWITCH_CHANNEL_RE.test(name)) throw new Error('invalid Twitch channel name');
+  return name;
+}
+
+// Lists a channel's past broadcasts (ended streams), newest first. --flat-playlist
+// keeps this to a single request: resolving each VOD individually would be one
+// network round-trip per item.
+function channelVods(channel, limit) {
+  return new Promise((resolve, reject) => {
+    const url = `https://www.twitch.tv/${channel}/videos?filter=archives&sort=time`;
+    const p = ytdlpSpawn([
+      '--no-warnings', '--flat-playlist', '--dump-json',
+      '--playlist-end', String(limit), '--socket-timeout', '30', url,
+    ]);
+    let out = '', err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('error', (e) => reject(new Error('could not run yt-dlp: ' + e.message)));
+    p.on('close', () => {
+      const vods = [];
+      for (const line of out.split('\n')) {
+        if (!line.trim()) continue;
+        try {
+          const d = JSON.parse(line);
+          if (!d.url) continue;
+          vods.push({
+            id: String(d.id || '').replace(/^v/, ''),
+            url: d.webpage_url || d.url,
+            title: d.title || 'untitled broadcast',
+            duration: d.duration || null,
+            durationString: d.duration_string || null,
+            viewCount: d.view_count ?? null,
+            thumbnail: /404_processing/.test(d.thumbnail || '') ? null : d.thumbnail || null,
+          });
+        } catch (_) {}
+      }
+      if (!vods.length) {
+        const why = /does not exist|not found/i.test(err) ? 'no such Twitch channel'
+          : /no videos|empty/i.test(err) ? 'this channel has no past broadcasts'
+          : 'no past broadcasts found — the channel may hide them, or Twitch may be unreachable';
+        return reject(new Error(why));
+      }
+      resolve(vods);
+    });
+  });
+}
+
+// Downloads a whole past broadcast (no section bounds).
+function vodDownload({ url, name, quality }) {
+  if (!/^https?:\/\//i.test(String(url || ''))) throw new Error('invalid VOD url');
+  const h = Number(quality) || 720;
+  const base = sanitizeName(name) || tsName('vod_full');
+  const out = path.join(CLIPS_DIR, base + '.%(ext)s');
+  const job = newJob('vod-download', `VOD download: ${base}.mp4 (${h}p max)`);
+  return runYtdlpJob(job, [
+    '--no-warnings', '--no-playlist',
+    '--ffmpeg-location', FFMPEG,
+    '-f', `bv*[height<=?${h}]+ba/b[height<=?${h}]/b`,
+    '--merge-output-format', 'mp4',
+    '--newline', '--progress',
+    '-o', out,
+    url,
+  ], base);
 }
 
 // ---------------------------------------------------------------- vertical export
@@ -1055,6 +1134,24 @@ app.post('/api/vod/clip', (req, res) => {
       url: String(req.body.url || '').trim(),
       start: req.body.start, end: req.body.end,
       name: req.body.name, precise: req.body.precise,
+    });
+    res.json({ ok: true, jobId: job.id });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.get('/api/twitch/vods', async (req, res) => {
+  try {
+    const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 8));
+    const channel = parseChannel(req.query.channel);
+    res.json({ channel, vods: await channelVods(channel, limit) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/vod/download', (req, res) => {
+  try {
+    const job = vodDownload({
+      url: String(req.body.url || '').trim(),
+      name: req.body.name, quality: req.body.quality,
     });
     res.json({ ok: true, jobId: job.id });
   } catch (e) { res.status(400).json({ error: e.message }); }

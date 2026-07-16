@@ -8,27 +8,39 @@
 <title>DAWASSI AI CLIPPER — The #1 Local Stream Clipping Tool</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
 <style>
-  /* Departure Mono by Helena Zhang, SIL OFL 1.1 — see fonts/DepartureMono-LICENSE.txt.
-     Self-hosted: the page makes no font request off this machine. Ships Regular
-     only, so bold is synthesised by the browser (see the .b/strong rules below). */
-  @font-face {
-    font-family: 'Departure Mono';
-    src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
+  /* Self-hosted fonts — the page makes no font request off this machine.
+     Departure Mono (Helena Zhang, SIL OFL 1.1) is the PRIMARY / display face.
+     Open Sans (Apache-2.0) is the SECONDARY / body face.
+     Caveat (SIL OFL 1.1) is used only for the "AI Clipper" logo script.
+     Licences live beside each file in fonts/. */
+  @font-face { font-family: 'Departure Mono'; src: url('/fonts/DepartureMono-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sans'; src: url('/fonts/OpenSans-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sans'; src: url('/fonts/OpenSans-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sans'; src: url('/fonts/OpenSans-400i.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Open Sans'; src: url('/fonts/OpenSans-700i.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Caveat'; src: url('/fonts/Caveat-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
   :root {
     --bg: #ffffff; --text: #1a130f; --muted: #6f635b; --accent: #e4571e;
     --accent-dark: #c44712; --hi: #e4571e; --border: #f0e6df; --panel: #fbf7f4;
     --shadow: rgba(228,87,30,.12);
     --spring: cubic-bezier(.34,1.56,.64,1);
     --ease: cubic-bezier(.16,1,.3,1);
+    --font-display: 'Departure Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --font-body: 'Open Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: 'Departure Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
+  /* Departure Mono is the display face: headings, eyebrows, ticker, nav, buttons,
+     prices. Body copy stays in Open Sans (inherited from body). The logo is
+     excluded on purpose — it keeps its Open Sans wordmark + Caveat script. */
+  h1.head, .h2, .eyebrow, .finalcard h2, .showhead h2, .feat h3, .step h4, .step .n,
+  .tickeritem, nav a:not(.logo), .cta, .newstag, .tk {
+    font-family: var(--font-display);
+  }
+  /* logo keeps the secondary face for its wordmark, never the display face */
+  .logo { font-family: var(--font-body); }
 
   /* ---------- ambient background ---------- */
   .blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; will-change: transform; }
@@ -51,9 +63,9 @@
   .navdiscord svg { width: 20px; height: 20px; display: block; }
   .navdiscord:hover { background: var(--accent); color: #fff !important; transform: translateY(-1px); }
   .navdiscord:hover svg { fill: #fff; }
-  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 19px; letter-spacing: 0; color: var(--text); transition: transform .35s var(--spring); }
+  .logo { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; letter-spacing: -0.5px; color: var(--text); transition: transform .35s var(--spring); }
   .logo:hover { transform: scale(1.04); }
-  .logo .script { font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
+  .logo .script { font-family: 'Caveat', cursive; font-weight: 700; font-style: normal; text-transform: none; color: var(--accent); font-size: 1.05em; }
   .navlinks { display: flex; gap: 30px; align-items: center; }
   .navlinks a { font-weight: 600; font-size: 15px; color: #3a322d; transition: color .15s; position: relative; }
   .navlinks a:not(.cta)::after { content: ''; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0; background: var(--accent); border-radius: 2px; transition: width .3s var(--ease); }
@@ -121,7 +133,7 @@
   /* ---------- footer ---------- */
   footer { max-width: 1120px; margin: 58px auto 0; padding: 32px 26px 48px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
   .fbrand { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 20px; color: var(--text); }
-  .fbrand .script { font-style: normal; text-transform: none; color: var(--accent); }
+  .fbrand .script { font-family: 'Caveat', cursive; font-weight: 700; font-style: normal; text-transform: none; color: var(--accent); }
   .flinks { margin: 18px 0 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .flinks a { display: inline-flex; align-items: center; gap: 7px; background: var(--panel); border: 1px solid var(--border); padding: 8px 15px; border-radius: 999px; font-weight: 700; font-size: 13.5px; color: var(--text); transition: transform .35s var(--spring), background .2s ease, color .2s ease; }
   .flinks a:hover { background: var(--accent); color: #fff; transform: translateY(-3px); }

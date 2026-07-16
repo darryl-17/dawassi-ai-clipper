@@ -97,7 +97,7 @@ Clipping for commentary and reaction content is common practice, but the content
 
 [MIT](LICENSE) — fork it, tweak it, make it yours.
 
-The landing page is set in [Departure Mono](https://departuremono.com/) by Helena Zhang, used under the SIL Open Font License 1.1. The font is self-hosted in `public/fonts/`, with its licence alongside it — the page loads no fonts off your machine.
+The landing page pairs [Departure Mono](https://departuremono.com/) (Helena Zhang, SIL OFL 1.1) as the display face with [Open Sans](https://github.com/googlefonts/opensans) (Apache-2.0) for body text; the logo keeps its [Caveat](https://github.com/googlefonts/caveat) (SIL OFL 1.1) script. All three are self-hosted in `public/fonts/` with their licences alongside — the page loads no fonts off your machine.
 
 ---
 
@@ -188,4 +188,4 @@ Clipper pour du commentaire ou de la réaction est une pratique courante, mais l
 
 [MIT](LICENSE) — forkez-le, modifiez-le, faites-en le vôtre.
 
-La landing page est composée en [Departure Mono](https://departuremono.com/) de Helena Zhang, utilisée sous licence SIL Open Font License 1.1. La police est hébergée en local dans `public/fonts/`, avec sa licence à côté — la page ne charge aucune police depuis l'extérieur de votre machine.
+La landing page associe [Departure Mono](https://departuremono.com/) (Helena Zhang, SIL OFL 1.1) comme police d'affichage à [Open Sans](https://github.com/googlefonts/opensans) (Apache-2.0) pour le corps de texte ; le logo garde son script [Caveat](https://github.com/googlefonts/caveat) (SIL OFL 1.1). Les trois sont hébergées en local dans `public/fonts/` avec leurs licences à côté — la page ne charge aucune police depuis l'extérieur de votre machine.

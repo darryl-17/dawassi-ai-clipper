@@ -16,26 +16,6 @@
   <p class="sub" data-animate data-i18n="bp.sub">Want a walkthrough before you install?</p>
 </section>
 
-<section>
-  <!-- Cal inline embed code begins -->
-<div style="width:100%;height:100%;overflow:scroll" id="my-cal-inline-dawassi-ai-clipper"></div>
-<script type="text/javascript">
-  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-Cal("init", "dawassi-ai-clipper", {origin:"https://app.cal.com"});
-Cal.config = Cal.config || {};
-Cal.config.forwardQueryParams = true;
-
-  Cal.ns["dawassi-ai-clipper"]("inline", {
-    elementOrSelector:"#my-cal-inline-dawassi-ai-clipper",
-    config: {"layout":"month_view","useSlotsViewOnSmallScreen":"true","theme":"auto"},
-    calLink: "darrylwassi/dawassi-ai-clipper",
-  });
-
-  Cal.ns["dawassi-ai-clipper"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#e35619"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
-  </script>
-  <!-- Cal inline embed code ends -->
-</section>>
-
 <section class="section" style="padding-top:8px">
   <div class="callist" data-stagger>
     <div class="usecard" data-animate><div class="ic" data-ic="video"></div><h3 data-i18n="bp.c1.t">See it live</h3><p data-i18n="bp.c1.d">A real screen-share: buffer a stream, cut a clip, add captions, export a vertical short.</p></div>
@@ -43,48 +23,34 @@ Cal.config.forwardQueryParams = true;
     <div class="usecard" data-animate><div class="ic" data-ic="zap"></div><h3 data-i18n="bp.c3.t">15 minutes</h3><p data-i18n="bp.c3.d">Short and focused. No sales pitch — the tool is free and open source.</p></div>
   </div>
 
+  <!-- Cal.com inline booking (calLink: darrylwassi/dawassi-ai-clipper) -->
   <div class="calwrap" data-animate>
-    <div id="bookMount"></div>
+    <div class="calcard"><div id="cal-dawassi" style="width:100%;min-height:660px;overflow:auto"></div></div>
+  </div>
+
+  <div class="calnote" data-animate style="text-align:center">
+    <b data-i18n="bp.reach">Prefer another way? Reach me directly:</b>
+    <div class="pageherocta" style="margin-top:14px">
+      <a class="cta ghost" href="mailto:darrylwassi@gmail.com"><i data-ic="zap"></i><span data-i18n="bp.email">Email me</span></a>
+      <a class="cta ghost" href="https://x.com/darryl_wassi" target="_blank" rel="noopener" data-i18n="bp.dm">DM on X</a>
+      <a class="cta ghost" href="https://discord.gg/nFPU9Gteu" target="_blank" rel="noopener">Discord</a>
+    </div>
   </div>
 </section>
 </main>
 
 <script src="/i18n.js"></script>
 <script src="/site.js"></script>
-<script>
-// ── Cal.com booking ────────────────────────────────────────────────────────
-// Set this to your Cal.com event once your account is ready, e.g. "darryl-wassi/demo".
-// While it's empty, the page shows a friendly "reach me here" fallback instead of
-// a broken widget. See the README ("Book-a-call / Cal.com setup") for the 4 steps.
-const CAL_LINK = "";
-
-const mount = document.getElementById('bookMount');
-let calLoaded = false;
-
-function contactFallback() {
-  return '<div class="calnote" style="text-align:center">'
-    + '<b>' + t('bp.soon') + '</b><br>' + t('bp.soon2')
-    + '<div class="pageherocta" style="margin-top:18px">'
-    + '<a class="cta magnetic" href="mailto:darrylwassi@gmail.com">' + icon('zap') + '<span>' + t('bp.email') + '</span></a>'
-    + '<a class="cta ghost" href="https://x.com/darryl_wassi" target="_blank" rel="noopener">' + t('bp.dm') + '</a>'
-    + '<a class="cta ghost" href="https://discord.gg/nFPU9Gteu" target="_blank" rel="noopener">Discord</a>'
-    + '</div></div>';
-}
-
-function renderBooking() {
-  if (!CAL_LINK) { mount.innerHTML = contactFallback(); return; }
-  mount.innerHTML = '<div class="calcard"><div id="calInline"></div></div>';
-  if (calLoaded) { window.Cal && Cal('inline', { elementOrSelector: '#calInline', calLink: CAL_LINK }); return; }
-  // official Cal.com embed loader
-  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; typeof namespace === 'string' ? (cal.ns[namespace] = api) && p(api, ar) : p(cal, ar); return; } p(cal, ar); }; })(window, 'https://app.cal.com/embed/embed.js', 'init');
-  Cal('init', { origin: 'https://cal.com' });
-  Cal('inline', { elementOrSelector: '#calInline', calLink: CAL_LINK, layout: 'month_view' });
-  Cal('ui', { theme: 'light', hideEventTypeDetails: false, styles: { branding: { brandColor: '#e4571e' } } });
-  calLoaded = true;
-}
-
-window.onSitePageLang = renderBooking; // re-render fallback text on language change
-renderBooking();
+<!-- Cal.com embed — generated for the darrylwassi/dawassi-ai-clipper event -->
+<script type="text/javascript">
+(function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+Cal("init", "dawassi-ai-clipper", { origin: "https://app.cal.com" });
+Cal.ns["dawassi-ai-clipper"]("inline", {
+  elementOrSelector: "#cal-dawassi",
+  config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "auto" },
+  calLink: "darrylwassi/dawassi-ai-clipper",
+});
+Cal.ns["dawassi-ai-clipper"]("ui", { cssVarsPerTheme: { light: { "cal-brand": "#e35619" }, dark: { "cal-brand": "#fafafa" } }, hideEventTypeDetails: false, layout: "month_view" });
 </script>
 </body>
 </html>

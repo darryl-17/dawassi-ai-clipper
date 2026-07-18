@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<title>Book a call — DAWASSI AI Clipper</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e4571e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='38' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<main>
+<section class="pagehero">
+  <div class="eyebrow" data-animate data-i18n="bp.eyebrow">Live demo</div>
+  <h1 class="h1" data-animate data-i18n="bp.h1">Book a personal demo</h1>
+  <p class="sub" data-animate data-i18n="bp.sub">Want a walkthrough before you install? Grab a slot and I'll show you DAWASSI live — screen-shared, one-on-one, and answer anything you like.</p>
+</section>
+
+<section class="section" style="padding-top:8px">
+  <div class="callist" data-stagger>
+    <div class="usecard" data-animate><div class="ic" data-ic="video"></div><h3 data-i18n="bp.c1.t">See it live</h3><p data-i18n="bp.c1.d">A real screen-share: buffer a stream, cut a clip, add captions, export a vertical short.</p></div>
+    <div class="usecard" data-animate><div class="ic" data-ic="help"></div><h3 data-i18n="bp.c2.t">Ask anything</h3><p data-i18n="bp.c2.d">Setup, your workflow, feature requests — bring your questions and edge cases.</p></div>
+    <div class="usecard" data-animate><div class="ic" data-ic="zap"></div><h3 data-i18n="bp.c3.t">15 minutes</h3><p data-i18n="bp.c3.d">Short and focused. No sales pitch — the tool is free and open source.</p></div>
+  </div>
+
+  <div class="calwrap" data-animate>
+    <div id="bookMount"></div>
+  </div>
+</section>
+</main>
+
+<script src="/i18n.js"></script>
+<script src="/site.js"></script>
+<script>
+// ── Cal.com booking ────────────────────────────────────────────────────────
+// Set this to your Cal.com event once your account is ready, e.g. "darryl-wassi/demo".
+// While it's empty, the page shows a friendly "reach me here" fallback instead of
+// a broken widget. See the README ("Book-a-call / Cal.com setup") for the 4 steps.
+const CAL_LINK = "";
+
+const mount = document.getElementById('bookMount');
+let calLoaded = false;
+
+function contactFallback() {
+  return '<div class="calnote" style="text-align:center">'
+    + '<b>' + t('bp.soon') + '</b><br>' + t('bp.soon2')
+    + '<div class="pageherocta" style="margin-top:18px">'
+    + '<a class="cta magnetic" href="mailto:darrylwassi@gmail.com">' + icon('zap') + '<span>' + t('bp.email') + '</span></a>'
+    + '<a class="cta ghost" href="https://x.com/darryl_wassi" target="_blank" rel="noopener">' + t('bp.dm') + '</a>'
+    + '<a class="cta ghost" href="https://discord.gg/nFPU9Gteu" target="_blank" rel="noopener">Discord</a>'
+    + '</div></div>';
+}
+
+function renderBooking() {
+  if (!CAL_LINK) { mount.innerHTML = contactFallback(); return; }
+  mount.innerHTML = '<div class="calcard"><div id="calInline"></div></div>';
+  if (calLoaded) { window.Cal && Cal('inline', { elementOrSelector: '#calInline', calLink: CAL_LINK }); return; }
+  // official Cal.com embed loader
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; typeof namespace === 'string' ? (cal.ns[namespace] = api) && p(api, ar) : p(cal, ar); return; } p(cal, ar); }; })(window, 'https://app.cal.com/embed/embed.js', 'init');
+  Cal('init', { origin: 'https://cal.com' });
+  Cal('inline', { elementOrSelector: '#calInline', calLink: CAL_LINK, layout: 'month_view' });
+  Cal('ui', { theme: 'light', hideEventTypeDetails: false, styles: { branding: { brandColor: '#e4571e' } } });
+  calLoaded = true;
+}
+
+window.onSitePageLang = renderBooking; // re-render fallback text on language change
+renderBooking();
+</script>
+</body>
+</html>

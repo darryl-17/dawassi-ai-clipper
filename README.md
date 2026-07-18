@@ -94,6 +94,17 @@ Clips are ordinary MP4 files in the `clips/` folder — open them, drag them int
 
 Clipping for commentary and reaction content is common practice, but the content still belongs to its creator. Follow the streamer's rules and the platform's terms, credit the original channel, and don't rebroadcast entire streams.
 
+### The landing site
+
+The marketing site is a small multi-page static site in `public/`, all sharing one shell (`site.css` + `site.js` inject the header, ticker and footer; `i18n.js` holds the 5-language strings). Pages: `index.html` (home), `features.html`, `how-it-works.html`, `use-cases.html`, `pricing.html`, `whats-new.html`, `faq.html`, `download.html`, `about.html`, `book-a-call.html`.
+
+**Book a call (Cal.com) — one-line setup.** The demo page (`public/book-a-call.html`) is wired for [Cal.com](https://cal.com) but ships with a friendly "reach me here" fallback until you connect your account:
+
+1. Create a free account at **cal.com** and verify your email.
+2. Create an **event type** for demos (e.g. name it *DAWASSI Demo*, 15 min, video/Google Meet).
+3. Your public link is `cal.com/<username>/<event-slug>` — the value you need is just `<username>/<event-slug>`.
+4. Open `public/book-a-call.html`, set `const CAL_LINK = "<username>/<event-slug>";`, save and redeploy. The embedded calendar replaces the fallback automatically.
+
 ### License
 
 [MIT](LICENSE) — fork it, tweak it, make it yours.
@@ -185,6 +196,17 @@ Les clips sont de simples fichiers MP4 dans le dossier `clips/` — ouvrez-les, 
 ### Usage responsable
 
 Clipper pour du commentaire ou de la réaction est une pratique courante, mais le contenu appartient toujours à son créateur. Respectez les règles du streamer et les conditions de la plateforme, créditez la chaîne d'origine, et ne rediffusez pas des lives entiers.
+
+### Le site vitrine
+
+Le site marketing est un petit site statique multi-pages dans `public/`, partageant un squelette commun (`site.css` + `site.js` injectent le header, le bandeau et le footer ; `i18n.js` contient les textes en 5 langues). Pages : `index.html` (accueil), `features.html`, `how-it-works.html`, `use-cases.html`, `pricing.html`, `whats-new.html`, `faq.html`, `download.html`, `about.html`, `book-a-call.html`.
+
+**Réserver un appel (Cal.com) — config en une ligne.** La page démo (`public/book-a-call.html`) est prête pour [Cal.com](https://cal.com) mais affiche un repli « contactez-moi ici » tant que votre compte n'est pas connecté :
+
+1. Créez un compte gratuit sur **cal.com** et vérifiez votre email.
+2. Créez un **type d'événement** pour les démos (ex. *DAWASSI Demo*, 15 min, visio/Google Meet).
+3. Votre lien public est `cal.com/<pseudo>/<slug-evenement>` — la valeur à utiliser est `<pseudo>/<slug-evenement>`.
+4. Ouvrez `public/book-a-call.html`, mettez `const CAL_LINK = "<pseudo>/<slug-evenement>";`, sauvegardez et redéployez. Le calendrier intégré remplace automatiquement le repli.
 
 ### Licence
 

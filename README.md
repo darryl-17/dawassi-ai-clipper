@@ -27,6 +27,7 @@ The app runs in your browser at `http://localhost:3547`, but every byte stays on
 - **Hype detection** — flags loudness spikes automatically so you can grab the whole reaction
 - **Past broadcasts** — list any Twitch channel's recent ended streams (thumbnail, length, views), then clip a section or download the whole broadcast
 - **VOD section download** — grab just the part you need, by timestamp
+- **Instagram & TikTok thumbnails** — paste a public post link and save its cover image as a clean, full-quality JPG
 - Import your own video files
 
 **AI tools (all on-device)**
@@ -118,6 +119,7 @@ L'application s'ouvre dans votre navigateur sur `http://localhost:3547`, mais **
 - **Détection des moments forts** — repère automatiquement les pics de volume pour capturer toute la réaction
 - **Rediffusions** — listez les derniers streams terminés de n'importe quelle chaîne Twitch (miniature, durée, vues), puis clippez une section ou téléchargez toute la rediffusion
 - **Téléchargement d'une section de VOD** — seulement la partie voulue, par timestamp
+- **Miniatures Instagram & TikTok** — collez le lien d'un post public et enregistrez son image de couverture en JPG propre et pleine qualité
 - Importez vos propres fichiers vidéo
 
 **Outils IA (100% en local)**

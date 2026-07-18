@@ -557,6 +557,88 @@ function vodDownload({ url, name, quality }) {
   ], base);
 }
 
+// ---------------------------------------------------------------- social thumbnail
+
+const SOCIAL_RE = /^https?:\/\/(?:www\.|m\.|vm\.|vt\.)?(?:instagram\.com|instagr\.am|tiktok\.com)\//i;
+// A desktop browser UA — Instagram/TikTok serve the og:image link-preview meta
+// to browsers but block bare/CLI agents.
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15';
+
+// Normalises any image URL to a clean, full-quality jpg on disk (handles
+// webp/png/jpg sources) via ffmpeg, so the saved file is always a good jpg.
+function fetchImageToJpg(imgUrl, destJpg) {
+  return fetch(imgUrl, { headers: { 'User-Agent': BROWSER_UA } }).then(async (res) => {
+    if (!res.ok) throw new Error('image fetch ' + res.status);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 1000) throw new Error('image too small');
+    const tmp = destJpg + '.src';
+    fs.writeFileSync(tmp, buf);
+    await new Promise((resolve, reject) => {
+      const p = spawn(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-i', tmp, '-qscale:v', '2', destJpg]);
+      p.on('error', reject);
+      p.on('close', (code) => { try { fs.unlinkSync(tmp); } catch (_) {} code === 0 ? resolve() : reject(new Error('convert failed')); });
+    });
+  });
+}
+
+// Scrapes the og:image preview off a post page — the reliable path for Instagram
+// (its yt-dlp extractor is broken) and a safety net for TikTok.
+async function ogImageUrl(pageUrl) {
+  const res = await fetch(pageUrl, { headers: { 'User-Agent': BROWSER_UA, 'Accept-Language': 'en-US,en;q=0.9' } });
+  const html = await res.text();
+  const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+  return m ? m[1].replace(/&amp;/g, '&') : null;
+}
+
+// Retrieves an Instagram or TikTok post's thumbnail and saves it as a jpg.
+// Cascade: yt-dlp (best resolution, works for TikTok) → og:image scrape (works
+// for Instagram) → TikTok oembed. First one to land a real jpg wins.
+function socialThumbnail({ url }) {
+  const u = String(url || '').trim();
+  if (!SOCIAL_RE.test(u)) throw new Error('paste a public Instagram or TikTok post link');
+  const platform = /tiktok/i.test(u) ? 'TikTok' : 'Instagram';
+  const base = tsName('thumb');
+  const out = path.join(CLIPS_DIR, base + '.jpg');
+  const job = newJob('thumbnail', `Thumbnail: ${base}.jpg (${platform})`);
+  const done = () => { job.status = 'done'; job.progress = 100; job.output = base + '.jpg'; };
+  const landed = () => { try { return fs.existsSync(out) && fs.statSync(out).size > 1000; } catch (_) { return false; } };
+
+  (async () => {
+    // 1) yt-dlp writes + converts the highest-res thumbnail it can find.
+    job.detail = 'reading the post…';
+    const viaYtdlp = await new Promise((resolve) => {
+      const p = ytdlpSpawn(['--no-warnings', '--no-playlist', '--skip-download',
+        '--write-thumbnail', '--convert-thumbnails', 'jpg', '--ffmpeg-location', FFMPEG,
+        '--socket-timeout', '30', '-o', path.join(CLIPS_DIR, base + '.%(ext)s'), u]);
+      p.stderr.on('data', () => {});
+      p.stdout.on('data', () => {});
+      p.on('error', () => resolve(false));
+      p.on('close', () => resolve(landed()));
+    });
+    if (viaYtdlp && landed()) return done();
+
+    // 2) og:image off the page (Instagram's main path).
+    try {
+      const img = await ogImageUrl(u);
+      if (img) { await fetchImageToJpg(img, out); if (landed()) return done(); }
+    } catch (_) {}
+
+    // 3) TikTok oembed as a last resort.
+    if (platform === 'TikTok') {
+      try {
+        const oe = await (await fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(u), { headers: { 'User-Agent': BROWSER_UA } })).json();
+        if (oe && oe.thumbnail_url) { await fetchImageToJpg(oe.thumbnail_url, out); if (landed()) return done(); }
+      } catch (_) {}
+    }
+
+    job.status = 'error';
+    job.detail = `couldn't get the thumbnail — the ${platform} post may be private or removed, or the platform blocked the request`;
+  })();
+
+  return job;
+}
+
 // ---------------------------------------------------------------- vertical export
 
 function verticalExport(file) {
@@ -1160,6 +1242,13 @@ app.post('/api/vod/download', (req, res) => {
       url: String(req.body.url || '').trim(),
       name: req.body.name, quality: req.body.quality,
     });
+    res.json({ ok: true, jobId: job.id });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/thumbnail', (req, res) => {
+  try {
+    const job = socialThumbnail({ url: String(req.body.url || '').trim() });
     res.json({ ok: true, jobId: job.id });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });

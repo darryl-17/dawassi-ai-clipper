@@ -439,6 +439,16 @@
     <div class="hint">Downloads only the section you asked for (not the whole video). Times accept <b>1:23:45</b>, <b>12:34</b> or plain seconds.</div>
   </div>
 
+  <!-- SOCIAL THUMBNAIL -->
+  <div class="card" data-view="create" id="secThumb">
+    <h2 data-i18n="a.thumb.title">Instagram / TikTok thumbnail</h2>
+    <div class="row">
+      <input type="text" id="thumbUrl" class="grow" placeholder="Instagram or TikTok post link" data-i18n-ph="a.thumb.ph">
+      <button id="btnThumb" class="primary big"><i data-ic="image"></i><span data-i18n="a.thumb.btn">Grab thumbnail</span></button>
+    </div>
+    <div class="hint" data-i18n="a.thumb.hint">Paste a public post link — its cover image is saved to your library as a clean, full-quality JPG you can download.</div>
+  </div>
+
   <!-- JOBS -->
   <div class="card" id="jobsCard" style="display:none">
     <h2 data-i18n="a.jobs">Activity</h2>
@@ -845,6 +855,19 @@ $('btnVod').onclick = async () => {
     refresh();
   } catch (e) { toast(e.message, true); }
 };
+
+// ---- social thumbnail (Instagram / TikTok)
+$('btnThumb').onclick = async () => {
+  const url = $('thumbUrl').value.trim();
+  if (!url) return toast(window.t('a.thumb.need'), true);
+  try {
+    await post('/api/thumbnail', { url });
+    toast(window.t('a.thumb.saving'));
+    setView('library');
+    refresh();
+  } catch (e) { toast(e.message, true); }
+};
+$('thumbUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnThumb').click(); });
 
 // ---- past broadcasts
 function fmtViews(n) {

@@ -107,25 +107,62 @@
 <div class="tickerwrap" id="ticker" aria-label="Latest news and tips"><div class="tickertrack" id="tickerTrack"></div></div>`;
   }
 
+  const FOOT_COLS = [
+    { h: 'foot.c.product', links: [
+      { href: '/features.html', key: 'nav.features' },
+      { href: '/how-it-works.html', key: 'nav.how' },
+      { href: '/use-cases.html', key: 'nav.uses' },
+      { href: '/pricing.html', key: 'nav.pricing' },
+      { href: '/whats-new.html', key: 'nav.new' },
+    ] },
+    { h: 'foot.c.tools', links: [
+      { href: '/app.html', key: 'foot.t1' },
+      { href: '/app.html', key: 'foot.t2' },
+      { href: '/app.html', key: 'foot.t3' },
+      { href: '/app.html', key: 'foot.t4' },
+      { href: '/app.html', key: 'foot.t5' },
+      { href: '/app.html', key: 'foot.t6' },
+      { href: '/app.html', key: 'foot.t7' },
+    ] },
+    { h: 'foot.c.start', links: [
+      { href: '/download.html', key: 'nav.download' },
+      { href: '/book-a-call.html', key: 'nav.book' },
+      { href: '/faq.html', key: 'nav.faq' },
+      { href: '/about.html', key: 'nav.about' },
+      { href: 'https://github.com/darryl-17/dawassi-ai-clipper', key: 'foot.source' },
+    ] },
+    { h: 'foot.c.legal', links: [
+      { href: '/terms.html', key: 'leg.terms' },
+      { href: '/privacy.html', key: 'leg.privacy' },
+      { href: '/license.html', key: 'leg.license' },
+      { href: '/fair-use.html', key: 'leg.fair' },
+    ] },
+  ];
+  const FOOT_SOC = [
+    ['https://x.com/darryl_wassi', brand.x],
+    ['https://instagram.com/k_rryl', brand.instagram],
+    ['https://youtube.com/@d_wassi', brand.youtube],
+    ['https://twitch.tv/darrylwassi', brand.twitch],
+    ['https://github.com/darryl-17/dawassi-ai-clipper', brand.github],
+    ['https://discord.gg/nFPU9Gteu', brand.discord],
+  ];
+
   function footerHTML() {
-    const nav = FOOTER_NAV.map((n) => `<a href="${n.href}" data-i18n="${n.key}">${n.label}</a>`).join('');
-    const soc = [
-      ['https://darrylwassi.com', brand.website, '<span data-i18n="foot.website">Website</span>'],
-      ['https://x.com/darryl_wassi', brand.x, '@darryl_wassi'],
-      ['https://youtube.com/@d_wassi', brand.youtube, 'YouTube'],
-      ['https://twitch.tv/darrylwassi', brand.twitch, 'Twitch'],
-      ['https://instagram.com/k_rryl', brand.instagram, 'Instagram'],
-      ['https://linkedin.com/in/darryl-wassi', brand.linkedin, 'LinkedIn'],
-      ['https://github.com/darryl-17/dawassi-ai-clipper', brand.github, 'GitHub'],
-      ['https://discord.gg/nFPU9Gteu', brand.discord, 'Discord'],
-      ['mailto:darrylwassi@gmail.com', brand.mail, '<span data-i18n="foot.contact">Contact</span>'],
-    ].map(([h, s, l]) => `<a href="${h}"${h.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${s}${l}</a>`).join('');
+    const cols = FOOT_COLS.map((c) =>
+      `<div class="footcol"><div class="footh" data-i18n="${c.h}">.</div>`
+      + c.links.map((l) => `<a href="${l.href}"${l.href.startsWith('http') ? ' target="_blank" rel="noopener"' : ''} data-i18n="${l.key}">.</a>`).join('')
+      + `</div>`).join('');
+    const soc = FOOT_SOC.map(([h, s]) => `<a href="${h}" target="_blank" rel="noopener" class="footsoc-i" aria-label="social">${s}</a>`).join('');
     return `
 <footer>
-  <div class="fbrand">DAWASSI <span class="script">AI Clipper</span></div>
-  <nav class="fnav">${nav}</nav>
-  <div class="flinks">${soc}</div>
-  <div class="fcopy" data-i18n="foot.copy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
+  <div class="footcard">
+    <div class="footcols">${cols}</div>
+    <div class="footbottom">
+      <a href="/" class="fbrand">DAWASSI <span class="script">AI Clipper</span></a>
+      <div class="footsoc">${soc}</div>
+    </div>
+    <div class="fcopy" data-i18n="foot.copy">© 2026 Darryl Wassi · DAWASSI AI CLIPPER — free &amp; open source · runs 100% on your machine</div>
+  </div>
 </footer>`;
   }
 
